@@ -7,7 +7,7 @@
 
 Name:		golang
 Version:	1.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -73,6 +73,11 @@ BuildArch:	noarch
 
 # increase verbosity of build
 %patch0 -p1
+
+# make a copy before building to let us avoid generated src files in docs
+pushd ..
+cp -av go go-nogenerated
+popd
 
 
 %build
@@ -140,9 +145,11 @@ rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/lib/time
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/doc/Makefile
 
-# install all sources, used by godoc
+# install all non-generated sources, used by godoc
+pushd ../go-nogenerated
 mkdir $RPM_BUILD_ROOT%{_datadir}/%{name}/src
 cp -av src/pkg $RPM_BUILD_ROOT%{_datadir}/%{name}/src
+popd
 
 # remove testdata, tests, and non-go files: this is all we need for godoc
 pushd $RPM_BUILD_ROOT%{_datadir}/%{name}/src/pkg
@@ -274,6 +281,9 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 
 %changelog
+* Fri May 24 2013 Adam Goode <adam@spicenitz.org> - 1.1-2
+- Fix noarch package discrepancies
+
 * Fri May 24 2013 Adam Goode <adam@spicenitz.org> - 1.1-1
 - Initial Fedora release.
 - Update to 1.1
