@@ -1,0 +1,27 @@
+diff -ur go~/src/make.bash go/src/make.bash
+--- go~/src/make.bash	2013-05-13 16:07:18.000000000 -0400
++++ go/src/make.bash	2013-05-23 21:20:56.804544307 -0400
+@@ -135,7 +135,7 @@
+ if [ "$1" = "--no-clean" ]; then
+ 	buildall=""
+ fi
+-./cmd/dist/dist bootstrap $buildall -v # builds go_bootstrap
++./cmd/dist/dist bootstrap $buildall -vv # builds go_bootstrap
+ # Delay move of dist tool to now, because bootstrap may clear tool directory.
+ mv cmd/dist/dist "$GOTOOLDIR"/dist
+ "$GOTOOLDIR"/go_bootstrap clean -i std
+@@ -144,12 +144,12 @@
+ if [ "$GOHOSTARCH" != "$GOARCH" -o "$GOHOSTOS" != "$GOOS" ]; then
+ 	echo "# Building packages and commands for host, $GOHOSTOS/$GOHOSTARCH."
+ 	GOOS=$GOHOSTOS GOARCH=$GOHOSTARCH \
+-		"$GOTOOLDIR"/go_bootstrap install -ccflags "$GO_CCFLAGS" -gcflags "$GO_GCFLAGS" -ldflags "$GO_LDFLAGS" -v std
++		"$GOTOOLDIR"/go_bootstrap install -ccflags "$GO_CCFLAGS" -gcflags "$GO_GCFLAGS" -ldflags "$GO_LDFLAGS" -v -x std
+ 	echo
+ fi
+ 
+ echo "# Building packages and commands for $GOOS/$GOARCH."
+-"$GOTOOLDIR"/go_bootstrap install $GO_FLAGS -ccflags "$GO_CCFLAGS" -gcflags "$GO_GCFLAGS" -ldflags "$GO_LDFLAGS" -v std
++"$GOTOOLDIR"/go_bootstrap install $GO_FLAGS -ccflags "$GO_CCFLAGS" -gcflags "$GO_GCFLAGS" -ldflags "$GO_LDFLAGS" -v -x std
+ echo
+ 
+ rm -f "$GOTOOLDIR"/go_bootstrap
