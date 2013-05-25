@@ -7,7 +7,7 @@
 
 Name:		golang
 Version:	1.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -18,6 +18,8 @@ BuildRequires:	/bin/hostname
 BuildRequires:	emacs xemacs xemacs-packages-extra
 
 Patch0:		golang-1.1-verbose-build.patch
+
+ExclusiveArch:	%{ix86} x86_64 %{arm}
 
 %description
 %{summary}.
@@ -281,6 +283,9 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 
 %changelog
+* Sat May 25 2013 Dan Horák <dan[at]danny.cz> - 1.1-3
+- set ExclusiveArch
+
 * Fri May 24 2013 Adam Goode <adam@spicenitz.org> - 1.1-2
 - Fix noarch package discrepancies
 
