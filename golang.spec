@@ -5,19 +5,32 @@
 # "Failed to write file: invalid section alignment"
 %global debug_package %{nil}
 
+# we are shipping the full contents of src in the data subpackage, which
+# contains binary-like things (ELF data for tests, etc)
+%global _binaries_in_noarch_packages_terminate_build 0
+
+# Do not check any files in doc or src for requires
+%global __requires_exclude_from ^%{_datadir}/%{name}/(doc|src)/.*$
+
 Name:		golang
-Version:	1.1
-Release:	3%{?dist}
+Version:	1.1.1
+Release:	1%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
 URL:		http://golang.org/
 Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
 
-BuildRequires:	/bin/hostname
+BuildRequires:	/bin/hostname symlinks
 BuildRequires:	emacs xemacs xemacs-packages-extra
 
 Patch0:		golang-1.1-verbose-build.patch
+
+# Having godoc and the documentation separate was broken
+Obsoletes:	%{name}-godoc < 1.1-4
+
+# All the noarch stuff is in one package now
+Requires:	%{name}-data = %{version}-%{release}
 
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 
@@ -25,20 +38,13 @@ ExclusiveArch:	%{ix86} x86_64 %{arm}
 %{summary}.
 
 
-%package godoc
-Summary: The Go documentation tool
-Requires:    %{name}%{?_isa} = %{version}-%{release}
-Requires:    %{name}-docs = %{version}-%{release}
+%package data
+Summary: Required architecture-independent files for Go
+Requires:	%{name} = %{version}-%{release}
+BuildArch:	noarch
+Obsoletes:	%{name}-docs < 1.1-4
 
-%description godoc
-%{summary}.
-
-
-%package docs
-Summary: Go sources and documentation
-BuildArch:  noarch
-
-%description docs
+%description data
 %{summary}.
 
 
@@ -147,24 +153,20 @@ rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/lib/time
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/doc/Makefile
 
-# install all non-generated sources, used by godoc
+# install all non-generated sources
 pushd ../go-nogenerated
-mkdir $RPM_BUILD_ROOT%{_datadir}/%{name}/src
-cp -av src/pkg $RPM_BUILD_ROOT%{_datadir}/%{name}/src
+cp -av src $RPM_BUILD_ROOT%{_datadir}/%{name}
 popd
 
-# remove testdata, tests, and non-go files: this is all we need for godoc
-pushd $RPM_BUILD_ROOT%{_datadir}/%{name}/src/pkg
-find \( -name testdata -type d -o -name '*_test.go' -type f \) -print0 | xargs -0 rm -rfv
-find -type f \! -name '*.go' -print0 | xargs -0 rm -rfv
-popd
+# make a symlink tree for src
+cp -asv $RPM_BUILD_ROOT%{_datadir}/%{name}/src $RPM_BUILD_ROOT%{_libdir}/%{name}
 
-# restore the gdb debugging script, needed at runtime by gdb
-cp -av src/pkg/runtime/runtime-gdb.py $RPM_BUILD_ROOT%{_datadir}/%{name}/src/pkg/runtime
+# install arch-specific generated sources (don't clobber symlinks)
+cp -anv src $RPM_BUILD_ROOT%{_libdir}/%{name}
 
 # add symlinks for things in datadir
-for z in $RPM_BUILD_ROOT%{_datadir}/%{name}/*
-  do ln -s ../../share/%{name}/$(basename "$z") $RPM_BUILD_ROOT%{_libdir}/%{name}
+for z in api doc favicon.ico include lib robots.txt
+  do ln -s ../../share/%{name}/$z $RPM_BUILD_ROOT%{_libdir}/%{name}
 done
 
 # add symlinks for binaries
@@ -202,6 +204,9 @@ rm $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles/readme.txt
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
+# fix all the symlinks
+symlinks -c -s -r $RPM_BUILD_ROOT%{_libdir}
+
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
@@ -210,59 +215,35 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 %dir %{_libdir}/%{name}
 %dir %{_libdir}/%{name}/bin
 %{_libdir}/%{name}/bin/go
+%{_libdir}/%{name}/bin/godoc
 %{_libdir}/%{name}/bin/gofmt
 %{_libdir}/%{name}/pkg
-
-# data
-%dir %{_datadir}/%{name}
-%{_datadir}/%{name}/api
-%{_datadir}/%{name}/include
+%{_bindir}/go
+%{_bindir}/godoc
+%{_bindir}/gofmt
 
 # symlinks (lib -> share)
-%{_bindir}/go
-%{_bindir}/gofmt
 %{_libdir}/%{name}/api
-%{_libdir}/%{name}/include
-%{_libdir}/%{name}/src
-
-# GDB script
-%dir %{_datadir}/%{name}/src
-%dir %{_datadir}/%{name}/src/pkg
-%dir %{_datadir}/%{name}/src/pkg/runtime
-%{_datadir}/%{name}/src/pkg/runtime/runtime-gdb.*
-
-# bash completion
-%{_datadir}/bash-completion
-
-# zsh
-%{_datadir}/zsh
-
-
-%files godoc
-# binaries
-%{_libdir}/%{name}/bin/godoc
-
-# symlinks
-%{_bindir}/godoc
 %{_libdir}/%{name}/doc
 %{_libdir}/%{name}/favicon.ico
+%{_libdir}/%{name}/include
 %{_libdir}/%{name}/lib
 %{_libdir}/%{name}/robots.txt
+%{_libdir}/%{name}/src
 
 
-%files docs
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
+%files data
+%{_datadir}/bash-completion
+%{_datadir}/zsh
 
-# data
 %dir %{_datadir}/%{name}
+%{_datadir}/%{name}/api
 %{_datadir}/%{name}/doc
 %{_datadir}/%{name}/favicon.ico
-%{_datadir}/%{name}/robots.txt
+%{_datadir}/%{name}/include
 %{_datadir}/%{name}/lib
+%{_datadir}/%{name}/robots.txt
 %{_datadir}/%{name}/src
-
-# exclude the GDB script
-%exclude %{_datadir}/%{name}/src/pkg/runtime/runtime-gdb.*
 
 
 %files vim
@@ -283,6 +264,10 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 
 %changelog
+* Thu Jun 13 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-1
+- Update to 1.1.1
+- Fix basically useless package (#973842)
+
 * Sat May 25 2013 Dan Horák <dan[at]danny.cz> - 1.1-3
 - set ExclusiveArch
 
