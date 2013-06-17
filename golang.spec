@@ -14,7 +14,7 @@
 
 Name:		golang
 Version:	1.1.1
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -74,6 +74,14 @@ BuildArch:	noarch
 
 %description -n xemacs-%{name}
 %{summary}.
+
+
+# Workaround old RPM bug of symlink-replaced-with-dir failure
+%pretrans
+if [ -h %{_libdir}/%{name}/src ]; then
+   rm -v %{_libdir}/%{name}/src
+   mkdir %{_libdir}/%{name}/src
+fi
 
 
 %prep
@@ -204,8 +212,12 @@ rm $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles/readme.txt
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
-# fix all the symlinks
+# relativize the symlinks
 symlinks -c -s -r $RPM_BUILD_ROOT%{_libdir}
+
+# ensure all binaries have a later time than all sources (really fix #973842)
+touch $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/go
+find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/go
 
 
 %files
@@ -229,6 +241,8 @@ symlinks -c -s -r $RPM_BUILD_ROOT%{_libdir}
 %{_libdir}/%{name}/include
 %{_libdir}/%{name}/lib
 %{_libdir}/%{name}/robots.txt
+
+# src (directory of symlinks to datadir + arch-specific generated files)
 %{_libdir}/%{name}/src
 
 
@@ -264,6 +278,10 @@ symlinks -c -s -r $RPM_BUILD_ROOT%{_libdir}
 
 
 %changelog
+* Mon Jun 17 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-2
+- Hopefully really fix #973842
+- Fix update from pre-1.1.1 (#974840)
+
 * Thu Jun 13 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-1
 - Update to 1.1.1
 - Fix basically useless package (#973842)
