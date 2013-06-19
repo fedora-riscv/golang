@@ -14,7 +14,7 @@
 
 Name:		golang
 Version:	1.1.1
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -77,11 +77,12 @@ BuildArch:	noarch
 
 
 # Workaround old RPM bug of symlink-replaced-with-dir failure
-%pretrans
-if [ -h %{_libdir}/%{name}/src ]; then
-   rm -v %{_libdir}/%{name}/src
-   mkdir %{_libdir}/%{name}/src
-fi
+%pretrans -p <lua>
+src = "%{_libdir}/%{name}/src"
+if posix.stat(src, "type") == "link" then
+  os.remove(src)
+  posix.mkdir(src)
+end
 
 
 %prep
@@ -278,6 +279,9 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_
 
 
 %changelog
+* Wed Jun 19 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-3
+- Use lua for pretrans (http://fedoraproject.org/wiki/Packaging:Guidelines#The_.25pretrans_scriptlet)
+
 * Mon Jun 17 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-2
 - Hopefully really fix #973842
 - Fix update from pre-1.1.1 (#974840)
