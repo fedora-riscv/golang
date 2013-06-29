@@ -14,7 +14,7 @@
 
 Name:		golang
 Version:	1.1.1
-Release:	3%{?dist}
+Release:	4%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -29,8 +29,8 @@ Patch0:		golang-1.1-verbose-build.patch
 # Having godoc and the documentation separate was broken
 Obsoletes:	%{name}-godoc < 1.1-4
 
-# All the noarch stuff is in one package now
-Requires:	%{name}-data = %{version}-%{release}
+# RPM can't handle symlink -> dir with subpackages, so merge back
+Obsoletes:  	%{name}-data < 1.1.1-4
 
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 
@@ -38,14 +38,15 @@ ExclusiveArch:	%{ix86} x86_64 %{arm}
 %{summary}.
 
 
-%package data
-Summary: Required architecture-independent files for Go
-Requires:	%{name} = %{version}-%{release}
-BuildArch:	noarch
-Obsoletes:	%{name}-docs < 1.1-4
-
-%description data
-%{summary}.
+# Restore this package if RPM gets fixed (bug #975909)
+#%package data
+#Summary: Required architecture-independent files for Go
+#Requires:	%{name} = %{version}-%{release}
+#BuildArch:	noarch
+#Obsoletes:	%{name}-docs < 1.1-4
+#
+#%description data
+#%{summary}.
 
 
 %package vim
@@ -247,7 +248,8 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_
 %{_libdir}/%{name}/src
 
 
-%files data
+# Restore data package when RPM bug is fixed (see above)
+#%files data
 %{_datadir}/bash-completion
 %{_datadir}/zsh
 
@@ -279,6 +281,9 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_
 
 
 %changelog
+* Sat Jun 29 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-4
+- Eliminate noarch data package to work around RPM bug (bz #975909)
+
 * Wed Jun 19 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-3
 - Use lua for pretrans (http://fedoraproject.org/wiki/Packaging:Guidelines#The_.25pretrans_scriptlet)
 
