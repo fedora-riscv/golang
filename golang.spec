@@ -10,7 +10,7 @@
 %global _binaries_in_noarch_packages_terminate_build 0
 
 # Do not check any files in doc or src for requires
-%global __requires_exclude_from ^%{_datadir}/%{name}/(doc|src)/.*$
+%global __requires_exclude_from ^(%{_datadir}|%{_libdir})/%{name}/(doc|src)/.*$
 
 Name:		golang
 Version:	1.1.1
@@ -21,18 +21,21 @@ License:	BSD
 URL:		http://golang.org/
 Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
 
-BuildRequires:	/bin/hostname symlinks
+BuildRequires:	/bin/hostname
 BuildRequires:	emacs xemacs xemacs-packages-extra
 
 Patch0:		golang-1.1-verbose-build.patch
 
 # Having godoc and the documentation separate was broken
 Obsoletes:	%{name}-godoc < 1.1-4
+Obsoletes:	%{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
 Obsoletes:  	%{name}-data < 1.1.1-4
 
 ExclusiveArch:	%{ix86} x86_64 %{arm}
+
+Source100:	golang-gdbinit
 
 %description
 %{summary}.
@@ -79,10 +82,12 @@ BuildArch:	noarch
 
 # Workaround old RPM bug of symlink-replaced-with-dir failure
 %pretrans -p <lua>
-src = "%{_libdir}/%{name}/src"
-if posix.stat(src, "type") == "link" then
-  os.remove(src)
-  posix.mkdir(src)
+for _,d in pairs({"api", "doc", "include", "lib", "src"}) do
+  path = "%{_libdir}/%{name}/" .. d
+  if posix.stat(path, "type") == "link" then
+    os.remove(path)
+    posix.mkdir(path)
+  end
 end
 
 
@@ -91,11 +96,6 @@ end
 
 # increase verbosity of build
 %patch0 -p1
-
-# make a copy before building to let us avoid generated src files in docs
-pushd ..
-cp -av go go-nogenerated
-popd
 
 
 %build
@@ -149,35 +149,17 @@ rm -rf $RPM_BUILD_ROOT
 # create the top level directories
 mkdir -p $RPM_BUILD_ROOT%{_bindir}
 mkdir -p $RPM_BUILD_ROOT%{_libdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/%{name}
 
-# install binaries and runtime files into libdir
-cp -av bin pkg $RPM_BUILD_ROOT%{_libdir}/%{name}
-
-# install sources and other data in datadir
-cp -av api doc include lib favicon.ico robots.txt $RPM_BUILD_ROOT%{_datadir}/%{name}
+# install everything into libdir (until symlink problems are fixed)
+# https://code.google.com/p/go/issues/detail?id=5830
+cp -av api bin doc favicon.ico include lib pkg robots.txt src \
+   $RPM_BUILD_ROOT%{_libdir}/%{name}
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
-rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/lib/time
+rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/lib/time
 
 # remove the doc Makefile
-rm -rfv $RPM_BUILD_ROOT%{_datadir}/%{name}/doc/Makefile
-
-# install all non-generated sources
-pushd ../go-nogenerated
-cp -av src $RPM_BUILD_ROOT%{_datadir}/%{name}
-popd
-
-# make a symlink tree for src
-cp -asv $RPM_BUILD_ROOT%{_datadir}/%{name}/src $RPM_BUILD_ROOT%{_libdir}/%{name}
-
-# install arch-specific generated sources (don't clobber symlinks)
-cp -anv src $RPM_BUILD_ROOT%{_libdir}/%{name}
-
-# add symlinks for things in datadir
-for z in api doc favicon.ico include lib robots.txt
-  do ln -s ../../share/%{name}/$z $RPM_BUILD_ROOT%{_libdir}/%{name}
-done
+rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/doc/Makefile
 
 # add symlinks for binaries
 pushd $RPM_BUILD_ROOT%{_bindir}
@@ -214,53 +196,28 @@ rm $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles/readme.txt
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
-# relativize the symlinks
-symlinks -c -s -r $RPM_BUILD_ROOT%{_libdir}
-
-# ensure all binaries have a later time than all sources (really fix #973842)
-touch $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/go
-find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/go
+# gdbinit
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
+cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
 
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
-# binaries
-%dir %{_libdir}/%{name}
-%dir %{_libdir}/%{name}/bin
-%{_libdir}/%{name}/bin/go
-%{_libdir}/%{name}/bin/godoc
-%{_libdir}/%{name}/bin/gofmt
-%{_libdir}/%{name}/pkg
+# go files
+%{_libdir}/%{name}
+
+# bin symlinks
 %{_bindir}/go
 %{_bindir}/godoc
 %{_bindir}/gofmt
 
-# symlinks (lib -> share)
-%{_libdir}/%{name}/api
-%{_libdir}/%{name}/doc
-%{_libdir}/%{name}/favicon.ico
-%{_libdir}/%{name}/include
-%{_libdir}/%{name}/lib
-%{_libdir}/%{name}/robots.txt
-
-# src (directory of symlinks to datadir + arch-specific generated files)
-%{_libdir}/%{name}/src
-
-
-# Restore data package when RPM bug is fixed (see above)
-#%files data
+# autocomplete
 %{_datadir}/bash-completion
 %{_datadir}/zsh
 
-%dir %{_datadir}/%{name}
-%{_datadir}/%{name}/api
-%{_datadir}/%{name}/doc
-%{_datadir}/%{name}/favicon.ico
-%{_datadir}/%{name}/include
-%{_datadir}/%{name}/lib
-%{_datadir}/%{name}/robots.txt
-%{_datadir}/%{name}/src
+# gdbinit (for gdb debugging)
+%{_sysconfdir}/gdbinit.d
 
 
 %files vim
@@ -281,8 +238,10 @@ find $RPM_BUILD_ROOT%{_libdir}/%{name} -type f -print0 | xargs -0 touch -r $RPM_
 
 
 %changelog
-* Sat Jun 29 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-4
-- Eliminate noarch data package to work around RPM bug (bz #975909)
+* Fri Jul  5 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-4
+- Move src to libdir for now (#973842) (upstream issue https://code.google.com/p/go/issues/detail?id=5830)
+- Eliminate noarch data package to work around RPM bug (#975909)
+- Try to add runtime-gdb.py to the gdb safe-path (#981356)
 
 * Wed Jun 19 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-3
 - Use lua for pretrans (http://fedoraproject.org/wiki/Packaging:Guidelines#The_.25pretrans_scriptlet)
