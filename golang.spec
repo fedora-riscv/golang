@@ -12,9 +12,13 @@
 # Do not check any files in doc or src for requires
 %global __requires_exclude_from ^(%{_datadir}|%{_libdir})/%{name}/(doc|src)/.*$
 
+# Don't alter timestamps of especially the .a files (or else go will rebuild later)
+# Actually, don't strip at all since we are not even building debug packages and this corrupts the dwarf testdata
+%global __strip /bin/true
+
 Name:		golang
 Version:	1.1.1
-Release:	4%{?dist}
+Release:	5%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -36,6 +40,7 @@ Obsoletes:  	%{name}-data < 1.1.1-4
 ExclusiveArch:	%{ix86} x86_64 %{arm}
 
 Source100:	golang-gdbinit
+Source101:	golang-prelink.conf
 
 %description
 %{summary}.
@@ -200,6 +205,10 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
 cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
 
+# prelink blacklist
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
+cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
+
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
@@ -218,6 +227,9 @@ cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
 
 # gdbinit (for gdb debugging)
 %{_sysconfdir}/gdbinit.d
+
+# prelink blacklist
+%{_sysconfdir}/prelink.conf.d
 
 
 %files vim
@@ -238,6 +250,10 @@ cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
 
 
 %changelog
+* Wed Jul 10 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-5
+- Blacklist testdata files from prelink
+- Again try to fix #973842
+
 * Fri Jul  5 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-4
 - Move src to libdir for now (#973842) (upstream issue https://code.google.com/p/go/issues/detail?id=5830)
 - Eliminate noarch data package to work around RPM bug (#975909)
