@@ -18,7 +18,7 @@
 
 Name:		golang
 Version:	1.1.1
-Release:	5%{?dist}
+Release:	6%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -250,6 +250,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.1.1-6
+- Perl 5.18 rebuild
+
 * Wed Jul 10 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-5
 - Blacklist testdata files from prelink
 - Again try to fix #973842
