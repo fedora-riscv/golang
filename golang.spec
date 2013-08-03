@@ -18,7 +18,7 @@
 
 Name:		golang
 Version:	1.1.1
-Release:	6%{?dist}
+Release:	7%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -250,6 +250,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
 * Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.1.1-6
 - Perl 5.18 rebuild
 
