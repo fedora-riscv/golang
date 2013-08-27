@@ -18,7 +18,7 @@
 
 Name:		golang
 Version:	1.1.2
-Release:	1%{?dist}
+Release:	2%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -250,14 +250,11 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
+- Update spec to fix changelog entries from bad merge
+
 * Tue Aug 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-1
 - Update to latest upstream
-
-* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.1-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
-
-* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.1.1-6
-- Perl 5.18 rebuild
 
 * Wed Jul 10 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-5
 - Blacklist testdata files from prelink
