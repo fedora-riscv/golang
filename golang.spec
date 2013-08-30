@@ -16,9 +16,16 @@
 # Actually, don't strip at all since we are not even building debug packages and this corrupts the dwarf testdata
 %global __strip /bin/true
 
+# rpmbuild magic to keep from having meta dependency on libc.so.6
+%define _use_internal_dependency_generator 0
+%define __find_requires %{nil}
+%global debug_package %{nil}
+%global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
+  /usr/lib/rpm/brp-compress
+
 Name:		golang
 Version:	1.1.2
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -250,6 +257,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-3
+- fix the libc meta dependency (thanks to vbatts [at] redhat.com for the fix)
+
 * Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
 - Update spec to fix changelog entries from bad merge
 
