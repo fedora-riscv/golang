@@ -35,6 +35,10 @@ Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
 BuildRequires:	/bin/hostname
 BuildRequires:	emacs xemacs xemacs-packages-extra
 
+# We strip the meta dependency, but go does require glibc.
+# This is an odd issue, still looking for a better fix.
+Requires:   glibc
+
 Patch0:		golang-1.1-verbose-build.patch
 
 # Having godoc and the documentation separate was broken
