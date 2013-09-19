@@ -16,16 +16,9 @@
 # Actually, don't strip at all since we are not even building debug packages and this corrupts the dwarf testdata
 %global __strip /bin/true
 
-# rpmbuild magic to keep from having meta dependency on libc.so.6
-%define _use_internal_dependency_generator 0
-%define __find_requires %{nil}
-%global debug_package %{nil}
-%global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
-  /usr/lib/rpm/brp-compress
-
 Name:		golang
 Version:	1.1.2
-Release:	4%{?dist}
+Release:	2%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -33,7 +26,7 @@ URL:		http://golang.org/
 Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
 
 BuildRequires:	/bin/hostname
-BuildRequires:	emacs xemacs xemacs-packages-extra
+BuildRequires:	emacs 
 
 Patch0:		golang-1.1-verbose-build.patch
 
@@ -66,7 +59,6 @@ Source101:	golang-prelink.conf
 
 %package vim
 Summary: Vim plugins for Go
-Requires:    vim-filesystem
 BuildArch:   noarch
 
 %description vim
@@ -79,16 +71,6 @@ Requires:      emacs(bin) >= %{_emacs_version}
 BuildArch:     noarch
 
 %description -n emacs-%{name}
-%{summary}.
-
-
-%package -n xemacs-%{name}
-Summary: XEmacs add-on package for Go
-Requires:	xemacs(bin) >= %{_xemacs_version}
-Requires:	xemacs-packages-extra
-BuildArch:	noarch
-
-%description -n xemacs-%{name}
 %{summary}.
 
 
@@ -109,9 +91,9 @@ end
 # increase verbosity of build
 %patch0 -p1
 
-
 %build
 # create a gcc wrapper to allow us to build with our own flags
+
 mkdir zz
 cd zz
 echo -e "#!/bin/sh\n/usr/bin/gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS \"\$@\"" > mygcc
@@ -128,6 +110,7 @@ export GOROOT_FINAL=%{_libdir}/%{name}
 
 # build
 cd src
+rm *.rc
 ./make.bash
 cd ..
 
@@ -138,14 +121,11 @@ cd doc
 make
 cd ..
 
-# compile for emacs and xemacs
+# compile for emacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
-cp -av emacs xemacs
 %{_emacs_bytecompile} emacs/go-mode.el
-%{_xemacs_bytecompile} xemacs/go-mode.el
 cd ..
-
 
 %check
 export GOROOT=$(pwd -P)
@@ -153,7 +133,6 @@ export PATH="$PATH":"$GOROOT"/bin
 cd src
 ./run.bash --no-rebuild
 cd ..
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -192,12 +171,6 @@ mkdir -p $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-
-# misc/xemacs
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
-cp -av misc/xemacs/go-mode.* $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-cp -av misc/xemacs/%{name}-init.el $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
 
 # misc/vim
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
@@ -250,30 +223,15 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 %{_emacs_sitestartdir}/*.el
 
 
-%files -n xemacs-%{name}
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_xemacs_sitelispdir}/%{name}
-%{_xemacs_sitestartdir}/*.el
-
-
 %changelog
-* Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-4
-- fix the libc meta dependency (thanks to vbatts [at] redhat.com for the fix)
+* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.2-2
+- vim-filesystem only required for Fedora , vim-common owns those files in RHEL
 
-* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-3
-- Revert incorrect merged changelog
-
-* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
-- This was reverted, just a placeholder changelog entry for bad merge
-
-* Tue Aug 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-1
+* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.2-1
 - Update to latest upstream
 
-* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.1-7
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
-
-* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.1.1-6
-- Perl 5.18 rebuild
+* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.1-6
+- Remove xemacs bits for RHEL build
 
 * Wed Jul 10 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-5
 - Blacklist testdata files from prelink
