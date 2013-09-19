@@ -25,7 +25,7 @@
 
 Name:		golang
 Version:	1.1.2
-Release:	2%{?dist}
+Release:	3%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
