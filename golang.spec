@@ -25,7 +25,7 @@
 
 Name:		golang
 Version:	1.1.2
-Release:	4%{?dist}
+Release:	5%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -35,7 +35,14 @@ Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
 BuildRequires:	/bin/hostname
 BuildRequires:	emacs xemacs xemacs-packages-extra
 
+# We strip the meta dependency, but go does require glibc.
+# This is an odd issue, still looking for a better fix.
+Requires:   glibc
+
 Patch0:		golang-1.1-verbose-build.patch
+
+Patch10:    golang-1.1.2-long-links.patch
+Patch11:    golang-1.1.2-ustar-split.patch
 
 # Having godoc and the documentation separate was broken
 Obsoletes:	%{name}-godoc < 1.1-4
@@ -109,6 +116,9 @@ end
 # increase verbosity of build
 %patch0 -p1
 
+# Fix BZ#1010271
+%patch10 -p1
+%patch11 -p1
 
 %build
 # create a gcc wrapper to allow us to build with our own flags
@@ -257,6 +267,10 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Fri Sep 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-5
+- Pull upstream patches for BZ#1010271
+- Add glibc requirement that got dropped because of meta dep fix
+
 * Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-4
 - fix the libc meta dependency (thanks to vbatts [at] redhat.com for the fix)
 
