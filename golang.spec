@@ -25,7 +25,7 @@
 
 Name:		golang
 Version:	1.1.2
-Release:	5%{?dist}
+Release:	6%{?dist}
 Summary:	The Go Programming Language
 
 License:	BSD
@@ -37,15 +37,18 @@ BuildRequires:	emacs xemacs xemacs-packages-extra
 
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
-Requires:   glibc
+Requires:       glibc
+
+# `go doc ...` calls out to godoc in $PATH
+# while godoc is in go1.1,  it is moved to go.tools in go1.2
+Requires:       /usr/bin/godoc
 
 Patch0:		golang-1.1-verbose-build.patch
 
-Patch10:    golang-1.1.2-long-links.patch
-Patch11:    golang-1.1.2-ustar-split.patch
+Patch10:        golang-1.1.2-long-links.patch
+Patch11:        golang-1.1.2-ustar-split.patch
 
-# Having godoc and the documentation separate was broken
-Obsoletes:	%{name}-godoc < 1.1-4
+# Having documentation separate was broken
 Obsoletes:	%{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
@@ -59,6 +62,11 @@ Source101:	golang-prelink.conf
 %description
 %{summary}.
 
+
+%package godoc
+Summary: the Go Programming Language documentation tool
+%description godoc
+%{summary}.
 
 # Restore this package if RPM gets fixed (bug #975909)
 #%package data
@@ -183,10 +191,10 @@ rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/lib/time
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/doc/Makefile
 
-# add symlinks for binaries
+# put binaries to bindir
 pushd $RPM_BUILD_ROOT%{_bindir}
 for z in $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/*
-  do ln -s %{_libdir}/%{name}/bin/$(basename $z)
+  do mv $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/$(basename $z) .
 done
 popd
 
@@ -227,15 +235,17 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
+%files godoc
+%{_bindir}/godoc
+
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
 # go files
 %{_libdir}/%{name}
 
-# bin symlinks
+# binary executables
 %{_bindir}/go
-%{_bindir}/godoc
 %{_bindir}/gofmt
 
 # autocomplete
@@ -267,6 +277,10 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Wed Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-6
+- don't symlink /usr/bin out to ../lib..., move the file
+- seperate out godoc, to accomodate the go.tools godoc
+
 * Fri Sep 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-5
 - Pull upstream patches for BZ#1010271
 - Add glibc requirement that got dropped because of meta dep fix
