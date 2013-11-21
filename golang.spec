@@ -23,66 +23,87 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
-Name:		golang
-Version:	1.1.2
-Release:	3%{?dist}
-Summary:	The Go Programming Language
+Name:           golang
+Version:        1.1.2
+Release:        7%{?dist}
+Summary:        The Go Programming Language
 
-License:	BSD
-URL:		http://golang.org/
-Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
+License:        BSD
+URL:            http://golang.org/
+Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
 
-BuildRequires:	/bin/hostname
-BuildRequires:	emacs xemacs xemacs-packages-extra
+# this command moved places
+%if 0%{?fedora} >= 21
+BuildRequires:  /usr/bin/hostname
+Patch1:         golang-f21-hostname.patch
+%else
+BuildRequires:  /bin/hostname
+%endif
+
+BuildRequires:  emacs
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
+BuildRequires:  xemacs xemacs-packages-extra
+%endif
 
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
-Requires:   glibc
+Requires:       glibc
 
-Patch0:		golang-1.1-verbose-build.patch
+# `go doc ...` calls out to godoc in $PATH
+# while godoc is in go1.1,  it is moved to go.tools in go1.2
+Requires:       /usr/bin/godoc
 
-Patch10:    golang-1.1.2-long-links.patch
-Patch11:    golang-1.1.2-ustar-split.patch
+Patch0:         golang-1.1-verbose-build.patch
 
+Patch10:        golang-1.1.2-long-links.patch
+Patch11:        golang-1.1.2-ustar-split.patch
 
-# Having godoc and the documentation separate was broken
-Obsoletes:	%{name}-godoc < 1.1-4
-Obsoletes:	%{name}-docs < 1.1-4
+# Having documentation separate was broken
+Obsoletes:      %{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
-Obsoletes:  	%{name}-data < 1.1.1-4
+Obsoletes:      %{name}-data < 1.1.1-4
 
-ExclusiveArch:	%{ix86} x86_64 %{arm}
+ExclusiveArch:  %{ix86} x86_64 %{arm}
 
-Source100:	golang-gdbinit
-Source101:	golang-prelink.conf
+Source100:      golang-gdbinit
+Source101:      golang-prelink.conf
 
 %description
 %{summary}.
 
 
+%package        godoc
+Summary:        The Go Programming Language documentation tool
+%description    godoc
+%{summary}.
+
 # Restore this package if RPM gets fixed (bug #975909)
-#%package data
-#Summary: Required architecture-independent files for Go
-#Requires:	%{name} = %{version}-%{release}
-#BuildArch:	noarch
-#Obsoletes:	%{name}-docs < 1.1-4
+#%package       data
+#Summary:       Required architecture-independent files for Go
+#Requires:      %{name} = %{version}-%{release}
+#BuildArch:     noarch
+#Obsoletes:     %{name}-docs < 1.1-4
 #
-#%description data
+#%description   data
 #%{summary}.
 
 
-%package vim
-Summary: Vim plugins for Go
-Requires:    vim-filesystem
-BuildArch:   noarch
+%package        vim
+Summary:        Vim plugins for Go
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
+Requires:       vim-filesystem
+%endif
+BuildArch:      noarch
 
-%description vim
+%description    vim
 %{summary}.
 
 
-%package -n emacs-%{name}
-Summary: Emacs add-on package for Go
+%package -n    emacs-%{name}
+Summary:       Emacs add-on package for Go
 Requires:      emacs(bin) >= %{_emacs_version}
 BuildArch:     noarch
 
@@ -90,14 +111,17 @@ BuildArch:     noarch
 %{summary}.
 
 
-%package -n xemacs-%{name}
-Summary: XEmacs add-on package for Go
-Requires:	xemacs(bin) >= %{_xemacs_version}
-Requires:	xemacs-packages-extra
-BuildArch:	noarch
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
+%package -n    xemacs-%{name}
+Summary:       XEmacs add-on package for Go
+Requires:      xemacs(bin) >= %{_xemacs_version}
+Requires:      xemacs-packages-extra
+BuildArch:     noarch
 
 %description -n xemacs-%{name}
 %{summary}.
+%endif
 
 
 # Workaround old RPM bug of symlink-replaced-with-dir failure
@@ -116,6 +140,10 @@ end
 
 # increase verbosity of build
 %patch0 -p1
+
+%if 0%{?fedora} >= 21
+%patch1 -p1
+%endif
 
 # Fix BZ#1010271
 %patch10 -p1
@@ -152,9 +180,12 @@ cd ..
 # compile for emacs and xemacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 cp -av emacs xemacs
-%{_emacs_bytecompile} emacs/go-mode.el
 %{_xemacs_bytecompile} xemacs/go-mode.el
+%endif
+%{_emacs_bytecompile} emacs/go-mode.el
 cd ..
 
 
@@ -184,10 +215,10 @@ rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/lib/time
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{_libdir}/%{name}/doc/Makefile
 
-# add symlinks for binaries
+# put binaries to bindir
 pushd $RPM_BUILD_ROOT%{_bindir}
 for z in $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/*
-  do ln -s %{_libdir}/%{name}/bin/$(basename $z)
+  do mv $RPM_BUILD_ROOT%{_libdir}/%{name}/bin/$(basename $z) .
 done
 popd
 
@@ -204,11 +235,14 @@ mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 # misc/xemacs
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
 cp -av misc/xemacs/go-mode.* $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 cp -av misc/xemacs/%{name}-init.el $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
+%endif
 
 # misc/vim
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
@@ -228,15 +262,17 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
+%files godoc
+%{_bindir}/godoc
+
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
 # go files
 %{_libdir}/%{name}
 
-# bin symlinks
+# binary executables
 %{_bindir}/go
-%{_bindir}/godoc
 %{_bindir}/gofmt
 
 # autocomplete
@@ -261,19 +297,36 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 %{_emacs_sitestartdir}/*.el
 
 
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 %files -n xemacs-%{name}
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 %{_xemacs_sitelispdir}/%{name}
 %{_xemacs_sitestartdir}/*.el
+%endif
 
 
 %changelog
-* Fri Sep 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-3
+* Thu Nov 21 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
+- patch tests for testing on rawhide
+- let the same spec work for rhel and fedora
+
+* Wed Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-6
+- don't symlink /usr/bin out to ../lib..., move the file
+- seperate out godoc, to accomodate the go.tools godoc
+
+* Fri Sep 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-5
 - Pull upstream patches for BZ#1010271
 - Add glibc requirement that got dropped because of meta dep fix
 
-* Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
+* Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-4
 - fix the libc meta dependency (thanks to vbatts [at] redhat.com for the fix)
+
+* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-3
+- Revert incorrect merged changelog
+
+* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
+- This was reverted, just a placeholder changelog entry for bad merge
 
 * Tue Aug 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-1
 - Update to latest upstream
