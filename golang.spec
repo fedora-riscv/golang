@@ -23,17 +23,17 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
-Name:		golang
-Version:	1.1.2
-Release:	6%{?dist}
-Summary:	The Go Programming Language
+Name:           golang
+Version:        1.1.2
+Release:        6%{?dist}
+Summary:        The Go Programming Language
 
-License:	BSD
-URL:		http://golang.org/
-Source0:	https://go.googlecode.com/files/go%{version}.src.tar.gz
+License:        BSD
+URL:            http://golang.org/
+Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
 
-BuildRequires:	/bin/hostname
-BuildRequires:	emacs xemacs xemacs-packages-extra
+BuildRequires:  /bin/hostname
+BuildRequires:  emacs xemacs xemacs-packages-extra
 
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -43,53 +43,53 @@ Requires:       glibc
 # while godoc is in go1.1,  it is moved to go.tools in go1.2
 Requires:       /usr/bin/godoc
 
-Patch0:		golang-1.1-verbose-build.patch
+Patch0:         golang-1.1-verbose-build.patch
 
 Patch10:        golang-1.1.2-long-links.patch
 Patch11:        golang-1.1.2-ustar-split.patch
 
 # Having documentation separate was broken
-Obsoletes:	%{name}-docs < 1.1-4
+Obsoletes:      %{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
-Obsoletes:  	%{name}-data < 1.1.1-4
+Obsoletes:      %{name}-data < 1.1.1-4
 
-ExclusiveArch:	%{ix86} x86_64 %{arm}
+ExclusiveArch:  %{ix86} x86_64 %{arm}
 
-Source100:	golang-gdbinit
-Source101:	golang-prelink.conf
+Source100:      golang-gdbinit
+Source101:      golang-prelink.conf
 
 %description
 %{summary}.
 
 
-%package godoc
-Summary: the Go Programming Language documentation tool
-%description godoc
+%package        godoc
+Summary:        The Go Programming Language documentation tool
+%description    godoc
 %{summary}.
 
 # Restore this package if RPM gets fixed (bug #975909)
-#%package data
-#Summary: Required architecture-independent files for Go
-#Requires:	%{name} = %{version}-%{release}
-#BuildArch:	noarch
-#Obsoletes:	%{name}-docs < 1.1-4
+#%package       data
+#Summary:       Required architecture-independent files for Go
+#Requires:      %{name} = %{version}-%{release}
+#BuildArch:     noarch
+#Obsoletes:     %{name}-docs < 1.1-4
 #
-#%description data
+#%description   data
 #%{summary}.
 
 
-%package vim
-Summary: Vim plugins for Go
-Requires:    vim-filesystem
-BuildArch:   noarch
+%package        vim
+Summary:        Vim plugins for Go
+Requires:       vim-filesystem
+BuildArch:      noarch
 
-%description vim
+%description    vim
 %{summary}.
 
 
-%package -n emacs-%{name}
-Summary: Emacs add-on package for Go
+%package -n    emacs-%{name}
+Summary:       Emacs add-on package for Go
 Requires:      emacs(bin) >= %{_emacs_version}
 BuildArch:     noarch
 
@@ -97,11 +97,11 @@ BuildArch:     noarch
 %{summary}.
 
 
-%package -n xemacs-%{name}
-Summary: XEmacs add-on package for Go
-Requires:	xemacs(bin) >= %{_xemacs_version}
-Requires:	xemacs-packages-extra
-BuildArch:	noarch
+%package -n    xemacs-%{name}
+Summary:       XEmacs add-on package for Go
+Requires:      xemacs(bin) >= %{_xemacs_version}
+Requires:      xemacs-packages-extra
+BuildArch:     noarch
 
 %description -n xemacs-%{name}
 %{summary}.
