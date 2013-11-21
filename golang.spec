@@ -307,7 +307,7 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
-* Thu Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
+* Thu Nov 21 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
 - patch tests for testing on rawhide
 - let the same spec work for rhel and fedora
 
