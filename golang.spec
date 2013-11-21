@@ -90,13 +90,13 @@ Summary:        The Go Programming Language documentation tool
 #%{summary}.
 
 
-%package vim
-Summary: Vim plugins for Go
-BuildArch:   noarch
+%package        vim
+Summary:        Vim plugins for Go
 # xemacs on fedora only
 %if 0%{?fedora} >= 0
-Requires:    vim-filesystem
+Requires:       vim-filesystem
 %endif
+BuildArch:      noarch
 
 %description    vim
 %{summary}.
@@ -167,7 +167,6 @@ export GOROOT_FINAL=%{_libdir}/%{name}
 
 # build
 cd src
-rm *.rc
 ./make.bash
 cd ..
 
@@ -178,7 +177,7 @@ cd doc
 make
 cd ..
 
-# compile for emacs
+# compile for emacs and xemacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
 # xemacs on fedora only
