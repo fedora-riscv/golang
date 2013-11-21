@@ -40,7 +40,11 @@ Patch1:         golang-f21-hostname.patch
 BuildRequires:  /bin/hostname
 %endif
 
-BuildRequires:  emacs xemacs xemacs-packages-extra
+BuildRequires:  emacs
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
+BuildRequires:  xemacs xemacs-packages-extra
+%endif
 
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -104,6 +108,8 @@ BuildArch:     noarch
 %{summary}.
 
 
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 %package -n    xemacs-%{name}
 Summary:       XEmacs add-on package for Go
 Requires:      xemacs(bin) >= %{_xemacs_version}
@@ -112,6 +118,7 @@ BuildArch:     noarch
 
 %description -n xemacs-%{name}
 %{summary}.
+%endif
 
 
 # Workaround old RPM bug of symlink-replaced-with-dir failure
@@ -170,9 +177,12 @@ cd ..
 # compile for emacs and xemacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 cp -av emacs xemacs
-%{_emacs_bytecompile} emacs/go-mode.el
 %{_xemacs_bytecompile} xemacs/go-mode.el
+%endif
+%{_emacs_bytecompile} emacs/go-mode.el
 cd ..
 
 
@@ -222,11 +232,14 @@ mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 # misc/xemacs
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
 cp -av misc/xemacs/go-mode.* $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 cp -av misc/xemacs/%{name}-init.el $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
+%endif
 
 # misc/vim
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
@@ -281,15 +294,19 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 %{_emacs_sitestartdir}/*.el
 
 
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 %files -n xemacs-%{name}
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 %{_xemacs_sitelispdir}/%{name}
 %{_xemacs_sitestartdir}/*.el
+%endif
 
 
 %changelog
 * Thu Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
 - patch tests for testing on rawhide
+- let the same spec work for rhel and fedora
 
 * Wed Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-6
 - don't symlink /usr/bin out to ../lib..., move the file
