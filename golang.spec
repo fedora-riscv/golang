@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.1.2
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -288,6 +288,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Thu Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
+- patch tests for testing on rawhide
+
 * Wed Nov 20 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-6
 - don't symlink /usr/bin out to ../lib..., move the file
 - seperate out godoc, to accomodate the go.tools godoc
