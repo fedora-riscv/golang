@@ -92,7 +92,10 @@ Summary:        The Go Programming Language documentation tool
 
 %package        vim
 Summary:        Vim plugins for Go
+# xemacs on fedora only
+%if 0%{?fedora} >= 0
 Requires:       vim-filesystem
+%endif
 BuildArch:      noarch
 
 %description    vim
