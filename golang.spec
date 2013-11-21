@@ -32,7 +32,14 @@ License:        BSD
 URL:            http://golang.org/
 Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
 
+# this command moved places
+%if 0%{?fedora} >= 21
+BuildRequires:  /usr/bin/hostname
+Patch1:         golang-f21-hostname.patch
+%else
 BuildRequires:  /bin/hostname
+%endif
+
 BuildRequires:  emacs xemacs xemacs-packages-extra
 
 # We strip the meta dependency, but go does require glibc.
@@ -123,6 +130,10 @@ end
 
 # increase verbosity of build
 %patch0 -p1
+
+%if 0%{?fedora} >= 21
+%patch1 -p1
+%endif
 
 # Fix BZ#1010271
 %patch10 -p1
