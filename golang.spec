@@ -42,7 +42,7 @@ BuildRequires:  /bin/hostname
 
 BuildRequires:  emacs
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 BuildRequires:  xemacs xemacs-packages-extra
 %endif
 
@@ -93,7 +93,7 @@ Summary:        The Go Programming Language documentation tool
 %package        vim
 Summary:        Vim plugins for Go
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 Requires:       vim-filesystem
 %endif
 BuildArch:      noarch
@@ -112,7 +112,7 @@ BuildArch:     noarch
 
 
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 %package -n    xemacs-%{name}
 Summary:       XEmacs add-on package for Go
 Requires:      xemacs(bin) >= %{_xemacs_version}
@@ -181,7 +181,7 @@ cd ..
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 cp -av emacs xemacs
 %{_xemacs_bytecompile} xemacs/go-mode.el
 %endif
@@ -236,7 +236,7 @@ cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 # misc/xemacs
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
@@ -298,7 +298,7 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 # xemacs on fedora only
-%if 0%{?fedora} >= 0
+%if 0%{?fedora}
 %files -n xemacs-%{name}
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 %{_xemacs_sitelispdir}/%{name}
