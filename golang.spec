@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.1.2
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -307,6 +307,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Tue Nov 26 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-8
+- fix the rpmspec conditional for rhel and fedora
+
 * Thu Nov 21 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-7
 - patch tests for testing on rawhide
 - let the same spec work for rhel and fedora
