@@ -24,8 +24,8 @@
   /usr/lib/rpm/brp-compress
 
 Name:           golang
-Version:        1.1.2
-Release:        8%{?dist}
+Version:        1.2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -50,14 +50,9 @@ BuildRequires:  xemacs xemacs-packages-extra
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
 
-# `go doc ...` calls out to godoc in $PATH
-# while godoc is in go1.1,  it is moved to go.tools in go1.2
 Requires:       /usr/bin/godoc
 
-Patch0:         golang-1.1-verbose-build.patch
-
-Patch10:        golang-1.1.2-long-links.patch
-Patch11:        golang-1.1.2-ustar-split.patch
+Patch0:         golang-1.2-verbose-build.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -73,11 +68,6 @@ Source101:      golang-prelink.conf
 %description
 %{summary}.
 
-
-%package        godoc
-Summary:        The Go Programming Language documentation tool
-%description    godoc
-%{summary}.
 
 # Restore this package if RPM gets fixed (bug #975909)
 #%package       data
@@ -141,23 +131,15 @@ end
 # increase verbosity of build
 %patch0 -p1
 
-%if 0%{?fedora} >= 21
-%patch1 -p1
-%endif
-
-# Fix BZ#1010271
-%patch10 -p1
-%patch11 -p1
+# create a [dirty] gcc wrapper to allow us to build with our own flags
+# (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
+# TODO: remove this and just set CFLAGS/LDFLAGS once upstream supports it
+# https://code.google.com/p/go/issues/detail?id=6882
+mkdir -p zz
+echo -e "#!/bin/sh\n/usr/bin/gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS \"\$@\"" > ./zz/gcc
+chmod +x ./zz/gcc
 
 %build
-# create a gcc wrapper to allow us to build with our own flags
-mkdir zz
-cd zz
-echo -e "#!/bin/sh\n/usr/bin/gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS \"\$@\"" > mygcc
-chmod +x mygcc
-export CC="$(pwd -P)/mygcc"
-cd ..
-
 # set up final install location
 export GOROOT_FINAL=%{_libdir}/%{name}
 
@@ -167,14 +149,8 @@ export GOROOT_FINAL=%{_libdir}/%{name}
 
 # build
 cd src
-./make.bash
-cd ..
-
-# build static version of documentation
-export GOROOT=$(pwd -P)
-export PATH="$PATH":"$GOROOT"/bin
-cd doc
-make
+# use our gcc wrapper
+PATH="$(pwd -P)/../zz:$PATH" CC="gcc" ./make.bash
 cd ..
 
 # compile for emacs and xemacs
@@ -193,6 +169,8 @@ cd ..
 export GOROOT=$(pwd -P)
 export PATH="$PATH":"$GOROOT"/bin
 cd src
+# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
+# https://code.google.com/p/go/issues/detail?id=6883
 ./run.bash --no-rebuild
 cd ..
 
@@ -262,9 +240,6 @@ mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
-%files godoc
-%{_bindir}/godoc
-
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
@@ -307,6 +282,10 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Mon Dec 2 2013 Vincent Batts <vbatts@fedoraproject.org> - 1.2-1
+- Update to upstream 1.2 release
+- remove the pax tar patches
+
 * Tue Nov 26 2013 Vincent Batts <vbatts@redhat.com> - 1.1.2-8
 - fix the rpmspec conditional for rhel and fedora
 
