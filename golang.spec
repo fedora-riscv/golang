@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -53,6 +53,9 @@ Requires:       glibc
 Requires:       /usr/bin/godoc
 
 Patch0:         golang-1.2-verbose-build.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1038683
+Patch2:         golang-1.2-remove-ECC-p224.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -130,6 +133,9 @@ end
 
 # increase verbosity of build
 %patch0 -p1
+
+# remove the P224 curve
+%patch2 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -282,6 +288,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Wed Dec 18 2013 Vincent Batts <vbatts@redhat.com> - 1.2-2
+- removing P224 ECC curve
+
 * Mon Dec 2 2013 Vincent Batts <vbatts@fedoraproject.org> - 1.2-1
 - Update to upstream 1.2 release
 - remove the pax tar patches
