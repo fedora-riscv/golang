@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -49,8 +49,6 @@ BuildRequires:  xemacs xemacs-packages-extra
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
-
-Requires:       /usr/bin/godoc
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -288,6 +286,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Thu Jan 16 2014 Vincent Batts <vbatts@redhat.com> 1.2-3
+- remove golang-godoc dependency. cyclic dependency on compiling godoc
+
 * Wed Dec 18 2013 Vincent Batts <vbatts@redhat.com> - 1.2-2
 - removing P224 ECC curve
 
