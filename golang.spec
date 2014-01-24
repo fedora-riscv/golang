@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -54,6 +54,10 @@ Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch2:         golang-1.2-remove-ECC-p224.patch
+
+# disable flaky test for now
+# http://code.google.com/p/go/issues/detail?id=6522
+Patch3:         ./golang-1.2-skipCpuProfileTest.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -134,6 +138,9 @@ end
 
 # remove the P224 curve
 %patch2 -p1
+
+# skip flaky test
+%patch3 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -286,6 +293,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Thu Jan 24 2014 Vincent Batts <vbatts@redhat.com> 1.2-4
+- skip a flaky test that is sporadically failing on the build server
+
 * Thu Jan 16 2014 Vincent Batts <vbatts@redhat.com> 1.2-3
 - remove golang-godoc dependency. cyclic dependency on compiling godoc
 
