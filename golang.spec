@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -39,6 +39,8 @@ Patch1:         golang-f21-hostname.patch
 %else
 BuildRequires:  /bin/hostname
 %endif
+
+Provides:       go = %{version}-%{release}
 
 BuildRequires:  emacs
 # xemacs on fedora only
@@ -293,6 +295,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Tue Feb 18 2014 Vincent Batts <vbatts@redhat.com> 1.2-5
+- provide 'go', so users can yum install 'go'
+
 * Thu Jan 24 2014 Vincent Batts <vbatts@redhat.com> 1.2-4
 - skip a flaky test that is sporadically failing on the build server
 
