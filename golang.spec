@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        4%{?dist}
+Release:        6%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -39,6 +39,8 @@ Patch1:         golang-f21-hostname.patch
 %else
 BuildRequires:  /bin/hostname
 %endif
+
+Provides:       go = %{version}-%{release}
 
 BuildRequires:  emacs
 # xemacs on fedora only
@@ -59,6 +61,11 @@ Patch2:         golang-1.2-remove-ECC-p224.patch
 # http://code.google.com/p/go/issues/detail?id=6522
 Patch3:         ./golang-1.2-skipCpuProfileTest.patch
 
+# Pull in new archive/tar upstream patch to support xattrs for
+# docker-0.8.1
+# https://code.google.com/p/go/source/detail?r=a15f344a9efa
+Patch4:         golang-1.2-archive_tar-xattr.patch
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -69,6 +76,10 @@ ExclusiveArch:  %{ix86} x86_64 %{arm}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
+
+# Patch4 - pull in new archive/tar upstream patch, this file is part
+#          of the upstream merge and is used for test cases.
+Source400:      golang-19087:a15f344a9efa-xattrs.tar
 
 %description
 %{summary}.
@@ -133,6 +144,8 @@ end
 %prep
 %setup -q -n go
 
+cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
+
 # increase verbosity of build
 %patch0 -p1
 
@@ -141,6 +154,9 @@ end
 
 # skip flaky test
 %patch3 -p1
+
+# new archive/tar implementation from upstream
+%patch4 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -293,6 +309,13 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Wed Feb 19 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2-6
+- pull in upstream archive/tar implementation that supports xattr for
+  docker 0.8.1
+
+* Tue Feb 18 2014 Vincent Batts <vbatts@redhat.com> 1.2-5
+- provide 'go', so users can yum install 'go'
+
 * Thu Jan 24 2014 Vincent Batts <vbatts@redhat.com> 1.2-4
 - skip a flaky test that is sporadically failing on the build server
 
