@@ -151,7 +151,7 @@ end
 cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 
 %if 0%{?fedora} >= 21
-%patch210 -p1
+%patch210 -p0
 %patch211 -p0
 %endif
 
