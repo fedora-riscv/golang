@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -35,7 +35,11 @@ Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
 # this command moved places
 %if 0%{?fedora} >= 21
 BuildRequires:  /usr/bin/hostname
-Patch1:         golang-f21-hostname.patch
+Patch210:       golang-f21-hostname.patch
+
+# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates 
+#            _BSD_SOURCE and _SVID_SOURCE
+Patch211:       golang-1.2-BSD-SVID-SOURCE.patch
 %else
 BuildRequires:  /bin/hostname
 %endif
@@ -55,16 +59,16 @@ Requires:       glibc
 Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
-Patch2:         golang-1.2-remove-ECC-p224.patch
+Patch1:         golang-1.2-remove-ECC-p224.patch
 
 # disable flaky test for now
 # http://code.google.com/p/go/issues/detail?id=6522
-Patch3:         ./golang-1.2-skipCpuProfileTest.patch
+Patch2:         ./golang-1.2-skipCpuProfileTest.patch
 
 # Pull in new archive/tar upstream patch to support xattrs for
 # docker-0.8.1
 # https://code.google.com/p/go/source/detail?r=a15f344a9efa
-Patch4:         golang-1.2-archive_tar-xattr.patch
+Patch3:         golang-1.2-archive_tar-xattr.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -146,17 +150,22 @@ end
 
 cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 
+%if 0%{?fedora} >= 21
+%patch210 -p0
+%patch211 -p0
+%endif
+
 # increase verbosity of build
 %patch0 -p1
 
 # remove the P224 curve
-%patch2 -p1
+%patch1 -p1
 
 # skip flaky test
-%patch3 -p1
+%patch2 -p1
 
 # new archive/tar implementation from upstream
-%patch4 -p1
+%patch3 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -309,6 +318,10 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproejct.org> 1.2-7
+- Remove  _BSD_SOURCE and _SVID_SOURCE, they are deprecated in recent
+  versions of glibc and aren't needed
+
 * Wed Feb 19 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2-6
 - pull in upstream archive/tar implementation that supports xattr for
   docker 0.8.1

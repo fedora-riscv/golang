@@ -1,0 +1,12 @@
+--- include/u.h.orig	2014-02-20 11:27:46.943079375 -0600
++++ include/u.h	2014-02-20 11:27:54.126195603 -0600
+@@ -38,9 +38,6 @@
+ #		define __MAKECONTEXT_V2_SOURCE 1
+ #	endif
+ #endif
+-#define _BSD_SOURCE 1
+-#define _NETBSD_SOURCE 1	/* NetBSD */
+-#define _SVID_SOURCE 1
+ #if !defined(__APPLE__) && !defined(__OpenBSD__)
+ #	define _XOPEN_SOURCE 1000
+ #	define _XOPEN_SOURCE_EXTENDED 1
