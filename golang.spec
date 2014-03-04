@@ -24,8 +24,8 @@
   /usr/lib/rpm/brp-compress
 
 Name:           golang
-Version:        1.2
-Release:        7%{?dist}
+Version:        1.2.1
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -318,6 +318,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
+- Update to latest upstream
+
 * Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproejct.org> 1.2-7
 - Remove  _BSD_SOURCE and _SVID_SOURCE, they are deprecated in recent
   versions of glibc and aren't needed
