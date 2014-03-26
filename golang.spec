@@ -25,7 +25,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -80,6 +80,7 @@ ExclusiveArch:  %{ix86} x86_64 %{arm}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
+Source102:      macros.golang
 
 # Patch4 - pull in new archive/tar upstream patch, this file is part
 #          of the upstream merge and is used for test cases.
@@ -275,6 +276,10 @@ cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
+# rpm macros
+mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rpm
+cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
+
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
@@ -295,6 +300,8 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 # prelink blacklist
 %{_sysconfdir}/prelink.conf.d
+
+%{_sysconfdir}/rpm/macros.golang
 
 
 %files vim
@@ -318,6 +325,9 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
 
 %changelog
+* Wed Mar 26 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-2
+- provide a system rpm macros. Starting with %gopath
+
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
 
