@@ -25,6 +25,7 @@
 
 # let this match the macros in macros.golang
 %global goroot          /usr/lib/%{name}
+%global gopath          %{_datadir}/gocode
 %global go_arches       %{ix86} x86_64 %{arm}
 %ifarch x86_64
 %global gohostarch  amd64
@@ -38,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -425,7 +426,7 @@ export PATH="$PATH":"$GOROOT"/bin
 cd src
 # not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
 # https://code.google.com/p/go/issues/detail?id=6883
-#./run.bash --no-rebuild
+./run.bash --no-rebuild
 cd ..
 
 
@@ -452,6 +453,12 @@ rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
 mkdir -p $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}
 mv $RPM_BUILD_ROOT%{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
 mv $RPM_BUILD_ROOT%{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
+
+# ensure these exist and are owned
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/github.com/
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/bitbucket.org/
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/p/
 
 # remove the go and gofmt for other platforms (not used in the compile)
 pushd $RPM_BUILD_ROOT%{goroot}/bin/
@@ -559,13 +566,20 @@ fi
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
 # go files
-%{goroot}
+%dir %{goroot}
+%{goroot}/*
 %exclude %{goroot}/bin/
 %exclude %{goroot}/pkg/
 %exclude %{goroot}/src/
 
-# this directory is part of the core library tool
-%{goroot}/pkg/obj/linux_%{gohostarch}/
+# ensure directory ownership, so they are cleaned up if empty
+%dir %{gopath}
+%dir %{gopath}/src
+%dir %{gopath}/src/github.com/
+%dir %{gopath}/src/bitbucket.org/
+%dir %{gopath}/src/code.google.com/
+%dir %{gopath}/src/code.google.com/p/
+
 
 # autocomplete
 %{_datadir}/bash-completion
@@ -612,6 +626,24 @@ fi
 # binary executables
 %ghost %{_bindir}/go
 %ghost %{_bindir}/gofmt
+%dir %{goroot}/pkg/obj/linux_386
+%{goroot}/pkg/obj/linux_386/*
+%{goroot}/pkg/linux_386/runtime/cgo.a
+%dir %{goroot}/pkg/tool/linux_386
+%{goroot}/pkg/tool/linux_386/6a
+%{goroot}/pkg/tool/linux_386/6c
+%{goroot}/pkg/tool/linux_386/6g
+%{goroot}/pkg/tool/linux_386/6l
+%{goroot}/pkg/tool/linux_386/8a
+%{goroot}/pkg/tool/linux_386/8c
+%{goroot}/pkg/tool/linux_386/8g
+%{goroot}/pkg/tool/linux_386/8l
+%{goroot}/pkg/tool/linux_386/addr2line
+%{goroot}/pkg/tool/linux_386/dist
+%{goroot}/pkg/tool/linux_386/nm
+%{goroot}/pkg/tool/linux_386/objdump
+%{goroot}/pkg/tool/linux_386/pack
+%{goroot}/pkg/tool/linux_386/pprof
 %endif
 
 %ifarch x86_64
@@ -620,6 +652,20 @@ fi
 # binary executables
 %ghost %{_bindir}/go
 %ghost %{_bindir}/gofmt
+%dir %{goroot}/pkg/obj/linux_amd64
+%{goroot}/pkg/obj/linux_amd64/*
+%{goroot}/pkg/linux_amd64/runtime/cgo.a
+%dir %{goroot}/pkg/tool/linux_amd64
+%{goroot}/pkg/tool/linux_amd64/6a
+%{goroot}/pkg/tool/linux_amd64/6c
+%{goroot}/pkg/tool/linux_amd64/6g
+%{goroot}/pkg/tool/linux_amd64/6l
+%{goroot}/pkg/tool/linux_amd64/addr2line
+%{goroot}/pkg/tool/linux_amd64/dist
+%{goroot}/pkg/tool/linux_amd64/nm
+%{goroot}/pkg/tool/linux_amd64/objdump
+%{goroot}/pkg/tool/linux_amd64/pack
+%{goroot}/pkg/tool/linux_amd64/pprof
 %endif
 
 %ifarch %{arm}
@@ -628,19 +674,46 @@ fi
 # binary executables
 %ghost %{_bindir}/go
 %ghost %{_bindir}/gofmt
+%dir %{goroot}/pkg/obj/linux_arm
+%{goroot}/pkg/obj/linux_arm/*
+%{goroot}/pkg/linux_arm/runtime/cgo.a
+%dir %{goroot}/pkg/tool/linux_arm
+%{goroot}/pkg/tool/linux_arm/5a
+%{goroot}/pkg/tool/linux_arm/5c
+%{goroot}/pkg/tool/linux_arm/5g
+%{goroot}/pkg/tool/linux_arm/5l
+%{goroot}/pkg/tool/linux_arm/6a
+%{goroot}/pkg/tool/linux_arm/6c
+%{goroot}/pkg/tool/linux_arm/6g
+%{goroot}/pkg/tool/linux_arm/6l
+%{goroot}/pkg/tool/linux_arm/addr2line
+%{goroot}/pkg/tool/linux_arm/dist
+%{goroot}/pkg/tool/linux_arm/nm
+%{goroot}/pkg/tool/linux_arm/objdump
+%{goroot}/pkg/tool/linux_arm/pack
+%{goroot}/pkg/tool/linux_arm/pprof
 %endif
 
 %files pkg-linux-386
 %{goroot}/pkg/linux_386/
-%{goroot}/pkg/tool/linux_386/
+%exclude %{goroot}/pkg/linux_386/runtime/cgo.a
+%{goroot}/pkg/tool/linux_386/cgo
+%{goroot}/pkg/tool/linux_386/fix
+%{goroot}/pkg/tool/linux_386/yacc
 
 %files pkg-linux-amd64
 %{goroot}/pkg/linux_amd64/
-%{goroot}/pkg/tool/linux_amd64/
+%exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
+%{goroot}/pkg/tool/linux_amd64/cgo
+%{goroot}/pkg/tool/linux_amd64/fix
+%{goroot}/pkg/tool/linux_amd64/yacc
 
 %files pkg-linux-arm
 %{goroot}/pkg/linux_arm/
-%{goroot}/pkg/tool/linux_arm/
+%exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
+%{goroot}/pkg/tool/linux_arm/cgo
+%{goroot}/pkg/tool/linux_arm/fix
+%{goroot}/pkg/tool/linux_arm/yacc
 
 %files pkg-darwin-386
 %{goroot}/pkg/darwin_386/
@@ -705,6 +778,9 @@ fi
 
 
 %changelog
+* Thu Apr 09 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-4
+- fixing file and directory ownership bz1010713
+
 * Wed Apr 09 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-3
 - including more to macros (%%go_arches)
 - set a standard goroot as /usr/lib/golang, regardless of arch
