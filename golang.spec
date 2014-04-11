@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -81,6 +81,11 @@ Patch2:         ./golang-1.2-skipCpuProfileTest.patch
 # docker-0.8.1
 # https://code.google.com/p/go/source/detail?r=a15f344a9efa
 Patch3:         golang-1.2-archive_tar-xattr.patch
+
+# skip test that causes a SIGABRT on fc21
+# until this test/issue is fixed
+# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
+Patch5:         golang-1.2.1-disable_testsetgid.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -369,6 +374,9 @@ cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 # new archive/tar implementation from upstream
 # TODO: remove this when updated to go1.3
 %patch3 -p1
+
+# SIGABRT bz1086900
+%patch5 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -778,6 +786,9 @@ fi
 
 
 %changelog
+* Fri Apr 10 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-5
+- skip test that is causing a SIGABRT on fc21 bz1086900
+
 * Thu Apr 09 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-4
 - fixing file and directory ownership bz1010713
 
