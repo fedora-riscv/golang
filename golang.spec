@@ -82,10 +82,14 @@ Patch2:         ./golang-1.2-skipCpuProfileTest.patch
 # https://code.google.com/p/go/source/detail?r=a15f344a9efa
 Patch3:         golang-1.2-archive_tar-xattr.patch
 
-# skip test that causes a SIGABRT on fc21
+# skip test that causes a SIGABRT on fc21 (bz1086900)
 # until this test/issue is fixed
 # https://bugzilla.redhat.com/show_bug.cgi?id=1086900
 Patch5:         golang-1.2.1-disable_testsetgid.patch
+
+# skip this test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
+Patch6:         golang-1.2.1-i686-cgo-test-failure.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -377,6 +381,9 @@ cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 
 # SIGABRT bz1086900
 %patch5 -p1
+
+# cgo/test bz1087621
+%patch6 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -786,10 +793,10 @@ fi
 
 
 %changelog
-* Fri Apr 10 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-5
+* Fri Apr 11 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-5
 - skip test that is causing a SIGABRT on fc21 bz1086900
 
-* Thu Apr 09 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-4
+* Thu Apr 10 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-4
 - fixing file and directory ownership bz1010713
 
 * Wed Apr 09 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-3
