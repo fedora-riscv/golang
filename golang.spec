@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -877,6 +877,9 @@ fi
 
 
 %changelog
+* Wed May 07 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-7
+- missed two arch-dependent src files
+
 * Wed May 07 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-6
 - put generated arch-dependent src in their respective RPMs
 
