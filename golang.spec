@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -634,6 +634,44 @@ fi
 
 %files src
 %{goroot}/src/
+# files that are generated based on compile-time ARCH will go in that arch's pkg-bin-*
+%exclude %{goroot}/src/cmd/5l/enam.c
+%exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
+%exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
+%exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
+%exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
+%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zmprof_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zmprof_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
+%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
+%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
+%exclude %{goroot}/src/pkg/runtime/zsema_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zsema_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zsema_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zstring_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zstring_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zsys_linux_386.s
+%exclude %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
+%exclude %{goroot}/src/pkg/runtime/zsys_linux_arm.s
+%exclude %{goroot}/src/pkg/runtime/ztime_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/ztime_linux_arm.c
+
 
 %ifarch %{ix86}
 %files pkg-bin-linux-386
@@ -659,6 +697,19 @@ fi
 %{goroot}/pkg/tool/linux_386/objdump
 %{goroot}/pkg/tool/linux_386/pack
 %{goroot}/pkg/tool/linux_386/pprof
+
+# arch dependent generated files, used by cgo
+%{goroot}/src/pkg/runtime/zasm_linux_386.h
+%{goroot}/src/pkg/runtime/zmalloc_linux_386.c
+%{goroot}/src/pkg/runtime/zmprof_linux_386.c
+%{goroot}/src/pkg/runtime/znetpoll_linux_386.c
+%{goroot}/src/pkg/runtime/zruntime1_linux_386.c
+%{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
+%{goroot}/src/pkg/runtime/zsema_linux_386.c
+%{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
+%{goroot}/src/pkg/runtime/zstring_linux_386.c
+%{goroot}/src/pkg/runtime/zsys_linux_386.s
+%{goroot}/src/pkg/runtime/ztime_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -681,6 +732,19 @@ fi
 %{goroot}/pkg/tool/linux_amd64/objdump
 %{goroot}/pkg/tool/linux_amd64/pack
 %{goroot}/pkg/tool/linux_amd64/pprof
+
+# arch dependent generated files, used by cgo
+%{goroot}/src/pkg/runtime/zasm_linux_amd64.h
+%{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
+%{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
+%{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
+%{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
+%{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
+%{goroot}/src/pkg/runtime/zsema_linux_amd64.c
+%{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
+%{goroot}/src/pkg/runtime/zstring_linux_amd64.c
+%{goroot}/src/pkg/runtime/zsys_linux_amd64.s
+%{goroot}/src/pkg/runtime/ztime_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -707,6 +771,22 @@ fi
 %{goroot}/pkg/tool/linux_arm/objdump
 %{goroot}/pkg/tool/linux_arm/pack
 %{goroot}/pkg/tool/linux_arm/pprof
+
+# arch dependent generated files, used by cgo
+%{goroot}/src/cmd/5l/enam.c
+%{goroot}/src/pkg/runtime/zasm_linux_arm.h
+%{goroot}/src/pkg/runtime/zgoarch_arm.go
+%{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
+%{goroot}/src/pkg/runtime/zmprof_linux_arm.c
+%{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
+%{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
+%{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
+%{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
+%{goroot}/src/pkg/runtime/zsema_linux_arm.c
+%{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
+%{goroot}/src/pkg/runtime/zstring_linux_arm.c
+%{goroot}/src/pkg/runtime/zsys_linux_arm.s
+%{goroot}/src/pkg/runtime/ztime_linux_arm.c
 %endif
 
 %files pkg-linux-386
@@ -793,6 +873,9 @@ fi
 
 
 %changelog
+* Wed May 07 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-6
+- put generated arch-dependent src in their respective RPMs
+
 * Fri Apr 11 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-5
 - skip test that is causing a SIGABRT on fc21 bz1086900
 
