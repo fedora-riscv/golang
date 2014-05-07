@@ -699,7 +699,9 @@ fi
 %{goroot}/pkg/tool/linux_386/pprof
 
 # arch dependent generated files, used by cgo
+%{goroot}/src/cmd/8l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_386.h
+%{goroot}/src/pkg/runtime/zgoarch_386.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
 %{goroot}/src/pkg/runtime/zmprof_linux_386.c
 %{goroot}/src/pkg/runtime/znetpoll_linux_386.c
@@ -734,7 +736,9 @@ fi
 %{goroot}/pkg/tool/linux_amd64/pprof
 
 # arch dependent generated files, used by cgo
+%{goroot}/src/cmd/6l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
+%{goroot}/src/pkg/runtime/zgoarch_amd64.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
 %{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
 %{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
