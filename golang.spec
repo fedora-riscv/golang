@@ -636,9 +636,13 @@ fi
 %{goroot}/src/
 # files that are generated based on compile-time ARCH will go in that arch's pkg-bin-*
 %exclude %{goroot}/src/cmd/5l/enam.c
+%exclude %{goroot}/src/cmd/6l/enam.c
+%exclude %{goroot}/src/cmd/8l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
+%exclude %{goroot}/src/pkg/runtime/zgoarch_386.go
+%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 %exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
 %exclude %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
 %exclude %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
