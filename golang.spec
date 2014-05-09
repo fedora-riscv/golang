@@ -38,8 +38,8 @@
 %endif
 
 Name:           golang
-Version:        1.2.1
-Release:        8%{?dist}
+Version:        1.2.2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -895,6 +895,9 @@ fi
 
 
 %changelog
+* Fri May 09 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-1
+- update to go1.2.2
+
 * Thu May 08 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-8
 - RHEL6 rpm macros can't %%exlude missing files
 
