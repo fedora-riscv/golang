@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.1
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -635,46 +635,54 @@ fi
 %files src
 %{goroot}/src/
 # files that are generated based on compile-time ARCH will go in that arch's pkg-bin-*
-%exclude %{goroot}/src/cmd/5l/enam.c
-%exclude %{goroot}/src/cmd/6l/enam.c
+%ifarch %{ix86}
 %exclude %{goroot}/src/cmd/8l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
-%exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
-%exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
 %exclude %{goroot}/src/pkg/runtime/zgoarch_386.go
-%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
-%exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
 %exclude %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zmprof_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zmprof_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/znetpoll_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zruntime1_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
-%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
-%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
 %exclude %{goroot}/src/pkg/runtime/zsema_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zsema_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zsema_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zstring_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zstring_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zsys_linux_386.s
-%exclude %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
-%exclude %{goroot}/src/pkg/runtime/zsys_linux_arm.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_386.c
+%endif
+
+%ifarch x86_64
+%exclude %{goroot}/src/cmd/6l/enam.c
+%exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
+%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
+%exclude %{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zsema_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
+%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
+%endif
+
+%ifarch %{arm}
+%exclude %{goroot}/src/cmd/5l/enam.c
+%exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
+%exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
+%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zmprof_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
+%exclude %{goroot}/src/pkg/runtime/zsema_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zstring_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zsys_linux_arm.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_arm.c
+%endif
 
 
 %ifarch %{ix86}
@@ -799,21 +807,27 @@ fi
 
 %files pkg-linux-386
 %{goroot}/pkg/linux_386/
+%ifarch %{ix86}
 %exclude %{goroot}/pkg/linux_386/runtime/cgo.a
+%endif
 %{goroot}/pkg/tool/linux_386/cgo
 %{goroot}/pkg/tool/linux_386/fix
 %{goroot}/pkg/tool/linux_386/yacc
 
 %files pkg-linux-amd64
 %{goroot}/pkg/linux_amd64/
+%ifarch x86_64
 %exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
+%endif
 %{goroot}/pkg/tool/linux_amd64/cgo
 %{goroot}/pkg/tool/linux_amd64/fix
 %{goroot}/pkg/tool/linux_amd64/yacc
 
 %files pkg-linux-arm
 %{goroot}/pkg/linux_arm/
+%ifarch %{arm}
 %exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
+%endif
 %{goroot}/pkg/tool/linux_arm/cgo
 %{goroot}/pkg/tool/linux_arm/fix
 %{goroot}/pkg/tool/linux_arm/yacc
@@ -881,6 +895,9 @@ fi
 
 
 %changelog
+* Thu May 08 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-8
+- RHEL6 rpm macros can't %%exlude missing files
+
 * Wed May 07 2014 Vincent Batts <vbatts@redhat.com> 1.2.1-7
 - missed two arch-dependent src files
 
