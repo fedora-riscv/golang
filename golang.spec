@@ -676,6 +676,8 @@ fi
 %ifarch %{arm}
 %exclude %{goroot}/src/cmd/5l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
+%exclude %{goroot}/src/cmd/6l/enam.c
+%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
 %exclude %{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
