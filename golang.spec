@@ -640,6 +640,8 @@ fi
 # this is wacky that now these files are generated in a different arch
 %exclude %{goroot}/src/cmd/8l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_386.go
+%exclude %{goroot}/src/cmd/6l/enam.c
+%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
 %exclude %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
