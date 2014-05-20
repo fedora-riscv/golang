@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        2%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -488,8 +488,11 @@ pushd $RPM_BUILD_ROOT%{goroot}/bin/
 	esac
 popd
 
-touch $RPM_BUILD_ROOT%{_bindir}/go
-touch $RPM_BUILD_ROOT%{_bindir}/gofmt
+# make sure these files exist and point to alternatives
+rm -f $RPM_BUILD_ROOT%{_bindir}/go
+ln -sf /etc/alternatives/go $RPM_BUILD_ROOT%{_bindir}/go
+rm -f $RPM_BUILD_ROOT%{_bindir}/gofmt
+ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
 
 # misc/bash
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
@@ -576,6 +579,59 @@ if [ $1 = 0 ]; then
 	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/linux_arm/go
 fi
 %endif
+
+# All these archives need to be newer than the corresponding source in goroot
+# https://bugzilla.redhat.com/show_bug.cgi?id=1099206
+%post pkg-linux-386
+find %{goroot}/pkg/linux_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-linux-amd64
+find %{goroot}/pkg/linux_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-linux-arm
+find %{goroot}/pkg/linux_arm/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-darwin-386
+find %{goroot}/pkg/darwin_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-darwin-amd64
+find %{goroot}/pkg/darwin_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-windows-386
+find %{goroot}/pkg/windows_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-windows-amd64
+find %{goroot}/pkg/windows_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-plan9-386
+find %{goroot}/pkg/plan9_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-plan9-amd64
+find %{goroot}/pkg/plan9_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-freebsd-386
+find %{goroot}/pkg/freebsd_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-freebsd-amd64
+find %{goroot}/pkg/freebsd_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-freebsd-arm
+find %{goroot}/pkg/freebsd_arm/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-netbsd-386
+find %{goroot}/pkg/netbsd_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-netbsd-amd64
+find %{goroot}/pkg/netbsd_amd64/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-netbsd-arm
+find %{goroot}/pkg/netbsd_arm/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-openbsd-386
+find %{goroot}/pkg/openbsd_386/ -type f -name '*.a' -exec touch "{}" \;
+
+%post pkg-openbsd-amd64
+find %{goroot}/pkg/openbsd_amd64/ -type f -name '*.a' -exec touch "{}" \;
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
@@ -904,6 +960,12 @@ fi
 
 
 %changelog
+* Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-4
+- fix the existence and alternatives of `go` and `gofmt`
+
+* Mon May 19 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-3
+- bz1099206 fix timestamp issue caused by koji builders
+
 * Fri May 09 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-2
 - more arch file shuffling
 
