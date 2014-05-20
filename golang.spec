@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -581,7 +581,13 @@ fi
 %endif
 
 # All these archives need to be newer than the corresponding source in goroot
+# and the _directory_ of the source needs to match the source. (since the mkdir by
+# rpm causes the directories to be newer)
 # https://bugzilla.redhat.com/show_bug.cgi?id=1099206
+%post src
+ref_file=$(find %{goroot}/src/pkg/ -type f -name '*.go')
+find %{goroot}/src/pkg -type d -exec touch -r $ref_file "{}" \;
+
 %post pkg-linux-386
 find %{goroot}/pkg/linux_386/ -type f -name '*.a' -exec touch "{}" \;
 
@@ -960,6 +966,9 @@ find %{goroot}/pkg/openbsd_amd64/ -type f -name '*.a' -exec touch "{}" \;
 
 
 %changelog
+* Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-5
+- bz1099206 more fixing, this time for the directories themselves
+
 * Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-4
 - fix the existence and alternatives of `go` and `gofmt`
 
