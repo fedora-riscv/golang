@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -221,6 +221,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler toolchain to compile for linux 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-linux-386
 %{summary}
 
@@ -228,6 +229,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for linux amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-linux-amd64
 %{summary}
 
@@ -235,6 +237,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for linux arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-linux-arm
 %{summary}
 
@@ -242,6 +245,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for darwin 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-darwin-386
 %{summary}
 
@@ -249,6 +253,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for darwin amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-darwin-amd64
 %{summary}
 
@@ -256,6 +261,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for windows 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-windows-386
 %{summary}
 
@@ -263,6 +269,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for windows amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-windows-amd64
 %{summary}
 
@@ -270,6 +277,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for plan9 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-plan9-386
 %{summary}
 
@@ -277,6 +285,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for plan9 amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-plan9-amd64
 %{summary}
 
@@ -284,6 +293,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for freebsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-freebsd-386
 %{summary}
 
@@ -291,6 +301,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for freebsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-freebsd-amd64
 %{summary}
 
@@ -298,6 +309,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for freebsd arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-freebsd-arm
 %{summary}
 
@@ -305,6 +317,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for netbsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-netbsd-386
 %{summary}
 
@@ -312,6 +325,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for netbsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-netbsd-amd64
 %{summary}
 
@@ -319,6 +333,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for netbsd arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-netbsd-arm
 %{summary}
 
@@ -326,6 +341,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for openbsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-openbsd-386
 %{summary}
 
@@ -333,6 +349,7 @@ BuildArch:      noarch
 Summary:        Golang compiler toolchain to compile for openbsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
+Requires(post): golang-bin
 %description    pkg-openbsd-amd64
 %{summary}
 
@@ -342,6 +359,7 @@ BuildArch:      noarch
 #Summary:        Golang compiler toolchain to compile for openbsd arm
 #Requires:       go = %{version}-%{release}
 #BuildArch:      noarch
+#Requires(post): golang-bin
 #%description    pkg-openbsd-arm
 #%{summary}
 
@@ -960,6 +978,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-6
+- bz1099206 more fixing. The packages %%post need golang-bin present first
+
 * Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-5
 - bz1099206 more fixing. Let go fix its own timestamps and freshness
 
