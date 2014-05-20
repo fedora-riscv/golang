@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -488,8 +488,11 @@ pushd $RPM_BUILD_ROOT%{goroot}/bin/
 	esac
 popd
 
-touch $RPM_BUILD_ROOT%{_bindir}/go
-touch $RPM_BUILD_ROOT%{_bindir}/gofmt
+# make sure these files exist and point to alternatives
+rm -f $RPM_BUILD_ROOT%{_bindir}/go
+ln -sf /etc/alternatives/go $RPM_BUILD_ROOT%{_bindir}/go
+rm -f $RPM_BUILD_ROOT%{_bindir}/gofmt
+ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
 
 # misc/bash
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
@@ -957,6 +960,9 @@ find %{goroot}/pkg/openbsd_amd64/ -type f -name '*.a' -exec touch "{}" \;
 
 
 %changelog
+* Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-4
+- fix the existence and alternatives of `go` and `gofmt`
+
 * Mon May 19 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-3
 - bz1099206 fix timestamp issue caused by koji builders
 
