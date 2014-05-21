@@ -38,13 +38,13 @@
 %endif
 
 Name:           golang
-Version:        1.2.2
-Release:        7%{?dist}
+Version:        1.3beta2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
@@ -63,10 +63,6 @@ Requires:       golang-bin
 Requires:       golang-src
 
 BuildRequires:  emacs
-# xemacs on fedora only
-%if 0%{?fedora}
-BuildRequires:  xemacs xemacs-packages-extra
-%endif
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -76,20 +72,6 @@ Patch1:         golang-1.2-remove-ECC-p224.patch
 # disable flaky test for now
 # http://code.google.com/p/go/issues/detail?id=6522
 Patch2:         ./golang-1.2-skipCpuProfileTest.patch
-
-# Pull in new archive/tar upstream patch to support xattrs for
-# docker-0.8.1
-# https://code.google.com/p/go/source/detail?r=a15f344a9efa
-Patch3:         golang-1.2-archive_tar-xattr.patch
-
-# skip test that causes a SIGABRT on fc21 (bz1086900)
-# until this test/issue is fixed
-# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
-Patch5:         golang-1.2.1-disable_testsetgid.patch
-
-# skip this test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
-# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
-Patch6:         golang-1.2.1-i686-cgo-test-failure.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -103,10 +85,6 @@ ExclusiveArch:  %{go_arches}
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
 Source102:      macros.golang
-
-# Patch4 - pull in new archive/tar upstream patch, this file is part
-#          of the upstream merge and is used for test cases.
-Source400:      golang-19087:a15f344a9efa-xattrs.tar
 
 %description
 %{summary}.
@@ -143,18 +121,6 @@ BuildArch:     noarch
 %description -n emacs-%{name}
 %{summary}.
 
-
-# xemacs on fedora only
-%if 0%{?fedora}
-%package -n    xemacs-%{name}
-Summary:       XEmacs add-on package for Go
-Requires:      xemacs(bin) >= %{_xemacs_version}
-Requires:      xemacs-packages-extra
-BuildArch:     noarch
-
-%description -n xemacs-%{name}
-%{summary}.
-%endif
 
 ##
 # the source tree
@@ -377,8 +343,6 @@ end
 %prep
 %setup -q -n go
 
-cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
-
 %if 0%{?fedora} >= 21
 %patch210 -p0
 %patch211 -p0
@@ -392,16 +356,6 @@ cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 
 # skip flaky test
 %patch2 -p1
-
-# new archive/tar implementation from upstream
-# TODO: remove this when updated to go1.3
-%patch3 -p1
-
-# SIGABRT bz1086900
-%patch5 -p1
-
-# cgo/test bz1087621
-%patch6 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -441,14 +395,9 @@ pushd src
 	done
 popd
 
-# compile for emacs and xemacs
+# compile for emacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
-# xemacs on fedora only
-%if 0%{?fedora}
-cp -av emacs xemacs
-%{_xemacs_bytecompile} xemacs/go-mode.el
-%endif
 %{_emacs_bytecompile} emacs/go-mode.el
 cd ..
 
@@ -457,9 +406,17 @@ cd ..
 export GOROOT=$(pwd -P)
 export PATH="$PATH":"$GOROOT"/bin
 cd src
+
+# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
+# until this test/issue is fixed
+# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
+# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
+
 # not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
 # https://code.google.com/p/go/issues/detail?id=6883
-./run.bash --no-rebuild
+CGO_ENABLED=0 ./run.bash --no-rebuild
+
 cd ..
 
 
@@ -524,15 +481,6 @@ mkdir -p $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-
-# xemacs on fedora only
-%if 0%{?fedora}
-# misc/xemacs
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
-cp -av misc/xemacs/go-mode.* $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-cp -av misc/xemacs/%{name}-init.el $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
-%endif
 
 # misc/vim
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
@@ -651,6 +599,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=386 go install std
 %post pkg-openbsd-amd64
 GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
+#%post pkg-openbsd-arm
+#GOROOT=%{goroot} GOOS=openbsd GOARCH=arm go install std
+
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
 
@@ -698,23 +649,13 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{_emacs_sitestartdir}/*.el
 
 
-# xemacs on fedora only
-%if 0%{?fedora}
-%files -n xemacs-%{name}
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_xemacs_sitelispdir}/%{name}
-%{_xemacs_sitestartdir}/*.el
-%endif
-
 %files src
 %{goroot}/src/
 # files that are generated based on compile-time ARCH will go in that arch's pkg-bin-*
 %ifarch %{ix86}
 
 # this is wacky that now these files are generated in a different arch
-%exclude %{goroot}/src/cmd/8l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_386.go
-%exclude %{goroot}/src/cmd/6l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
@@ -731,7 +672,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %endif
 
 %ifarch x86_64
-%exclude %{goroot}/src/cmd/6l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
@@ -748,9 +688,7 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %endif
 
 %ifarch %{arm}
-%exclude %{goroot}/src/cmd/5l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
-%exclude %{goroot}/src/cmd/6l/enam.c
 %exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 
 %exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
@@ -794,7 +732,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_386/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/8l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_386.h
 %{goroot}/src/pkg/runtime/zgoarch_386.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
@@ -831,7 +768,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_amd64/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/6l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
 %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
@@ -872,7 +808,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_arm/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/5l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_arm.h
 %{goroot}/src/pkg/runtime/zgoarch_arm.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
@@ -978,6 +913,10 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.3beta2-1
+- update to go1.3beta2
+- no longer provides go-mode for xemacs (emacs only)
+
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-7
 - bz1099206 ghost files are not what is needed
 
