@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -772,8 +772,8 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %files pkg-bin-linux-386
 %{goroot}/bin/linux_386/
 # binary executables
-%ghost %{_bindir}/go
-%ghost %{_bindir}/gofmt
+%{_bindir}/go
+%{_bindir}/gofmt
 %dir %{goroot}/pkg/obj/linux_386
 %{goroot}/pkg/obj/linux_386/*
 %{goroot}/pkg/linux_386/runtime/cgo.a
@@ -813,8 +813,8 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %files pkg-bin-linux-amd64
 %{goroot}/bin/linux_amd64/
 # binary executables
-%ghost %{_bindir}/go
-%ghost %{_bindir}/gofmt
+%{_bindir}/go
+%{_bindir}/gofmt
 %dir %{goroot}/pkg/obj/linux_amd64
 %{goroot}/pkg/obj/linux_amd64/*
 %{goroot}/pkg/linux_amd64/runtime/cgo.a
@@ -850,8 +850,8 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %files pkg-bin-linux-arm
 %{goroot}/bin/linux_arm/
 # binary executables
-%ghost %{_bindir}/go
-%ghost %{_bindir}/gofmt
+%{_bindir}/go
+%{_bindir}/gofmt
 %dir %{goroot}/pkg/obj/linux_arm
 %{goroot}/pkg/obj/linux_arm/*
 %{goroot}/pkg/linux_arm/runtime/cgo.a
@@ -978,6 +978,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-7
+- bz1099206 ghost files are not what is needed
+
 * Tue May 20 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-6
 - bz1099206 more fixing. The packages %%post need golang-bin present first
 
