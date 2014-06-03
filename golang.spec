@@ -51,7 +51,7 @@ Source0:        http://golang.org/dl/go%{version}.src.tar.gz
 BuildRequires:  /usr/bin/hostname
 Patch210:       golang-f21-hostname.patch
 
-# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates 
+# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates
 #            _BSD_SOURCE and _SVID_SOURCE
 Patch211:       golang-1.2-BSD-SVID-SOURCE.patch
 %else
@@ -669,6 +669,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %exclude %{goroot}/src/pkg/runtime/zstring_linux_386.c
 %exclude %{goroot}/src/pkg/runtime/zsys_linux_386.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zalg_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zchan_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zcomplex_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zcpuprof_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zhashmap_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/ziface_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zlfstack_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zrdebug_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zslice_linux_386.c
+%exclude %{goroot}/src/pkg/runtime/zsymtab_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -685,6 +695,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %exclude %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
 %exclude %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zalg_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zchan_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zcomplex_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zcpuprof_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zhashmap_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/ziface_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zlfstack_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zrdebug_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zslice_linux_amd64.c
+%exclude %{goroot}/src/pkg/runtime/zsymtab_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -703,6 +723,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %exclude %{goroot}/src/pkg/runtime/zstring_linux_arm.c
 %exclude %{goroot}/src/pkg/runtime/zsys_linux_arm.s
 %exclude %{goroot}/src/pkg/runtime/ztime_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zalg_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zchan_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zcomplex_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zcpuprof_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zhashmap_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/ziface_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zlfstack_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zrdebug_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zslice_linux_arm.c
+%exclude %{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
 
@@ -744,6 +774,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_386.c
 %{goroot}/src/pkg/runtime/zsys_linux_386.s
 %{goroot}/src/pkg/runtime/ztime_linux_386.c
+%{goroot}/src/pkg/runtime/zalg_linux_386.c
+%{goroot}/src/pkg/runtime/zchan_linux_386.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_386.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_386.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_386.c
+%{goroot}/src/pkg/runtime/ziface_linux_386.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_386.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_386.c
+%{goroot}/src/pkg/runtime/zslice_linux_386.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -780,6 +820,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
 %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
 %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
+%{goroot}/src/pkg/runtime/zalg_linux_amd64.c
+%{goroot}/src/pkg/runtime/zchan_linux_amd64.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_amd64.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_amd64.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_amd64.c
+%{goroot}/src/pkg/runtime/ziface_linux_amd64.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_amd64.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_amd64.c
+%{goroot}/src/pkg/runtime/zslice_linux_amd64.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -821,6 +871,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_arm.c
 %{goroot}/src/pkg/runtime/zsys_linux_arm.s
 %{goroot}/src/pkg/runtime/ztime_linux_arm.c
+%{goroot}/src/pkg/runtime/zalg_linux_arm.c
+%{goroot}/src/pkg/runtime/zchan_linux_arm.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_arm.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_arm.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_arm.c
+%{goroot}/src/pkg/runtime/ziface_linux_arm.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_arm.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_arm.c
+%{goroot}/src/pkg/runtime/zslice_linux_arm.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
 %files pkg-linux-386
@@ -915,6 +975,7 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %changelog
 * Tue Jun 03 2014 Vincent Batts <vbatts@redhat.com> 1.3rc1-1
 - update to go1.3rc1
+- new arch file shuffling
 
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.3beta2-1
 - update to go1.3beta2
