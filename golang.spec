@@ -38,13 +38,13 @@
 %endif
 
 Name:           golang
-Version:        1.3beta2
+Version:        1.3rc1
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
+Source0:        http://golang.org/dl/go%{version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
@@ -913,6 +913,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Tue Jun 03 2014 Vincent Batts <vbatts@redhat.com> 1.3rc1-1
+- update to go1.3rc1
+
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.3beta2-1
 - update to go1.3beta2
 - no longer provides go-mode for xemacs (emacs only)
