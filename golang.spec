@@ -38,8 +38,8 @@
 %endif
 
 Name:           golang
-Version:        1.3rc1
-Release:        2%{?dist}
+Version:        1.3rc2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -973,6 +973,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3rc2-1
+- update to go1.3rc2
+
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3rc1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
 
