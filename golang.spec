@@ -38,7 +38,7 @@
 %endif
 
 Name:           golang
-Version:        1.3rc2
+Version:        1.3
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 
@@ -973,6 +973,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-1
+- update to go1.3
+
 * Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3rc2-1
 - update to go1.3rc2
 
