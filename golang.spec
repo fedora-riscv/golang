@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -72,6 +72,11 @@ Patch1:         golang-1.2-remove-ECC-p224.patch
 # disable flaky test for now
 # http://code.google.com/p/go/issues/detail?id=6522
 Patch2:         ./golang-1.2-skipCpuProfileTest.patch
+
+# these patches can be dropped for go1.4
+# discovered working here https://github.com/dotcloud/docker/pull/6829
+Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
+Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -356,6 +361,10 @@ end
 
 # skip flaky test
 %patch2 -p1
+
+# performance for archive/tar
+%patch3 -p1
+%patch4 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -973,6 +982,9 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Mon Jul 07 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-2
+- archive/tar memory allocation improvements
+
 * Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-1
 - update to go1.3
 
