@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -487,7 +487,7 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
-cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
+cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 
 # prelink blacklist
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
@@ -849,16 +849,19 @@ fi
 
 
 %changelog
-* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-3
+* Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-4
+- fix the loading of gdb safe-path. bz981356
+
+* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-3
 - `go install std` requires gcc, to build cgo. bz1105901, bz1101508
 
-* Mon Jul 07 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-2
+* Mon Jul 07 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-2
 - archive/tar memory allocation improvements
 
-* Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3-1
+* Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-1
 - update to go1.3
 
-* Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.3rc2-1
+* Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3rc2-1
 - update to go1.3rc2
 
 * Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3rc1-2
@@ -919,7 +922,7 @@ fi
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
 
-* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproejct.org> 1.2-7
+* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2-7
 - Remove  _BSD_SOURCE and _SVID_SOURCE, they are deprecated in recent
   versions of glibc and aren't needed
 
