@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -544,7 +544,7 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
-cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
+cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 
 # prelink blacklist
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
@@ -884,7 +884,10 @@ fi
 
 
 %changelog
-* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproejct.org> - 1.2.2-8
+* Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-9
+- fix the loading of gdb safe-path. bz981356
+
+* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-8
 - `go install std` requires gcc, to build cgo. bz1105901, bz1101508
 
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-7
@@ -934,7 +937,7 @@ fi
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
 
-* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproejct.org> 1.2-7
+* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2-7
 - Remove  _BSD_SOURCE and _SVID_SOURCE, they are deprecated in recent
   versions of glibc and aren't needed
 
