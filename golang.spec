@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -77,6 +77,8 @@ Patch2:         ./golang-1.2-skipCpuProfileTest.patch
 # discovered working here https://github.com/dotcloud/docker/pull/6829
 Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
 Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
+# https://code.google.com/p/go/source/detail?r=1b17b3426e3c
+Patch5:         ./go1.3-tar-fix_writing_of_pax_headers.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -350,6 +352,8 @@ end
 # performance for archive/tar
 %patch3 -p1
 %patch4 -p1
+# buffer the PAX header
+%patch5 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -849,6 +853,9 @@ fi
 
 
 %changelog
+* Mon Jul 21 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-5
+- fix the writing of pax headers
+
 * Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-4
 - fix the loading of gdb safe-path. bz981356
 
