@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -134,8 +134,6 @@ BuildArch:     noarch
 %package        src
 Summary:        Golang compiler source tree
 Requires:       go = %{version}-%{release}
-# the binary bits in this tree are for testdata
-BuildArch:      noarch
 %description    src
 %{summary}
 
@@ -853,6 +851,9 @@ fi
 
 
 %changelog
+* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-6
+- make the source subpackage arch'ed, instead of noarch
+
 * Mon Jul 21 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-5
 - fix the writing of pax headers
 
