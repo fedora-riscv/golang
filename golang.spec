@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -65,7 +65,10 @@ Requires:       golang-src
 BuildRequires:  emacs
 # xemacs on fedora only
 %if 0%{?fedora}
-BuildRequires:  xemacs xemacs-packages-extra
+BuildRequires:  xemacs
+# xemacs-packages-extra-20130408-3 worked fine, but not the newer bump
+# https://bugzilla.redhat.com/show_bug.cgi?id=1127518
+BuildRequires:  xemacs-packages-extra < 20140705-1
 %endif
 
 Patch0:         golang-1.2-verbose-build.patch
@@ -149,7 +152,8 @@ BuildArch:     noarch
 %package -n    xemacs-%{name}
 Summary:       XEmacs add-on package for Go
 Requires:      xemacs(bin) >= %{_xemacs_version}
-Requires:      xemacs-packages-extra
+# https://bugzilla.redhat.com/show_bug.cgi?id=1127518
+Requires:      xemacs-packages-extra < 20140705-1
 BuildArch:     noarch
 
 %description -n xemacs-%{name}
@@ -882,6 +886,9 @@ fi
 
 
 %changelog
+* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-11
+- set a version constraint on xemacs due to bz1127518
+
 * Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-10
 - make the source subpackage arch'ed, instead of noarch
 
