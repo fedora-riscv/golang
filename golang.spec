@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        8%{?dist}
+Release:        9%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -134,6 +134,7 @@ BuildArch:     noarch
 %package        src
 Summary:        Golang compiler source tree
 Requires:       go = %{version}-%{release}
+BuildArch:      noarch
 %description    src
 %{summary}
 
@@ -854,6 +855,9 @@ fi
 
 
 %changelog
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-9
+- make golang-src 'noarch' again, since that was not a fix, and takes up more space
+
 * Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-8
 - update timestamps of source files during %%install bz1099206
 
