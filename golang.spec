@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        15%{?dist}
+Release:        16%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -479,6 +479,10 @@ cp -apv api bin doc favicon.ico include lib pkg robots.txt src misc VERSION \
 
 # bz1099206
 find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
+# and level out all the built archives
+touch $RPM_BUILD_ROOT%{goroot}/pkg
+find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{}" \;
+
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
 rm -rfv $RPM_BUILD_ROOT%{goroot}/lib/time
@@ -890,6 +894,9 @@ fi
 
 
 %changelog
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-16
+- touch all the built archives to be the same
+
 * Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-15
 - make golang-src 'noarch' again, since that was not a fix, and takes up more space
 
