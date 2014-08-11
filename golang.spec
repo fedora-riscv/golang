@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -428,7 +428,8 @@ mkdir -p $RPM_BUILD_ROOT%{goroot}
 cp -apv api bin doc favicon.ico include lib pkg robots.txt src misc VERSION \
    $RPM_BUILD_ROOT%{goroot}
 
-find $RPM_BUILD_ROOT%{goroot}/src -type d -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
+# bz1099206
+find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
 rm -rfv $RPM_BUILD_ROOT%{goroot}/lib/time
@@ -853,6 +854,9 @@ fi
 
 
 %changelog
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-8
+- update timestamps of source files during %%install bz1099206
+
 * Fri Aug 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-7
 - update timestamps of source during %%install bz1099206
 
