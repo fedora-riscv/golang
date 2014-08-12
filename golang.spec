@@ -23,6 +23,9 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
+# allow turning this off
+%{!?build_xemacs:%global build_xemacs 1}
+
 # let this match the macros in macros.golang
 %global goroot          /usr/lib/%{name}
 %global gopath          %{_datadir}/gocode
@@ -39,7 +42,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        17%{?dist}
+Release:        18%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -64,7 +67,7 @@ Requires:       golang-src
 
 BuildRequires:  emacs
 # xemacs on fedora only
-%if 0%{?fedora}
+%if 0%{?fedora} && %{build_xemacs} == 1
 BuildRequires:  xemacs
 # xemacs-packages-extra-20130408-3 worked fine, but not the newer bump
 # https://bugzilla.redhat.com/show_bug.cgi?id=1127518
@@ -149,7 +152,7 @@ BuildArch:     noarch
 
 
 # xemacs on fedora only
-%if 0%{?fedora}
+%if 0%{?fedora} && %{build_xemacs} == 1
 %package -n    xemacs-%{name}
 Summary:       XEmacs add-on package for Go
 Requires:      xemacs(bin) >= %{_xemacs_version}
@@ -447,21 +450,11 @@ popd
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
 # xemacs on fedora only
-%if 0%{?fedora}
+%if 0%{?fedora} && %{build_xemacs} == 1
 cp -av emacs xemacs
 %{_xemacs_bytecompile} xemacs/go-mode.el
 %endif
 %{_emacs_bytecompile} emacs/go-mode.el
-cd ..
-
-
-%check
-export GOROOT=$(pwd -P)
-export PATH="$PATH":"$GOROOT"/bin
-cd src
-# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
-# https://code.google.com/p/go/issues/detail?id=6883
-./run.bash --no-rebuild
 cd ..
 
 
@@ -482,12 +475,30 @@ find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSIO
 # and level out all the built archives
 touch $RPM_BUILD_ROOT%{goroot}/pkg
 find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{}" \;
-# generate the spec file ownership of this source tree
-src_list=$(pwd)/go-src.list
+# generate the spec file ownership of this source tree and packages
+cwd=$(pwd)
+src_list=$cwd/go-src.list
+rm -f $src_list
 touch $src_list
 pushd $RPM_BUILD_ROOT%{goroot}
 	find src/ -type d -printf '%%%dir %{goroot}/%p\n' >> $src_list
 	find src/ ! -type d -printf '%{goroot}/%p\n' >> $src_list
+
+
+	for goos in darwin freebsd linux netbsd openbsd plan9 windows ; do
+		for goarch in 386 amd64 arm ; do
+			if [ "${goarch}" = "arm" ] ; then
+				if [ "${goos}" = "darwin" -o "${goos}" = "windows" -o "${goos}" = "plan9" -o "${goos}" = "openbsd" ] ;then
+					continue
+				fi
+			fi
+			file_list=${cwd}/pkg-${goos}-${goarch}.list
+			rm -f $file_list
+			touch $file_list
+			find pkg/${goos}_${goarch}/ -type d -printf '%%%dir %{goroot}/%p\n' >> $file_list
+			find pkg/${goos}_${goarch}/ ! -type d -printf '%{goroot}/%p\n' >> $file_list
+		done
+	done
 popd
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
@@ -541,7 +552,7 @@ cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 
 # xemacs on fedora only
-%if 0%{?fedora}
+%if 0%{?fedora} && %{build_xemacs} == 1
 # misc/xemacs
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
 mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
@@ -575,6 +586,19 @@ cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.golang
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rpm
 cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
 %endif
+
+%check
+export GOROOT=$(pwd -P)
+export PATH="$PATH":"$GOROOT"/bin
+cd src
+# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
+# https://code.google.com/p/go/issues/detail?id=6883
+./run.bash --no-rebuild
+cd ..
+if [ $(go list -json std | grep Stale | wc -l) -gt 2 ] ; then
+	# cmd/go and cmd/gofmt show like they are stale. we can ignore
+	exit 1
+fi
 
 
 %ifarch %{ix86}
@@ -664,7 +688,7 @@ fi
 
 
 # xemacs on fedora only
-%if 0%{?fedora}
+%if 0%{?fedora} && %{build_xemacs} == 1
 %files -n xemacs-%{name}
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 %{_xemacs_sitelispdir}/%{name}
@@ -810,7 +834,7 @@ fi
 %{goroot}/src/pkg/runtime/ztime_linux_arm.c
 %endif
 
-%files pkg-linux-386
+%files pkg-linux-386 -f pkg-linux-386.list
 %{goroot}/pkg/linux_386/
 %ifarch %{ix86}
 %exclude %{goroot}/pkg/linux_386/runtime/cgo.a
@@ -819,7 +843,7 @@ fi
 %{goroot}/pkg/tool/linux_386/fix
 %{goroot}/pkg/tool/linux_386/yacc
 
-%files pkg-linux-amd64
+%files pkg-linux-amd64 -f pkg-linux-amd64.list
 %{goroot}/pkg/linux_amd64/
 %ifarch x86_64
 %exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
@@ -828,7 +852,7 @@ fi
 %{goroot}/pkg/tool/linux_amd64/fix
 %{goroot}/pkg/tool/linux_amd64/yacc
 
-%files pkg-linux-arm
+%files pkg-linux-arm -f pkg-linux-arm.list
 %{goroot}/pkg/linux_arm/
 %ifarch %{arm}
 %exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
@@ -837,59 +861,59 @@ fi
 %{goroot}/pkg/tool/linux_arm/fix
 %{goroot}/pkg/tool/linux_arm/yacc
 
-%files pkg-darwin-386
+%files pkg-darwin-386 -f pkg-darwin-386.list
 %{goroot}/pkg/darwin_386/
 %{goroot}/pkg/tool/darwin_386/
 
-%files pkg-darwin-amd64
+%files pkg-darwin-amd64 -f pkg-darwin-amd64.list
 %{goroot}/pkg/darwin_amd64/
 %{goroot}/pkg/tool/darwin_amd64/
 
-%files pkg-windows-386
+%files pkg-windows-386 -f pkg-windows-386.list
 %{goroot}/pkg/windows_386/
 %{goroot}/pkg/tool/windows_386/
 
-%files pkg-windows-amd64
+%files pkg-windows-amd64 -f pkg-windows-amd64.list
 %{goroot}/pkg/windows_amd64/
 %{goroot}/pkg/tool/windows_amd64/
 
-%files pkg-plan9-386
+%files pkg-plan9-386 -f pkg-plan9-386.list
 %{goroot}/pkg/plan9_386/
 %{goroot}/pkg/tool/plan9_386/
 
-%files pkg-plan9-amd64
+%files pkg-plan9-amd64 -f pkg-plan9-amd64.list
 %{goroot}/pkg/plan9_amd64/
 %{goroot}/pkg/tool/plan9_amd64/
 
-%files pkg-freebsd-386
+%files pkg-freebsd-386 -f pkg-freebsd-386.list
 %{goroot}/pkg/freebsd_386/
 %{goroot}/pkg/tool/freebsd_386/
 
-%files pkg-freebsd-amd64
+%files pkg-freebsd-amd64 -f pkg-freebsd-amd64.list
 %{goroot}/pkg/freebsd_amd64/
 %{goroot}/pkg/tool/freebsd_amd64/
 
-%files pkg-freebsd-arm
+%files pkg-freebsd-arm -f pkg-freebsd-arm.list
 %{goroot}/pkg/freebsd_arm/
 %{goroot}/pkg/tool/freebsd_arm/
 
-%files pkg-netbsd-386
+%files pkg-netbsd-386 -f pkg-netbsd-386.list
 %{goroot}/pkg/netbsd_386/
 %{goroot}/pkg/tool/netbsd_386/
 
-%files pkg-netbsd-amd64
+%files pkg-netbsd-amd64 -f pkg-netbsd-amd64.list
 %{goroot}/pkg/netbsd_amd64/
 %{goroot}/pkg/tool/netbsd_amd64/
 
-%files pkg-netbsd-arm
+%files pkg-netbsd-arm -f pkg-netbsd-arm.list
 %{goroot}/pkg/netbsd_arm/
 %{goroot}/pkg/tool/netbsd_arm/
 
-%files pkg-openbsd-386
+%files pkg-openbsd-386 -f pkg-openbsd-386.list
 %{goroot}/pkg/openbsd_386/
 %{goroot}/pkg/tool/openbsd_386/
 
-%files pkg-openbsd-amd64
+%files pkg-openbsd-amd64 -f pkg-openbsd-amd64.list
 %{goroot}/pkg/openbsd_amd64/
 %{goroot}/pkg/tool/openbsd_amd64/
 
@@ -900,6 +924,9 @@ fi
 
 
 %changelog
+* Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-18
+- explicitly list all the files and directories for the packages trees
+
 * Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-17
 - explicitly list all the files and directories of the src tree, to preserve timestamps
 
