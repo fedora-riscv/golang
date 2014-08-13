@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        9%{?dist}
+Release:        10%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -145,6 +145,7 @@ BuildArch:      noarch
 Summary:        Golang compiler tool for linux 386
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-386 = %{version}-%{release}
+Requires(post): golang-pkg-linux-386 = %{version}-%{release}
 Provides:       golang-bin = 386
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -161,6 +162,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux amd64
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
+Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
 Provides:       golang-bin = amd64
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -177,6 +179,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux arm
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-arm = %{version}-%{release}
+Requires(post): golang-pkg-linux-arm = %{version}-%{release}
 Provides:       golang-bin = arm
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -399,24 +402,6 @@ mv emacs/go-mode-load.el emacs/%{name}-init.el
 cd ..
 
 
-%check
-export GOROOT=$(pwd -P)
-export PATH="$PATH":"$GOROOT"/bin
-cd src
-
-# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
-# until this test/issue is fixed
-# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
-# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
-# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
-
-# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
-# https://code.google.com/p/go/issues/detail?id=6883
-CGO_ENABLED=0 ./run.bash --no-rebuild
-
-cd ..
-
-
 %install
 rm -rf $RPM_BUILD_ROOT
 
@@ -431,6 +416,34 @@ cp -apv api bin doc favicon.ico include lib pkg robots.txt src misc VERSION \
 
 # bz1099206
 find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
+# and level out all the built archives
+touch $RPM_BUILD_ROOT%{goroot}/pkg
+find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{}" \;
+# generate the spec file ownership of this source tree and packages
+cwd=$(pwd)
+src_list=$cwd/go-src.list
+rm -f $src_list
+touch $src_list
+pushd $RPM_BUILD_ROOT%{goroot}
+	find src/ -type d -printf '%%%dir %{goroot}/%p\n' >> $src_list
+	find src/ ! -type d -printf '%{goroot}/%p\n' >> $src_list
+
+
+	for goos in darwin freebsd linux netbsd openbsd plan9 windows ; do
+		for goarch in 386 amd64 arm ; do
+			if [ "${goarch}" = "arm" ] ; then
+				if [ "${goos}" = "darwin" -o "${goos}" = "windows" -o "${goos}" = "plan9" -o "${goos}" = "openbsd" ] ;then
+					continue
+				fi
+			fi
+			file_list=${cwd}/pkg-${goos}-${goarch}.list
+			rm -f $file_list
+			touch $file_list
+			find pkg/${goos}_${goarch}/ -type d -printf '%%%dir %{goroot}/%p\n' >> $file_list
+			find pkg/${goos}_${goarch}/ ! -type d -printf '%{goroot}/%p\n' >> $file_list
+		done
+	done
+popd
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
 rm -rfv $RPM_BUILD_ROOT%{goroot}/lib/time
@@ -510,7 +523,31 @@ cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
 %endif
 
 
+%check
+export GOROOT=$(pwd -P)
+export PATH="$PATH":"$GOROOT"/bin
+cd src
+# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
+# until this test/issue is fixed
+# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
+# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
+
+# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
+# https://code.google.com/p/go/issues/detail?id=6883
+CGO_ENABLED=0 ./run.bash --no-rebuild
+cd ..
+
+if [ $(go list -json std | grep Stale | wc -l) -gt 2 ] ; then
+	# cmd/go and cmd/gofmt show like they are stale. we can ignore
+	exit 1
+fi
+
+
 %ifarch %{ix86}
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_386/runtime.a %{goroot}/pkg/linux_386/runtime/cgo.a
+
 %post pkg-bin-linux-386
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_386/go 90 \
@@ -524,6 +561,9 @@ fi
 
 %ifarch x86_64
 %post pkg-bin-linux-amd64
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_amd64/runtime.a %{goroot}/pkg/linux_amd64/runtime/cgo.a
+
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_amd64/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_amd64/gofmt
@@ -536,6 +576,9 @@ fi
 
 %ifarch %{arm}
 %post pkg-bin-linux-arm
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_arm/runtime.a %{goroot}/pkg/linux_arm/runtime/cgo.a
+
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_arm/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_arm/gofmt
@@ -599,7 +642,7 @@ fi
 %{_emacs_sitestartdir}/*.el
 
 
-%files src
+%files -f go-src.list src
 %{goroot}/src/
 
 %ifarch %{ix86}
@@ -765,7 +808,7 @@ fi
 %{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
-%files pkg-linux-386
+%files pkg-linux-386 -f pkg-linux-386.list
 %{goroot}/pkg/linux_386/
 %ifarch %{ix86}
 %exclude %{goroot}/pkg/linux_386/runtime/cgo.a
@@ -774,7 +817,7 @@ fi
 %{goroot}/pkg/tool/linux_386/fix
 %{goroot}/pkg/tool/linux_386/yacc
 
-%files pkg-linux-amd64
+%files pkg-linux-amd64 -f pkg-linux-amd64.list
 %{goroot}/pkg/linux_amd64/
 %ifarch x86_64
 %exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
@@ -783,7 +826,7 @@ fi
 %{goroot}/pkg/tool/linux_amd64/fix
 %{goroot}/pkg/tool/linux_amd64/yacc
 
-%files pkg-linux-arm
+%files pkg-linux-arm -f pkg-linux-arm.list
 %{goroot}/pkg/linux_arm/
 %ifarch %{arm}
 %exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
@@ -792,59 +835,59 @@ fi
 %{goroot}/pkg/tool/linux_arm/fix
 %{goroot}/pkg/tool/linux_arm/yacc
 
-%files pkg-darwin-386
+%files pkg-darwin-386 -f pkg-darwin-386.list
 %{goroot}/pkg/darwin_386/
 %{goroot}/pkg/tool/darwin_386/
 
-%files pkg-darwin-amd64
+%files pkg-darwin-amd64 -f pkg-darwin-amd64.list
 %{goroot}/pkg/darwin_amd64/
 %{goroot}/pkg/tool/darwin_amd64/
 
-%files pkg-windows-386
+%files pkg-windows-386 -f pkg-windows-386.list
 %{goroot}/pkg/windows_386/
 %{goroot}/pkg/tool/windows_386/
 
-%files pkg-windows-amd64
+%files pkg-windows-amd64 -f pkg-windows-amd64.list
 %{goroot}/pkg/windows_amd64/
 %{goroot}/pkg/tool/windows_amd64/
 
-%files pkg-plan9-386
+%files pkg-plan9-386 -f pkg-plan9-386.list
 %{goroot}/pkg/plan9_386/
 %{goroot}/pkg/tool/plan9_386/
 
-%files pkg-plan9-amd64
+%files pkg-plan9-amd64 -f pkg-plan9-amd64.list
 %{goroot}/pkg/plan9_amd64/
 %{goroot}/pkg/tool/plan9_amd64/
 
-%files pkg-freebsd-386
+%files pkg-freebsd-386 -f pkg-freebsd-386.list
 %{goroot}/pkg/freebsd_386/
 %{goroot}/pkg/tool/freebsd_386/
 
-%files pkg-freebsd-amd64
+%files pkg-freebsd-amd64 -f pkg-freebsd-amd64.list
 %{goroot}/pkg/freebsd_amd64/
 %{goroot}/pkg/tool/freebsd_amd64/
 
-%files pkg-freebsd-arm
+%files pkg-freebsd-arm -f pkg-freebsd-arm.list
 %{goroot}/pkg/freebsd_arm/
 %{goroot}/pkg/tool/freebsd_arm/
 
-%files pkg-netbsd-386
+%files pkg-netbsd-386 -f pkg-netbsd-386.list
 %{goroot}/pkg/netbsd_386/
 %{goroot}/pkg/tool/netbsd_386/
 
-%files pkg-netbsd-amd64
+%files pkg-netbsd-amd64 -f pkg-netbsd-amd64.list
 %{goroot}/pkg/netbsd_amd64/
 %{goroot}/pkg/tool/netbsd_amd64/
 
-%files pkg-netbsd-arm
+%files pkg-netbsd-arm -f pkg-netbsd-arm.list
 %{goroot}/pkg/netbsd_arm/
 %{goroot}/pkg/tool/netbsd_arm/
 
-%files pkg-openbsd-386
+%files pkg-openbsd-386 -f pkg-openbsd-386.list
 %{goroot}/pkg/openbsd_386/
 %{goroot}/pkg/tool/openbsd_386/
 
-%files pkg-openbsd-amd64
+%files pkg-openbsd-amd64 -f pkg-openbsd-amd64.list
 %{goroot}/pkg/openbsd_amd64/
 %{goroot}/pkg/tool/openbsd_amd64/
 
@@ -855,6 +898,11 @@ fi
 
 
 %changelog
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-10
+- more work to get cgo.a timestamps to line up, due to build-env
+- explicitly list all the files and directories for the source and packages trees
+- touch all the built archives to be the same
+
 * Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-9
 - make golang-src 'noarch' again, since that was not a fix, and takes up more space
 
