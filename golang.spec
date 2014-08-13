@@ -38,13 +38,13 @@
 %endif
 
 Name:           golang
-Version:        1.3
-Release:        11%{?dist}
+Version:        1.3.1
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        http://golang.org/dl/go%{version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
@@ -339,7 +339,7 @@ end
 
 %if 0%{?fedora} >= 21
 %patch210 -p0
-%patch211 -p0
+%patch211 -p1
 %endif
 
 # increase verbosity of build
@@ -898,6 +898,9 @@ fi
 
 
 %changelog
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-1
+- update to go1.3.1
+
 * Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-11
 - merged a line wrong
 

@@ -1,8 +1,8 @@
-Index: include/u.h
+Index: go/include/u.h
 ===================================================================
---- include/u.h.orig
-+++ include/u.h
-@@ -38,9 +38,12 @@ extern "C" {
+--- go.orig/include/u.h
++++ go/include/u.h
+@@ -38,10 +38,13 @@ extern "C" {
  #		define __MAKECONTEXT_V2_SOURCE 1
  #	endif
  #endif
@@ -10,7 +10,8 @@ Index: include/u.h
 +#define _DEFAULT_SOURCE 1
 +#else
  #define _BSD_SOURCE 1
--#define _NETBSD_SOURCE 1	/* NetBSD */
+ #define _NETBSD_SOURCE 1	/* NetBSD */
+-#define _DEFAULT_SOURCE 1	/* glibc > 2.19 */
  #define _SVID_SOURCE 1
 +#endif
  #if !defined(__APPLE__) && !defined(__OpenBSD__)
