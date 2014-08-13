@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3
-Release:        10%{?dist}
+Release:        11%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -545,10 +545,10 @@ fi
 
 
 %ifarch %{ix86}
+%post pkg-bin-linux-386
 # since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
 touch -r %{goroot}/pkg/linux_386/runtime.a %{goroot}/pkg/linux_386/runtime/cgo.a
 
-%post pkg-bin-linux-386
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_386/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_386/gofmt
@@ -898,6 +898,9 @@ fi
 
 
 %changelog
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-11
+- merged a line wrong
+
 * Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-10
 - more work to get cgo.a timestamps to line up, due to build-env
 - explicitly list all the files and directories for the source and packages trees
