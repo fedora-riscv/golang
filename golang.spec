@@ -42,7 +42,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        18%{?dist}
+Release:        19%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -603,6 +603,13 @@ fi
 
 %ifarch %{ix86}
 %post pkg-bin-linux-386
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+# then a multitude of packages will appear Stale. For sanity we'll check whether cgo is Stale, and plum it up to runtime.a
+if go list -json runtime/cgo | grep -q Stale ; then
+	runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	touch -r ${runtime_file} ${cgo_file}
+fi
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_386/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_386/gofmt
@@ -615,6 +622,13 @@ fi
 
 %ifarch x86_64
 %post pkg-bin-linux-amd64
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+# then a multitude of packages will appear Stale. For sanity we'll check whether cgo is Stale, and plum it up to runtime.a
+if go list -json runtime/cgo | grep -q Stale ; then
+	runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	touch -r ${runtime_file} ${cgo_file}
+fi
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_amd64/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_amd64/gofmt
@@ -627,6 +641,13 @@ fi
 
 %ifarch %{arm}
 %post pkg-bin-linux-arm
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+# then a multitude of packages will appear Stale. For sanity we'll check whether cgo is Stale, and plum it up to runtime.a
+if go list -json runtime/cgo | grep -q Stale ; then
+	runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
+	touch -r ${runtime_file} ${cgo_file}
+fi
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_arm/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_arm/gofmt
@@ -924,6 +945,9 @@ fi
 
 
 %changelog
+* Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-19
+- finally check for a Stale cgo in a %%post
+
 * Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-18
 - explicitly list all the files and directories for the packages trees
 
