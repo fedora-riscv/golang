@@ -42,7 +42,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        21%{?dist}
+Release:        22%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -607,9 +607,7 @@ fi
 %ifarch %{ix86}
 %post pkg-bin-linux-386
 # since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-touch -r ${runtime_file} ${cgo_file}
+touch -r %{goroot}/pkg/linux_386/runtime.a %{goroot}/pkg/linux_386/runtime/cgo.a
 
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_386/go 90 \
@@ -624,9 +622,7 @@ fi
 %ifarch x86_64
 %post pkg-bin-linux-amd64
 # since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-touch -r ${runtime_file} ${cgo_file}
+touch -r %{goroot}/pkg/linux_amd64/runtime.a %{goroot}/pkg/linux_amd64/runtime/cgo.a
 
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_amd64/go 90 \
@@ -641,9 +637,7 @@ fi
 %ifarch %{arm}
 %post pkg-bin-linux-arm
 # since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-runtime_file=$(go list -json runtime | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-cgo_file=$(go list -json runtime/cgo | grep -w  Target | sed -e 's/.*".*".*"\(.*\)".*/\1/')
-touch -r ${runtime_file} ${cgo_file}
+touch -r %{goroot}/pkg/linux_arm/runtime.a %{goroot}/pkg/linux_arm/runtime/cgo.a
 
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_arm/go 90 \
@@ -942,6 +936,9 @@ fi
 
 
 %changelog
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-22
+- more work to get cgo.a timestamps to line up, due to build-env
+
 * Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-21
 - touch cgo.a regardless
 
