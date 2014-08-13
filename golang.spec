@@ -42,7 +42,7 @@
 
 Name:           golang
 Version:        1.2.2
-Release:        19%{?dist}
+Release:        20%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -179,6 +179,7 @@ BuildArch:      noarch
 Summary:        Golang compiler tool for linux 386
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-386 = %{version}-%{release}
+Requires(post): golang-pkg-linux-386 = %{version}-%{release}
 Provides:       golang-bin = 386
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -194,6 +195,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux amd64
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
+Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
 Provides:       golang-bin = amd64
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -209,6 +211,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux arm
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-arm = %{version}-%{release}
+Requires(post): golang-pkg-linux-arm = %{version}-%{release}
 Provides:       golang-bin = arm
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
@@ -945,6 +948,9 @@ fi
 
 
 %changelog
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-20
+- rpm dependency ordering for %%post
+
 * Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-19
 - finally check for a Stale cgo in a %%post
 
