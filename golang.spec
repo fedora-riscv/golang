@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -898,6 +898,9 @@ fi
 
 
 %changelog
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
 * Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-1
 - update to go1.3.1
 
