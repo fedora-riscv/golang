@@ -39,7 +39,7 @@
 
 Name:           golang
 Version:        1.3.1
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -79,6 +79,9 @@ Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
 Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
 # https://code.google.com/p/go/source/detail?r=1b17b3426e3c
 Patch5:         ./go1.3-tar-fix_writing_of_pax_headers.patch
+
+# https://code.google.com/p/go/issues/detail?id=8547
+Patch6:         ./skip_syndey_time_test.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -356,6 +359,9 @@ end
 %patch4 -p1
 # buffer the PAX header
 %patch5 -p1
+
+# new tzinfo breaks a single unit test
+%patch6 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
 # (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
@@ -898,6 +904,9 @@ fi
 
 
 %changelog
+* Thu Sep 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-3
+- patching the tzinfo failure
+
 * Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
 
