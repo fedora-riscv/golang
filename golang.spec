@@ -38,20 +38,20 @@
 %endif
 
 Name:           golang
-Version:        1.2.2
-Release:        7%{?dist}
+Version:        1.3.2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://go.googlecode.com/files/go%{version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
 BuildRequires:  /usr/bin/hostname
 Patch210:       golang-f21-hostname.patch
 
-# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates 
+# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates
 #            _BSD_SOURCE and _SVID_SOURCE
 Patch211:       golang-1.2-BSD-SVID-SOURCE.patch
 %else
@@ -63,10 +63,6 @@ Requires:       golang-bin
 Requires:       golang-src
 
 BuildRequires:  emacs
-# xemacs on fedora only
-%if 0%{?fedora}
-BuildRequires:  xemacs xemacs-packages-extra
-%endif
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -77,19 +73,15 @@ Patch1:         golang-1.2-remove-ECC-p224.patch
 # http://code.google.com/p/go/issues/detail?id=6522
 Patch2:         ./golang-1.2-skipCpuProfileTest.patch
 
-# Pull in new archive/tar upstream patch to support xattrs for
-# docker-0.8.1
-# https://code.google.com/p/go/source/detail?r=a15f344a9efa
-Patch3:         golang-1.2-archive_tar-xattr.patch
+# these patches can be dropped for go1.4
+# discovered working here https://github.com/dotcloud/docker/pull/6829
+Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
+Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
+# https://code.google.com/p/go/source/detail?r=1b17b3426e3c
+Patch5:         ./go1.3-tar-fix_writing_of_pax_headers.patch
 
-# skip test that causes a SIGABRT on fc21 (bz1086900)
-# until this test/issue is fixed
-# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
-Patch5:         golang-1.2.1-disable_testsetgid.patch
-
-# skip this test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
-# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
-Patch6:         golang-1.2.1-i686-cgo-test-failure.patch
+# https://code.google.com/p/go/issues/detail?id=8547
+Patch6:         ./skip_syndey_time_test.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -103,10 +95,6 @@ ExclusiveArch:  %{go_arches}
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
 Source102:      macros.golang
-
-# Patch4 - pull in new archive/tar upstream patch, this file is part
-#          of the upstream merge and is used for test cases.
-Source400:      golang-19087:a15f344a9efa-xattrs.tar
 
 %description
 %{summary}.
@@ -144,24 +132,11 @@ BuildArch:     noarch
 %{summary}.
 
 
-# xemacs on fedora only
-%if 0%{?fedora}
-%package -n    xemacs-%{name}
-Summary:       XEmacs add-on package for Go
-Requires:      xemacs(bin) >= %{_xemacs_version}
-Requires:      xemacs-packages-extra
-BuildArch:     noarch
-
-%description -n xemacs-%{name}
-%{summary}.
-%endif
-
 ##
 # the source tree
 %package        src
 Summary:        Golang compiler source tree
 Requires:       go = %{version}-%{release}
-# the binary bits in this tree are for testdata
 BuildArch:      noarch
 %description    src
 %{summary}
@@ -173,10 +148,12 @@ BuildArch:      noarch
 Summary:        Golang compiler tool for linux 386
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-386 = %{version}-%{release}
+Requires(post): golang-pkg-linux-386 = %{version}-%{release}
 Provides:       golang-bin = 386
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
+Requires:       gcc
 Requires(post): %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
 %description    pkg-bin-linux-386
@@ -188,10 +165,12 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux amd64
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
+Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
 Provides:       golang-bin = amd64
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
+Requires:       gcc
 Requires(post): %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
 %description    pkg-bin-linux-amd64
@@ -203,10 +182,12 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler tool for linux arm
 Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-arm = %{version}-%{release}
+Requires(post): golang-pkg-linux-arm = %{version}-%{release}
 Provides:       golang-bin = arm
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
+Requires:       gcc
 Requires(post): %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
 %description    pkg-bin-linux-arm
@@ -221,7 +202,6 @@ Requires(postun): %{_sbindir}/update-alternatives
 Summary:        Golang compiler toolchain to compile for linux 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-linux-386
 %{summary}
 
@@ -229,7 +209,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for linux amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-linux-amd64
 %{summary}
 
@@ -237,7 +216,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for linux arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-linux-arm
 %{summary}
 
@@ -245,7 +223,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for darwin 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-darwin-386
 %{summary}
 
@@ -253,7 +230,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for darwin amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-darwin-amd64
 %{summary}
 
@@ -261,7 +237,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for windows 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-windows-386
 %{summary}
 
@@ -269,7 +244,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for windows amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-windows-amd64
 %{summary}
 
@@ -277,7 +251,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for plan9 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-plan9-386
 %{summary}
 
@@ -285,7 +258,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for plan9 amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-plan9-amd64
 %{summary}
 
@@ -293,7 +265,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for freebsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-freebsd-386
 %{summary}
 
@@ -301,7 +272,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for freebsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-freebsd-amd64
 %{summary}
 
@@ -309,7 +279,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for freebsd arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-freebsd-arm
 %{summary}
 
@@ -317,7 +286,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for netbsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-netbsd-386
 %{summary}
 
@@ -325,7 +293,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for netbsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-netbsd-amd64
 %{summary}
 
@@ -333,7 +300,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for netbsd arm
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-netbsd-arm
 %{summary}
 
@@ -341,7 +307,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for openbsd 386
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-openbsd-386
 %{summary}
 
@@ -349,7 +314,6 @@ Requires(post): golang-bin
 Summary:        Golang compiler toolchain to compile for openbsd amd64
 Requires:       go = %{version}-%{release}
 BuildArch:      noarch
-Requires(post): golang-bin
 %description    pkg-openbsd-amd64
 %{summary}
 
@@ -359,7 +323,6 @@ Requires(post): golang-bin
 #Summary:        Golang compiler toolchain to compile for openbsd arm
 #Requires:       go = %{version}-%{release}
 #BuildArch:      noarch
-#Requires(post): golang-bin
 #%description    pkg-openbsd-arm
 #%{summary}
 
@@ -377,11 +340,9 @@ end
 %prep
 %setup -q -n go
 
-cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
-
 %if 0%{?fedora} >= 21
 %patch210 -p0
-%patch211 -p0
+%patch211 -p1
 %endif
 
 # increase verbosity of build
@@ -393,14 +354,13 @@ cp %SOURCE400 src/pkg/archive/tar/testdata/xattrs.tar
 # skip flaky test
 %patch2 -p1
 
-# new archive/tar implementation from upstream
-# TODO: remove this when updated to go1.3
+# performance for archive/tar
 %patch3 -p1
-
-# SIGABRT bz1086900
+%patch4 -p1
+# buffer the PAX header
 %patch5 -p1
 
-# cgo/test bz1087621
+# new tzinfo breaks a single unit test
 %patch6 -p1
 
 # create a [dirty] gcc wrapper to allow us to build with our own flags
@@ -436,30 +396,15 @@ pushd src
 			PATH="$(pwd -P)/../zz:$PATH" CC="gcc" \
 				GOOS=${goos} \
 				GOARCH=${goarch} \
-				./make.bash
+				./make.bash --no-clean
 		done
 	done
 popd
 
-# compile for emacs and xemacs
+# compile for emacs
 cd misc
 mv emacs/go-mode-load.el emacs/%{name}-init.el
-# xemacs on fedora only
-%if 0%{?fedora}
-cp -av emacs xemacs
-%{_xemacs_bytecompile} xemacs/go-mode.el
-%endif
 %{_emacs_bytecompile} emacs/go-mode.el
-cd ..
-
-
-%check
-export GOROOT=$(pwd -P)
-export PATH="$PATH":"$GOROOT"/bin
-cd src
-# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
-# https://code.google.com/p/go/issues/detail?id=6883
-./run.bash --no-rebuild
 cd ..
 
 
@@ -472,8 +417,39 @@ mkdir -p $RPM_BUILD_ROOT%{goroot}
 
 # install everything into libdir (until symlink problems are fixed)
 # https://code.google.com/p/go/issues/detail?id=5830
-cp -av api bin doc favicon.ico include lib pkg robots.txt src \
+cp -apv api bin doc favicon.ico include lib pkg robots.txt src misc VERSION \
    $RPM_BUILD_ROOT%{goroot}
+
+# bz1099206
+find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
+# and level out all the built archives
+touch $RPM_BUILD_ROOT%{goroot}/pkg
+find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{}" \;
+# generate the spec file ownership of this source tree and packages
+cwd=$(pwd)
+src_list=$cwd/go-src.list
+rm -f $src_list
+touch $src_list
+pushd $RPM_BUILD_ROOT%{goroot}
+	find src/ -type d -printf '%%%dir %{goroot}/%p\n' >> $src_list
+	find src/ ! -type d -printf '%{goroot}/%p\n' >> $src_list
+
+
+	for goos in darwin freebsd linux netbsd openbsd plan9 windows ; do
+		for goarch in 386 amd64 arm ; do
+			if [ "${goarch}" = "arm" ] ; then
+				if [ "${goos}" = "darwin" -o "${goos}" = "windows" -o "${goos}" = "plan9" -o "${goos}" = "openbsd" ] ;then
+					continue
+				fi
+			fi
+			file_list=${cwd}/pkg-${goos}-${goarch}.list
+			rm -f $file_list
+			touch $file_list
+			find pkg/${goos}_${goarch}/ -type d -printf '%%%dir %{goroot}/%p\n' >> $file_list
+			find pkg/${goos}_${goarch}/ ! -type d -printf '%{goroot}/%p\n' >> $file_list
+		done
+	done
+popd
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
 rm -rfv $RPM_BUILD_ROOT%{goroot}/lib/time
@@ -525,15 +501,6 @@ mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
 cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
 
-# xemacs on fedora only
-%if 0%{?fedora}
-# misc/xemacs
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
-cp -av misc/xemacs/go-mode.* $RPM_BUILD_ROOT%{_xemacs_sitelispdir}/%{name}
-cp -av misc/xemacs/%{name}-init.el $RPM_BUILD_ROOT%{_xemacs_sitestartdir}
-%endif
-
 # misc/vim
 mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
 cp -av misc/vim/* $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
@@ -545,7 +512,7 @@ cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
-cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang
+cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 
 # prelink blacklist
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
@@ -562,8 +529,32 @@ cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
 %endif
 
 
+%check
+export GOROOT=$(pwd -P)
+export PATH="$PATH":"$GOROOT"/bin
+cd src
+# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
+# until this test/issue is fixed
+# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
+# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
+# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
+
+# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
+# https://code.google.com/p/go/issues/detail?id=6883
+CGO_ENABLED=0 ./run.bash --no-rebuild
+cd ..
+
+if [ $(go list -json std | grep Stale | wc -l) -gt 2 ] ; then
+	# cmd/go and cmd/gofmt show like they are stale. we can ignore
+	exit 1
+fi
+
+
 %ifarch %{ix86}
 %post pkg-bin-linux-386
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_386/runtime.a %{goroot}/pkg/linux_386/runtime/cgo.a
+
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_386/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_386/gofmt
@@ -576,6 +567,9 @@ fi
 
 %ifarch x86_64
 %post pkg-bin-linux-amd64
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_amd64/runtime.a %{goroot}/pkg/linux_amd64/runtime/cgo.a
+
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_amd64/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_amd64/gofmt
@@ -588,6 +582,9 @@ fi
 
 %ifarch %{arm}
 %post pkg-bin-linux-arm
+# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
+touch -r %{goroot}/pkg/linux_arm/runtime.a %{goroot}/pkg/linux_arm/runtime/cgo.a
+
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
 	go %{goroot}/bin/linux_arm/go 90 \
 	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_arm/gofmt
@@ -598,61 +595,14 @@ if [ $1 = 0 ]; then
 fi
 %endif
 
-# All these archives need to be newer than the corresponding source in goroot
-# https://bugzilla.redhat.com/show_bug.cgi?id=1099206
-%post pkg-linux-386
-GOROOT=%{goroot} GOOS=linux GOARCH=386 go install std
 
-%post pkg-linux-amd64
-GOROOT=%{goroot} GOOS=linux GOARCH=amd64 go install std
-
-%post pkg-linux-arm
-GOROOT=%{goroot} GOOS=linux GOARCH=arm go install std
-
-%post pkg-darwin-386
-GOROOT=%{goroot} GOOS=darwin GOARCH=386 go install std
-
-%post pkg-darwin-amd64
-GOROOT=%{goroot} GOOS=darwin GOARCH=amd64 go install std
-
-%post pkg-windows-386
-GOROOT=%{goroot} GOOS=windows GOARCH=386 go install std
-
-%post pkg-windows-amd64
-GOROOT=%{goroot} GOOS=windows GOARCH=amd64 go install std
-
-%post pkg-plan9-386
-GOROOT=%{goroot} GOOS=plan9 GOARCH=386 go install std
-
-%post pkg-plan9-amd64
-GOROOT=%{goroot} GOOS=plan9 GOARCH=amd64 go install std
-
-%post pkg-freebsd-386
-GOROOT=%{goroot} GOOS=freebsd GOARCH=386 go install std
-
-%post pkg-freebsd-amd64
-GOROOT=%{goroot} GOOS=freebsd GOARCH=amd64 go install std
-
-%post pkg-freebsd-arm
-GOROOT=%{goroot} GOOS=freebsd GOARCH=arm go install std
-
-%post pkg-netbsd-386
-GOROOT=%{goroot} GOOS=netbsd GOARCH=386 go install std
-
-%post pkg-netbsd-amd64
-GOROOT=%{goroot} GOOS=netbsd GOARCH=amd64 go install std
-
-%post pkg-netbsd-arm
-GOROOT=%{goroot} GOOS=netbsd GOARCH=arm go install std
-
-%post pkg-openbsd-386
-GOROOT=%{goroot} GOOS=openbsd GOARCH=386 go install std
-
-%post pkg-openbsd-amd64
-GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
+#%post pkg-openbsd-arm
+#GOROOT=%{goroot} GOOS=openbsd GOARCH=arm go install std
 
 %files
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS VERSION
+%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
+# VERSION has to be present in the GOROOT, for `go install std` to work
+%doc %{goroot}/VERSION
 
 # go files
 %dir %{goroot}
@@ -698,75 +648,8 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{_emacs_sitestartdir}/*.el
 
 
-# xemacs on fedora only
-%if 0%{?fedora}
-%files -n xemacs-%{name}
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_xemacs_sitelispdir}/%{name}
-%{_xemacs_sitestartdir}/*.el
-%endif
-
-%files src
+%files -f go-src.list src
 %{goroot}/src/
-# files that are generated based on compile-time ARCH will go in that arch's pkg-bin-*
-%ifarch %{ix86}
-
-# this is wacky that now these files are generated in a different arch
-%exclude %{goroot}/src/cmd/8l/enam.c
-%exclude %{goroot}/src/pkg/runtime/zgoarch_386.go
-%exclude %{goroot}/src/cmd/6l/enam.c
-%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
-
-%exclude %{goroot}/src/pkg/runtime/zasm_linux_386.h
-%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zmprof_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
-%exclude %{goroot}/src/pkg/runtime/zsema_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zstring_linux_386.c
-%exclude %{goroot}/src/pkg/runtime/zsys_linux_386.s
-%exclude %{goroot}/src/pkg/runtime/ztime_linux_386.c
-%endif
-
-%ifarch x86_64
-%exclude %{goroot}/src/cmd/6l/enam.c
-%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
-
-%exclude %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
-%exclude %{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zsema_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
-%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
-%exclude %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
-%exclude %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
-%endif
-
-%ifarch %{arm}
-%exclude %{goroot}/src/cmd/5l/enam.c
-%exclude %{goroot}/src/pkg/runtime/zgoarch_arm.go
-%exclude %{goroot}/src/cmd/6l/enam.c
-%exclude %{goroot}/src/pkg/runtime/zgoarch_amd64.go
-
-%exclude %{goroot}/src/pkg/runtime/zasm_linux_arm.h
-%exclude %{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zmprof_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
-%exclude %{goroot}/src/pkg/runtime/zsema_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zstring_linux_arm.c
-%exclude %{goroot}/src/pkg/runtime/zsys_linux_arm.s
-%exclude %{goroot}/src/pkg/runtime/ztime_linux_arm.c
-%endif
-
 
 %ifarch %{ix86}
 %files pkg-bin-linux-386
@@ -778,6 +661,10 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/obj/linux_386/*
 %{goroot}/pkg/linux_386/runtime/cgo.a
 %dir %{goroot}/pkg/tool/linux_386
+%{goroot}/pkg/tool/linux_386/5a
+%{goroot}/pkg/tool/linux_386/5c
+%{goroot}/pkg/tool/linux_386/5g
+%{goroot}/pkg/tool/linux_386/5l
 %{goroot}/pkg/tool/linux_386/6a
 %{goroot}/pkg/tool/linux_386/6c
 %{goroot}/pkg/tool/linux_386/6g
@@ -794,7 +681,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_386/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/8l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_386.h
 %{goroot}/src/pkg/runtime/zgoarch_386.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_386.c
@@ -807,6 +693,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_386.c
 %{goroot}/src/pkg/runtime/zsys_linux_386.s
 %{goroot}/src/pkg/runtime/ztime_linux_386.c
+%{goroot}/src/pkg/runtime/zalg_linux_386.c
+%{goroot}/src/pkg/runtime/zchan_linux_386.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_386.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_386.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_386.c
+%{goroot}/src/pkg/runtime/ziface_linux_386.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_386.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_386.c
+%{goroot}/src/pkg/runtime/zslice_linux_386.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -819,10 +715,18 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/obj/linux_amd64/*
 %{goroot}/pkg/linux_amd64/runtime/cgo.a
 %dir %{goroot}/pkg/tool/linux_amd64
+%{goroot}/pkg/tool/linux_amd64/5a
+%{goroot}/pkg/tool/linux_amd64/5c
+%{goroot}/pkg/tool/linux_amd64/5g
+%{goroot}/pkg/tool/linux_amd64/5l
 %{goroot}/pkg/tool/linux_amd64/6a
 %{goroot}/pkg/tool/linux_amd64/6c
 %{goroot}/pkg/tool/linux_amd64/6g
 %{goroot}/pkg/tool/linux_amd64/6l
+%{goroot}/pkg/tool/linux_amd64/8a
+%{goroot}/pkg/tool/linux_amd64/8c
+%{goroot}/pkg/tool/linux_amd64/8g
+%{goroot}/pkg/tool/linux_amd64/8l
 %{goroot}/pkg/tool/linux_amd64/addr2line
 %{goroot}/pkg/tool/linux_amd64/dist
 %{goroot}/pkg/tool/linux_amd64/nm
@@ -831,7 +735,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_amd64/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/6l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_amd64.h
 %{goroot}/src/pkg/runtime/zgoarch_amd64.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
@@ -844,6 +747,16 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_amd64.c
 %{goroot}/src/pkg/runtime/zsys_linux_amd64.s
 %{goroot}/src/pkg/runtime/ztime_linux_amd64.c
+%{goroot}/src/pkg/runtime/zalg_linux_amd64.c
+%{goroot}/src/pkg/runtime/zchan_linux_amd64.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_amd64.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_amd64.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_amd64.c
+%{goroot}/src/pkg/runtime/ziface_linux_amd64.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_amd64.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_amd64.c
+%{goroot}/src/pkg/runtime/zslice_linux_amd64.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -864,6 +777,10 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_arm/6c
 %{goroot}/pkg/tool/linux_arm/6g
 %{goroot}/pkg/tool/linux_arm/6l
+%{goroot}/pkg/tool/linux_arm/8a
+%{goroot}/pkg/tool/linux_arm/8c
+%{goroot}/pkg/tool/linux_arm/8g
+%{goroot}/pkg/tool/linux_arm/8l
 %{goroot}/pkg/tool/linux_arm/addr2line
 %{goroot}/pkg/tool/linux_arm/dist
 %{goroot}/pkg/tool/linux_arm/nm
@@ -872,7 +789,6 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_arm/pprof
 
 # arch dependent generated files, used by cgo
-%{goroot}/src/cmd/5l/enam.c
 %{goroot}/src/pkg/runtime/zasm_linux_arm.h
 %{goroot}/src/pkg/runtime/zgoarch_arm.go
 %{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
@@ -886,9 +802,19 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/src/pkg/runtime/zstring_linux_arm.c
 %{goroot}/src/pkg/runtime/zsys_linux_arm.s
 %{goroot}/src/pkg/runtime/ztime_linux_arm.c
+%{goroot}/src/pkg/runtime/zalg_linux_arm.c
+%{goroot}/src/pkg/runtime/zchan_linux_arm.c
+%{goroot}/src/pkg/runtime/zcomplex_linux_arm.c
+%{goroot}/src/pkg/runtime/zcpuprof_linux_arm.c
+%{goroot}/src/pkg/runtime/zhashmap_linux_arm.c
+%{goroot}/src/pkg/runtime/ziface_linux_arm.c
+%{goroot}/src/pkg/runtime/zlfstack_linux_arm.c
+%{goroot}/src/pkg/runtime/zrdebug_linux_arm.c
+%{goroot}/src/pkg/runtime/zslice_linux_arm.c
+%{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
-%files pkg-linux-386
+%files pkg-linux-386 -f pkg-linux-386.list
 %{goroot}/pkg/linux_386/
 %ifarch %{ix86}
 %exclude %{goroot}/pkg/linux_386/runtime/cgo.a
@@ -897,7 +823,7 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_386/fix
 %{goroot}/pkg/tool/linux_386/yacc
 
-%files pkg-linux-amd64
+%files pkg-linux-amd64 -f pkg-linux-amd64.list
 %{goroot}/pkg/linux_amd64/
 %ifarch x86_64
 %exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
@@ -906,7 +832,7 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_amd64/fix
 %{goroot}/pkg/tool/linux_amd64/yacc
 
-%files pkg-linux-arm
+%files pkg-linux-arm -f pkg-linux-arm.list
 %{goroot}/pkg/linux_arm/
 %ifarch %{arm}
 %exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
@@ -915,59 +841,59 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 %{goroot}/pkg/tool/linux_arm/fix
 %{goroot}/pkg/tool/linux_arm/yacc
 
-%files pkg-darwin-386
+%files pkg-darwin-386 -f pkg-darwin-386.list
 %{goroot}/pkg/darwin_386/
 %{goroot}/pkg/tool/darwin_386/
 
-%files pkg-darwin-amd64
+%files pkg-darwin-amd64 -f pkg-darwin-amd64.list
 %{goroot}/pkg/darwin_amd64/
 %{goroot}/pkg/tool/darwin_amd64/
 
-%files pkg-windows-386
+%files pkg-windows-386 -f pkg-windows-386.list
 %{goroot}/pkg/windows_386/
 %{goroot}/pkg/tool/windows_386/
 
-%files pkg-windows-amd64
+%files pkg-windows-amd64 -f pkg-windows-amd64.list
 %{goroot}/pkg/windows_amd64/
 %{goroot}/pkg/tool/windows_amd64/
 
-%files pkg-plan9-386
+%files pkg-plan9-386 -f pkg-plan9-386.list
 %{goroot}/pkg/plan9_386/
 %{goroot}/pkg/tool/plan9_386/
 
-%files pkg-plan9-amd64
+%files pkg-plan9-amd64 -f pkg-plan9-amd64.list
 %{goroot}/pkg/plan9_amd64/
 %{goroot}/pkg/tool/plan9_amd64/
 
-%files pkg-freebsd-386
+%files pkg-freebsd-386 -f pkg-freebsd-386.list
 %{goroot}/pkg/freebsd_386/
 %{goroot}/pkg/tool/freebsd_386/
 
-%files pkg-freebsd-amd64
+%files pkg-freebsd-amd64 -f pkg-freebsd-amd64.list
 %{goroot}/pkg/freebsd_amd64/
 %{goroot}/pkg/tool/freebsd_amd64/
 
-%files pkg-freebsd-arm
+%files pkg-freebsd-arm -f pkg-freebsd-arm.list
 %{goroot}/pkg/freebsd_arm/
 %{goroot}/pkg/tool/freebsd_arm/
 
-%files pkg-netbsd-386
+%files pkg-netbsd-386 -f pkg-netbsd-386.list
 %{goroot}/pkg/netbsd_386/
 %{goroot}/pkg/tool/netbsd_386/
 
-%files pkg-netbsd-amd64
+%files pkg-netbsd-amd64 -f pkg-netbsd-amd64.list
 %{goroot}/pkg/netbsd_amd64/
 %{goroot}/pkg/tool/netbsd_amd64/
 
-%files pkg-netbsd-arm
+%files pkg-netbsd-arm -f pkg-netbsd-arm.list
 %{goroot}/pkg/netbsd_arm/
 %{goroot}/pkg/tool/netbsd_arm/
 
-%files pkg-openbsd-386
+%files pkg-openbsd-386 -f pkg-openbsd-386.list
 %{goroot}/pkg/openbsd_386/
 %{goroot}/pkg/tool/openbsd_386/
 
-%files pkg-openbsd-amd64
+%files pkg-openbsd-amd64 -f pkg-openbsd-amd64.list
 %{goroot}/pkg/openbsd_amd64/
 %{goroot}/pkg/tool/openbsd_amd64/
 
@@ -978,6 +904,67 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 
 
 %changelog
+* Mon Sep 29 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.2-1
+- update to go1.3.2 (bz1147324)
+
+* Thu Sep 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-3
+- patching the tzinfo failure
+
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-1
+- update to go1.3.1
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-11
+- merged a line wrong
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-10
+- more work to get cgo.a timestamps to line up, due to build-env
+- explicitly list all the files and directories for the source and packages trees
+- touch all the built archives to be the same
+
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-9
+- make golang-src 'noarch' again, since that was not a fix, and takes up more space
+
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-8
+- update timestamps of source files during %%install bz1099206
+
+* Fri Aug 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-7
+- update timestamps of source during %%install bz1099206
+
+* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-6
+- make the source subpackage arch'ed, instead of noarch
+
+* Mon Jul 21 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-5
+- fix the writing of pax headers
+
+* Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-4
+- fix the loading of gdb safe-path. bz981356
+
+* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-3
+- `go install std` requires gcc, to build cgo. bz1105901, bz1101508
+
+* Mon Jul 07 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-2
+- archive/tar memory allocation improvements
+
+* Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-1
+- update to go1.3
+
+* Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3rc2-1
+- update to go1.3rc2
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3rc1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue Jun 03 2014 Vincent Batts <vbatts@redhat.com> 1.3rc1-1
+- update to go1.3rc1
+- new arch file shuffling
+
+* Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.3beta2-1
+- update to go1.3beta2
+- no longer provides go-mode for xemacs (emacs only)
+
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-7
 - bz1099206 ghost files are not what is needed
 
@@ -1025,7 +1012,7 @@ GOROOT=%{goroot} GOOS=openbsd GOARCH=amd64 go install std
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
 
-* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproejct.org> 1.2-7
+* Thu Feb 20 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2-7
 - Remove  _BSD_SOURCE and _SVID_SOURCE, they are deprecated in recent
   versions of glibc and aren't needed
 

@@ -1,0 +1,56 @@
+# HG changeset patch
+# User Cristian Staretu <unclejacksons@gmail.com>
+# Date 1404344453 -36000
+#      Thu Jul 03 09:40:53 2014 +1000
+# Node ID 837348e418f33fc7a242f56dbe2feff829532526
+# Parent  c5f72a685e256457a0872f6587e2bb9500eac7c4
+archive/tar: reuse temporary buffer in writeHeader
+
+A temporary 512 bytes buffer is allocated for every call to
+writeHeader. This buffer could be reused the lower the number
+of memory allocations.
+
+benchmark                   old ns/op     new ns/op     delta
+BenchmarkWriteFiles100k     634622051     583810847     -8.01%
+
+benchmark                   old allocs     new allocs     delta
+BenchmarkWriteFiles100k     2701920        2602621        -3.68%
+
+benchmark                   old bytes     new bytes     delta
+BenchmarkWriteFiles100k     115383884     64349922      -44.23%
+
+This change is very important if your code has to write a lot of
+tarballs with a lot of files.
+
+LGTM=dsymonds
+R=golang-codereviews, dave, dsymonds
+CC=golang-codereviews
+https://codereview.appspot.com/107440043
+
+Committer: David Symonds <dsymonds@golang.org>
+
+diff -r c5f72a685e25 -r 837348e418f3 src/pkg/archive/tar/writer.go
+--- a/src/pkg/archive/tar/writer.go	Wed Jul 02 15:28:57 2014 -0700
++++ b/src/pkg/archive/tar/writer.go	Thu Jul 03 09:40:53 2014 +1000
+@@ -37,8 +37,9 @@
+ 	nb         int64 // number of unwritten bytes for current file entry
+ 	pad        int64 // amount of padding to write after current file entry
+ 	closed     bool
+-	usedBinary bool // whether the binary numeric field extension was used
+-	preferPax  bool // use pax header instead of binary numeric header
++	usedBinary bool            // whether the binary numeric field extension was used
++	preferPax  bool            // use pax header instead of binary numeric header
++	hdrBuff    [blockSize]byte // buffer to use in writeHeader
+ }
+ 
+ // NewWriter creates a new Writer writing to w.
+@@ -160,7 +161,8 @@
+ 	// subsecond time resolution, but for now let's just capture
+ 	// too long fields or non ascii characters
+ 
+-	header := make([]byte, blockSize)
++	header := tw.hdrBuff[:]
++	copy(header, zeroBlock)
+ 	s := slicer(header)
+ 
+ 	// keep a reference to the filename to allow to overwrite it later if we detect that we can use ustar longnames instead of pax
