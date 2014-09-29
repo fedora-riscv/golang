@@ -1,0 +1,110 @@
+# HG changeset patch
+# User Cristian Staretu <unclejacksons@gmail.com>
+# Date 1405555229 -36000
+#      Thu Jul 17 10:00:29 2014 +1000
+# Node ID 1b17b3426e3c281a973d2d7bbf235b936d6a0942
+# Parent  278365dff593f027db6c6b2c0a89262490d6b676
+archive/tar: fix writing of pax headers
+
+"archive/tar: reuse temporary buffer in writeHeader" introduced a
+change which was supposed to help lower the number of allocations from
+512 bytes for every call to writeHeader. This change broke the writing
+of PAX headers.
+
+writeHeader calls writePAXHeader and writePAXHeader calls writeHeader
+again. writeHeader will end up writing the PAX header twice.
+
+example broken header:
+PaxHeaders.4007/NetLock_Arany_=Class_Gold=_Ftanstvny.crt0000000000000000000000000000007112301216634021512 xustar0000000000000000
+PaxHeaders.4007/NetLock_Arany_=Class_Gold=_Ftanstvny.crt0000000000000000000000000000007112301216634021512 xustar0000000000000000
+
+example correct header:
+PaxHeaders.4290/NetLock_Arany_=Class_Gold=_Ftanstvny.crt0000000000000000000000000000007112301216634021516 xustar0000000000000000
+0100644000000000000000000000270412301216634007250 0ustar0000000000000000
+
+This commit adds a dedicated buffer for pax headers to the Writer
+struct. This change increases the size of the struct by 512 bytes, but
+allows tar/writer to avoid allocating 512 bytes for all written
+headers and it avoids allocating 512 more bytes for pax headers.
+
+LGTM=dsymonds
+R=dsymonds, dave, iant
+CC=golang-codereviews
+https://codereview.appspot.com/110480043
+
+Committer: David Symonds <dsymonds@golang.org>
+
+diff -r 278365dff593 -r 1b17b3426e3c src/pkg/archive/tar/writer.go
+--- a/src/pkg/archive/tar/writer.go	Wed Jul 16 16:29:51 2014 -0700
++++ b/src/pkg/archive/tar/writer.go	Thu Jul 17 10:00:29 2014 +1000
+@@ -39,7 +39,8 @@
+ 	closed     bool
+ 	usedBinary bool            // whether the binary numeric field extension was used
+ 	preferPax  bool            // use pax header instead of binary numeric header
+-	hdrBuff    [blockSize]byte // buffer to use in writeHeader
++	hdrBuff    [blockSize]byte // buffer to use in writeHeader when writing a regular header
++	paxHdrBuff [blockSize]byte // buffer to use in writeHeader when writing a pax header
+ }
+ 
+ // NewWriter creates a new Writer writing to w.
+@@ -161,7 +162,17 @@
+ 	// subsecond time resolution, but for now let's just capture
+ 	// too long fields or non ascii characters
+ 
+-	header := tw.hdrBuff[:]
++	var header []byte
++
++	// We need to select which scratch buffer to use carefully,
++	// since this method is called recursively to write PAX headers.
++	// If allowPax is true, this is the non-recursive call, and we will use hdrBuff.
++	// If allowPax is false, we are being called by writePAXHeader, and hdrBuff is
++	// already being used by the non-recursive call, so we must use paxHdrBuff.
++	header = tw.hdrBuff[:]
++	if !allowPax {
++		header = tw.paxHdrBuff[:]
++	}
+ 	copy(header, zeroBlock)
+ 	s := slicer(header)
+ 
+diff -r 278365dff593 -r 1b17b3426e3c src/pkg/archive/tar/writer_test.go
+--- a/src/pkg/archive/tar/writer_test.go	Wed Jul 16 16:29:51 2014 -0700
++++ b/src/pkg/archive/tar/writer_test.go	Thu Jul 17 10:00:29 2014 +1000
+@@ -454,3 +454,38 @@
+ 		t.Fatal("Couldn't recover long name")
+ 	}
+ }
++
++func TestValidTypeflagWithPAXHeader(t *testing.T) {
++	var buffer bytes.Buffer
++	tw := NewWriter(&buffer)
++
++	fileName := strings.Repeat("ab", 100)
++
++	hdr := &Header{
++		Name:     fileName,
++		Size:     4,
++		Typeflag: 0,
++	}
++	if err := tw.WriteHeader(hdr); err != nil {
++		t.Fatalf("Failed to write header: %s", err)
++	}
++	if _, err := tw.Write([]byte("fooo")); err != nil {
++		t.Fatalf("Failed to write the file's data: %s", err)
++	}
++	tw.Close()
++
++	tr := NewReader(&buffer)
++
++	for {
++		header, err := tr.Next()
++		if err == io.EOF {
++			break
++		}
++		if err != nil {
++			t.Fatalf("Failed to read header: %s", err)
++		}
++		if header.Typeflag != 0 {
++			t.Fatalf("Typeflag should've been 0, found %d", header.Typeflag)
++		}
++	}
++}
