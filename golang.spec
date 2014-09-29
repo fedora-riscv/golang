@@ -38,8 +38,8 @@
 %endif
 
 Name:           golang
-Version:        1.3.1
-Release:        3%{?dist}
+Version:        1.3.2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -904,6 +904,9 @@ fi
 
 
 %changelog
+* Mon Sep 29 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.2-1
+- update to go1.3.2 (bz1147324)
+
 * Thu Sep 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-3
 - patching the tzinfo failure
 
