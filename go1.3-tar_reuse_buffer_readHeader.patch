@@ -1,0 +1,64 @@
+# HG changeset patch
+# User Cristian Staretu <unclejacksons@gmail.com>
+# Date 1404344479 -36000
+#      Thu Jul 03 09:41:19 2014 +1000
+# Node ID 17404efd6b02d4b3acd17070e3f89de97a145877
+# Parent  837348e418f33fc7a242f56dbe2feff829532526
+archive/tar: reuse temporary buffer in readHeader
+
+A temporary 512 bytes buffer is allocated for every call to
+readHeader. This buffer isn't returned to the caller and it could
+be reused to lower the number of memory allocations.
+
+This CL improves it by using a pool and zeroing out the buffer before
+putting it back into the pool.
+
+benchmark                  old ns/op     new ns/op     delta
+BenchmarkListFiles100k     545249903     538832687     -1.18%
+
+benchmark                  old allocs    new allocs    delta
+BenchmarkListFiles100k     2105167       2005692       -4.73%
+
+benchmark                  old bytes     new bytes     delta
+BenchmarkListFiles100k     105903472     54831527      -48.22%
+
+This improvement is very important if your code has to deal with a lot
+of tarballs which contain a lot of files.
+
+LGTM=dsymonds
+R=golang-codereviews, dave, dsymonds, bradfitz
+CC=golang-codereviews
+https://codereview.appspot.com/108240044
+
+Committer: David Symonds <dsymonds@golang.org>
+
+diff -r 837348e418f3 -r 17404efd6b02 src/pkg/archive/tar/reader.go
+--- a/src/pkg/archive/tar/reader.go	Thu Jul 03 09:40:53 2014 +1000
++++ b/src/pkg/archive/tar/reader.go	Thu Jul 03 09:41:19 2014 +1000
+@@ -29,10 +29,11 @@
+ // The Next method advances to the next file in the archive (including the first),
+ // and then it can be treated as an io.Reader to access the file's data.
+ type Reader struct {
+-	r    io.Reader
+-	err  error
+-	pad  int64          // amount of padding (ignored) after current file entry
+-	curr numBytesReader // reader for current file entry
++	r       io.Reader
++	err     error
++	pad     int64           // amount of padding (ignored) after current file entry
++	curr    numBytesReader  // reader for current file entry
++	hdrBuff [blockSize]byte // buffer to use in readHeader
+ }
+ 
+ // A numBytesReader is an io.Reader with a numBytes method, returning the number
+@@ -426,7 +427,9 @@
+ }
+ 
+ func (tr *Reader) readHeader() *Header {
+-	header := make([]byte, blockSize)
++	header := tr.hdrBuff[:]
++	copy(header, zeroBlock)
++
+ 	if _, tr.err = io.ReadFull(tr.r, header); tr.err != nil {
+ 		return nil
+ 	}
