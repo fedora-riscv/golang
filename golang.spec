@@ -37,6 +37,8 @@
 %global gohostarch  arm
 %endif
 
+%global go_api 1.3.3
+
 Name:           golang
 Version:        1.3.3
 Release:        1%{?dist}
@@ -60,7 +62,8 @@ BuildRequires:  /bin/hostname
 
 Provides:       go = %{version}-%{release}
 Requires:       golang-bin
-Requires:       golang-src
+Requires:       golang-src = %{version}-%{release}
+Requires:       golang-srpm-macros = %{version}-%{release}
 
 BuildRequires:  emacs
 
@@ -108,6 +111,14 @@ Source102:      macros.golang
 #%{summary}.
 
 
+%package        srpm-macros
+Summary:        RPM macros for the Go programming language
+BuildArch:      noarch
+
+%description    srpm-macros
+%{summary}.
+
+
 %package        vim
 Summary:        Vim plugins for Go
 # fedora only
@@ -133,7 +144,6 @@ BuildArch:     noarch
 # the source tree
 %package        src
 Summary:        Golang compiler source tree
-Requires:       go = %{version}-%{release}
 BuildArch:      noarch
 %description    src
 %{summary}
@@ -147,6 +157,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-386 = %{version}-%{release}
 Requires(post): golang-pkg-linux-386 = %{version}-%{release}
 Provides:       golang-bin = 386
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -164,6 +175,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
 Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
 Provides:       golang-bin = amd64
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -181,6 +193,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-arm = %{version}-%{release}
 Requires(post): golang-pkg-linux-arm = %{version}-%{release}
 Provides:       golang-bin = arm
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -198,6 +211,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 %package        pkg-linux-386
 Summary:        Golang compiler toolchain to compile for linux 386
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-386
 %{summary}
@@ -205,6 +219,7 @@ BuildArch:      noarch
 %package        pkg-linux-amd64
 Summary:        Golang compiler toolchain to compile for linux amd64
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-amd64
 %{summary}
@@ -212,6 +227,7 @@ BuildArch:      noarch
 %package        pkg-linux-arm
 Summary:        Golang compiler toolchain to compile for linux arm
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-arm
 %{summary}
@@ -624,6 +640,8 @@ fi
 # prelink blacklist
 %{_sysconfdir}/prelink.conf.d
 
+
+%files srpm-macros
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 %{_rpmconfigdir}/macros.d/macros.golang
 %else
