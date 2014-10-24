@@ -19,7 +19,6 @@
 # rpmbuild magic to keep from having meta dependency on libc.so.6
 %define _use_internal_dependency_generator 0
 %define __find_requires %{nil}
-%global debug_package %{nil}
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
@@ -41,7 +40,7 @@
 
 Name:           golang
 Version:        1.3.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -916,6 +915,10 @@ fi
 
 
 %changelog
+* Fri Oct 24 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-2
+- split out rpm macros (bz1156129)
+- progress on gccgo accomodation
+
 * Wed Oct 01 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-1
 - update to go1.3.3 (bz1146882)
 
