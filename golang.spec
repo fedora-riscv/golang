@@ -40,7 +40,7 @@
 
 Name:           golang
 Version:        1.3.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -62,7 +62,6 @@ BuildRequires:  /bin/hostname
 Provides:       go = %{version}-%{release}
 Requires:       golang-bin
 Requires:       golang-src = %{version}-%{release}
-Requires:       golang-srpm-macros = %{version}-%{release}
 
 BuildRequires:  emacs
 
@@ -108,14 +107,6 @@ Source102:      macros.golang
 #
 #%description   data
 #%{summary}.
-
-
-%package        srpm-macros
-Summary:        RPM macros for the Go programming language
-BuildArch:      noarch
-
-%description    srpm-macros
-%{summary}.
 
 
 %package        vim
@@ -639,8 +630,6 @@ fi
 # prelink blacklist
 %{_sysconfdir}/prelink.conf.d
 
-
-%files srpm-macros
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 %{_rpmconfigdir}/macros.d/macros.golang
 %else
@@ -915,6 +904,9 @@ fi
 
 
 %changelog
+* Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-3
+- macros will need to be in their own rpm
+
 * Fri Oct 24 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-2
 - split out rpm macros (bz1156129)
 - progress on gccgo accomodation
