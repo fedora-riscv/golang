@@ -36,16 +36,17 @@
 %global gohostarch  arm
 %endif
 
-%global go_api 1.3.3
+%global go_api 1.4
+%global go_version 1.4beta1
 
 Name:           golang
-Version:        1.3.3
-Release:        3%{?dist}
+Version:        1.3.99
+Release:        1.%{go_version}%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
@@ -63,23 +64,10 @@ Provides:       go = %{version}-%{release}
 Requires:       golang-bin
 Requires:       golang-src = %{version}-%{release}
 
-BuildRequires:  emacs
-
 Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
-
-# disable flaky test for now
-# http://code.google.com/p/go/issues/detail?id=6522
-Patch2:         ./golang-1.2-skipCpuProfileTest.patch
-
-# these patches can be dropped for go1.4
-# discovered working here https://github.com/dotcloud/docker/pull/6829
-Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
-Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
-# https://code.google.com/p/go/source/detail?r=1b17b3426e3c
-Patch5:         ./go1.3-tar-fix_writing_of_pax_headers.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -107,27 +95,6 @@ Source102:      macros.golang
 #
 #%description   data
 #%{summary}.
-
-
-%package        vim
-Summary:        Vim plugins for Go
-# fedora only
-%if 0%{?fedora}
-Requires:       vim-filesystem
-%endif
-BuildArch:      noarch
-
-%description    vim
-%{summary}.
-
-
-%package -n    emacs-%{name}
-Summary:       Emacs add-on package for Go
-Requires:      emacs(bin) >= %{_emacs_version}
-BuildArch:     noarch
-
-%description -n emacs-%{name}
-%{summary}.
 
 
 ##
@@ -320,7 +287,7 @@ BuildArch:      noarch
 %description    pkg-openbsd-amd64
 %{summary}
 
-## missing ./go/src/pkg/runtime/defs_openbsd_arm.h
+## missing ./go/src/runtime/defs_openbsd_arm.h
 ## we'll skip this bundle for now
 #%package        pkg-openbsd-arm
 #Summary:        Golang compiler toolchain to compile for openbsd arm
@@ -354,24 +321,6 @@ end
 # remove the P224 curve
 %patch1 -p1
 
-# skip flaky test
-%patch2 -p1
-
-# performance for archive/tar
-%patch3 -p1
-%patch4 -p1
-# buffer the PAX header
-%patch5 -p1
-
-# create a [dirty] gcc wrapper to allow us to build with our own flags
-# (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
-# TODO: remove this and just set CFLAGS/LDFLAGS once upstream supports it
-# https://code.google.com/p/go/issues/detail?id=6882
-# UPDATE: this is fixed in trunk, and will be in go1.3
-mkdir -p zz
-echo -e "#!/bin/sh\n/usr/bin/gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS \"\$@\"" > ./zz/gcc
-chmod +x ./zz/gcc
-
 %build
 # set up final install location
 export GOROOT_FINAL=%{goroot}
@@ -392,21 +341,15 @@ pushd src
 					continue
 				fi
 			fi
-			# use our gcc wrapper
-			PATH="$(pwd -P)/../zz:$PATH" CC="gcc" \
+			# use our gcc options for this build, but store gcc as default for compiler
+			CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
+			CC_FOR_TARGET="gcc" \
 				GOOS=${goos} \
 				GOARCH=${goarch} \
 				./make.bash --no-clean
 		done
 	done
 popd
-
-# compile for emacs
-cd misc
-mv emacs/go-mode-load.el emacs/%{name}-init.el
-%{_emacs_bytecompile} emacs/go-mode.el
-cd ..
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -487,28 +430,6 @@ rm -f $RPM_BUILD_ROOT%{_bindir}/go
 ln -sf /etc/alternatives/go $RPM_BUILD_ROOT%{_bindir}/go
 rm -f $RPM_BUILD_ROOT%{_bindir}/gofmt
 ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
-
-# misc/bash
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
-cp -av misc/bash/go $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
-for z in 8l 6l 5l 8g 6g 5g gofmt gccgo
-  do ln -s go $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions/$z
-done
-
-# misc/emacs
-mkdir -p $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
-cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-
-# misc/vim
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
-cp -av misc/vim/* $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
-rm $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles/readme.txt
-
-# misc/zsh
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
-cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
@@ -596,9 +517,6 @@ fi
 %endif
 
 
-#%post pkg-openbsd-arm
-#GOROOT=%{goroot} GOOS=openbsd GOARCH=arm go install std
-
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 # VERSION has to be present in the GOROOT, for `go install std` to work
@@ -607,6 +525,7 @@ fi
 # go files
 %dir %{goroot}
 %{goroot}/*
+%exclude %{goroot}/VERSION
 %exclude %{goroot}/bin/
 %exclude %{goroot}/pkg/
 %exclude %{goroot}/src/
@@ -619,10 +538,6 @@ fi
 %dir %{gopath}/src/code.google.com/
 %dir %{gopath}/src/code.google.com/p/
 
-
-# autocomplete
-%{_datadir}/bash-completion
-%{_datadir}/zsh
 
 # gdbinit (for gdb debugging)
 %{_sysconfdir}/gdbinit.d
@@ -637,19 +552,8 @@ fi
 %endif
 
 
-%files vim
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_datadir}/vim/vimfiles/*
-
-
-%files -n emacs-%{name}
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_emacs_sitelispdir}/%{name}
-%{_emacs_sitestartdir}/*.el
-
-
 %files -f go-src.list src
-%{goroot}/src/
+
 
 %ifarch %{ix86}
 %files pkg-bin-linux-386
@@ -679,30 +583,6 @@ fi
 %{goroot}/pkg/tool/linux_386/objdump
 %{goroot}/pkg/tool/linux_386/pack
 %{goroot}/pkg/tool/linux_386/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_386.h
-%{goroot}/src/pkg/runtime/zgoarch_386.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_386.c
-%{goroot}/src/pkg/runtime/zmprof_linux_386.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_386.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_386.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
-%{goroot}/src/pkg/runtime/zsema_linux_386.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
-%{goroot}/src/pkg/runtime/zstring_linux_386.c
-%{goroot}/src/pkg/runtime/zsys_linux_386.s
-%{goroot}/src/pkg/runtime/ztime_linux_386.c
-%{goroot}/src/pkg/runtime/zalg_linux_386.c
-%{goroot}/src/pkg/runtime/zchan_linux_386.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_386.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_386.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_386.c
-%{goroot}/src/pkg/runtime/ziface_linux_386.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_386.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_386.c
-%{goroot}/src/pkg/runtime/zslice_linux_386.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -733,30 +613,6 @@ fi
 %{goroot}/pkg/tool/linux_amd64/objdump
 %{goroot}/pkg/tool/linux_amd64/pack
 %{goroot}/pkg/tool/linux_amd64/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_amd64.h
-%{goroot}/src/pkg/runtime/zgoarch_amd64.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
-%{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
-%{goroot}/src/pkg/runtime/zsema_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
-%{goroot}/src/pkg/runtime/zstring_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsys_linux_amd64.s
-%{goroot}/src/pkg/runtime/ztime_linux_amd64.c
-%{goroot}/src/pkg/runtime/zalg_linux_amd64.c
-%{goroot}/src/pkg/runtime/zchan_linux_amd64.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_amd64.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_amd64.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_amd64.c
-%{goroot}/src/pkg/runtime/ziface_linux_amd64.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_amd64.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_amd64.c
-%{goroot}/src/pkg/runtime/zslice_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -787,31 +643,6 @@ fi
 %{goroot}/pkg/tool/linux_arm/objdump
 %{goroot}/pkg/tool/linux_arm/pack
 %{goroot}/pkg/tool/linux_arm/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_arm.h
-%{goroot}/src/pkg/runtime/zgoarch_arm.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
-%{goroot}/src/pkg/runtime/zmprof_linux_arm.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
-%{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
-%{goroot}/src/pkg/runtime/zsema_linux_arm.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
-%{goroot}/src/pkg/runtime/zstring_linux_arm.c
-%{goroot}/src/pkg/runtime/zsys_linux_arm.s
-%{goroot}/src/pkg/runtime/ztime_linux_arm.c
-%{goroot}/src/pkg/runtime/zalg_linux_arm.c
-%{goroot}/src/pkg/runtime/zchan_linux_arm.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_arm.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_arm.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_arm.c
-%{goroot}/src/pkg/runtime/ziface_linux_arm.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_arm.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_arm.c
-%{goroot}/src/pkg/runtime/zslice_linux_arm.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
 %files pkg-linux-386 -f pkg-linux-386.list
@@ -904,6 +735,9 @@ fi
 
 
 %changelog
+* Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-1.1.4beta1
+- update to go1.4beta1
+
 * Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-3
 - macros will need to be in their own rpm
 
