@@ -37,11 +37,11 @@
 %endif
 
 %global go_api 1.4
-%global go_version 1.4beta1
+%global go_version 1.4rc1
 
 Name:           golang
 Version:        1.3.99
-Release:        1.%{go_version}%{?dist}
+Release:        2.%{go_version}%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -735,6 +735,9 @@ fi
 
 
 %changelog
+* Mon Nov 17 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-2.1.4rc1
+- update to go1.4rc1
+
 * Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-1.1.4beta1
 - update to go1.4beta1
 
