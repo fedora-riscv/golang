@@ -37,16 +37,15 @@
 %endif
 
 %global go_api 1.4
-%global go_version 1.4rc2
 
 Name:           golang
-Version:        1.3.99
-Release:        3.%{go_version}%{?dist}
+Version:        1.4
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
 
 # this command moved places
 %if 0%{?fedora} >= 21
@@ -735,6 +734,9 @@ fi
 
 
 %changelog
+* Thu Dec 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.4-1
+- update to go1.4 release
+
 * Wed Dec 03 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-3.1.4rc2
 - update to go1.4rc2
 
