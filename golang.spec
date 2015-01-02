@@ -40,7 +40,7 @@
 
 Name:           golang
 Version:        1.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -520,6 +520,7 @@ fi
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 # VERSION has to be present in the GOROOT, for `go install std` to work
 %doc %{goroot}/VERSION
+%doc %{goroot}/doc/*
 
 # go files
 %dir %{goroot}
@@ -734,6 +735,9 @@ fi
 
 
 %changelog
+* Fri Jan 02 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4-2
+- doc organizing
+
 * Thu Dec 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.4-1
 - update to go1.4 release
 
