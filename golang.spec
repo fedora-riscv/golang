@@ -39,7 +39,7 @@
 %global go_api 1.4
 
 Name:           golang
-Version:        1.4.1
+Version:        1.4.2
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 
@@ -735,6 +735,9 @@ fi
 
 
 %changelog
+* Wed Feb 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-1
+- updating to go1.4.2
+
 * Fri Jan 16 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.1-1
 - updating to go1.4.1
 
