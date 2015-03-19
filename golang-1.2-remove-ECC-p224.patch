@@ -10,10 +10,10 @@ Index: go/api/go1.txt
  pkg crypto/elliptic, func P256() Curve
  pkg crypto/elliptic, func P384() Curve
  pkg crypto/elliptic, func P521() Curve
-Index: go/src/pkg/crypto/ecdsa/ecdsa_test.go
+Index: go/src/crypto/ecdsa/ecdsa_test.go
 ===================================================================
---- go.orig/src/pkg/crypto/ecdsa/ecdsa_test.go
-+++ go/src/pkg/crypto/ecdsa/ecdsa_test.go
+--- go.orig/src/crypto/ecdsa/ecdsa_test.go
++++ go/src/crypto/ecdsa/ecdsa_test.go
 @@ -33,7 +33,6 @@ func testKeyGeneration(t *testing.T, c e
  }
  
@@ -39,10 +39,10 @@ Index: go/src/pkg/crypto/ecdsa/ecdsa_test.go
  			case "P-256":
  				pub.Curve = elliptic.P256()
  			case "P-384":
-Index: go/src/pkg/crypto/elliptic/bottombits.go
+Index: go/src/crypto/elliptic/bottombits.go
 ===================================================================
 --- /dev/null
-+++ go/src/pkg/crypto/elliptic/bottombits.go
++++ go/src/crypto/elliptic/bottombits.go
 @@ -0,0 +1,14 @@
 +
 +// Copyright 2012 The Go Authors.  All rights reserved.
@@ -58,10 +58,10 @@ Index: go/src/pkg/crypto/elliptic/bottombits.go
 +const two31m3 = 1<<31 - 1<<3
 +const two31m15m3 = 1<<31 - 1<<15 - 1<<3
 +
-Index: go/src/pkg/crypto/elliptic/elliptic.go
+Index: go/src/crypto/elliptic/elliptic.go
 ===================================================================
---- go.orig/src/pkg/crypto/elliptic/elliptic.go
-+++ go/src/pkg/crypto/elliptic/elliptic.go
+--- go.orig/src/crypto/elliptic/elliptic.go
++++ go/src/crypto/elliptic/elliptic.go
 @@ -326,7 +326,6 @@ var p384 *CurveParams
  var p521 *CurveParams
  
@@ -70,20 +70,20 @@ Index: go/src/pkg/crypto/elliptic/elliptic.go
  	initP256()
  	initP384()
  	initP521()
-Index: go/src/pkg/crypto/elliptic/elliptic_test.go
+Index: go/src/crypto/elliptic/elliptic_test.go
 ===================================================================
---- go.orig/src/pkg/crypto/elliptic/elliptic_test.go
-+++ go/src/pkg/crypto/elliptic/elliptic_test.go
+--- go.orig/src/crypto/elliptic/elliptic_test.go
++++ go/src/crypto/elliptic/elliptic_test.go
 @@ -1,3 +1,5 @@
 +// +build ignore
 +
  // Copyright 2010 The Go Authors. All rights reserved.
  // Use of this source code is governed by a BSD-style
  // license that can be found in the LICENSE file.
-Index: go/src/pkg/crypto/elliptic/p224.go
+Index: go/src/crypto/elliptic/p224.go
 ===================================================================
---- go.orig/src/pkg/crypto/elliptic/p224.go
-+++ go/src/pkg/crypto/elliptic/p224.go
+--- go.orig/src/crypto/elliptic/p224.go
++++ go/src/crypto/elliptic/p224.go
 @@ -1,3 +1,5 @@
 +// +build ignore
 +
@@ -111,20 +111,20 @@ Index: go/src/pkg/crypto/elliptic/p224.go
  // p224Mul computes *out = a*b
  //
  // a[i] < 2**29, b[i] < 2**30 (or vice versa)
-Index: go/src/pkg/crypto/elliptic/p224_test.go
+Index: go/src/crypto/elliptic/p224_test.go
 ===================================================================
---- go.orig/src/pkg/crypto/elliptic/p224_test.go
-+++ go/src/pkg/crypto/elliptic/p224_test.go
+--- go.orig/src/crypto/elliptic/p224_test.go
++++ go/src/crypto/elliptic/p224_test.go
 @@ -1,3 +1,5 @@
 +// +build ignore
 +
  // Copyright 2012 The Go Authors.  All rights reserved.
  // Use of this source code is governed by a BSD-style
  // license that can be found in the LICENSE file.
-Index: go/src/pkg/crypto/x509/x509.go
+Index: go/src/crypto/x509/x509.go
 ===================================================================
---- go.orig/src/pkg/crypto/x509/x509.go
-+++ go/src/pkg/crypto/x509/x509.go
+--- go.orig/src/crypto/x509/x509.go
++++ go/src/crypto/x509/x509.go
 @@ -306,9 +306,6 @@ func getPublicKeyAlgorithmFromOID(oid as
  
  // RFC 5480, 2.1.1.1. Named Curve

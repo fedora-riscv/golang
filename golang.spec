@@ -19,7 +19,6 @@
 # rpmbuild magic to keep from having meta dependency on libc.so.6
 %define _use_internal_dependency_generator 0
 %define __find_requires %{nil}
-%global debug_package %{nil}
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
@@ -40,9 +39,11 @@
 %global gohostarch  arm
 %endif
 
+%global go_api 1.4
+
 Name:           golang
-Version:        1.3.3
-Release:        1%{?dist}
+Version:        1.4.2
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -63,30 +64,21 @@ BuildRequires:  /bin/hostname
 
 Provides:       go = %{version}-%{release}
 Requires:       golang-bin
-Requires:       golang-src
-
-BuildRequires:  emacs
+Requires:       golang-src = %{version}-%{release}
 Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
-
-# disable flaky test for now
-# http://code.google.com/p/go/issues/detail?id=6522
-Patch2:         ./golang-1.2-skipCpuProfileTest.patch
-
-# these patches can be dropped for go1.4
-# discovered working here https://github.com/dotcloud/docker/pull/6829
-Patch3:         ./go1.3-tar_reuse_buffer_readHeader.patch
-Patch4:         ./go1.3-tar_reuse_buffer_writeHeader.patch
-# https://code.google.com/p/go/source/detail?r=1b17b3426e3c
-Patch5:         ./go1.3-tar-fix_writing_of_pax_headers.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
 Obsoletes:      %{name}-data < 1.1.1-4
+
+# go1.4 deprecates a few packages
+Obsoletes:      %{name}-vim < 1.4
+Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
 ExclusiveArch:  %{go_arches}
@@ -110,32 +102,10 @@ Source102:      macros.golang
 #%{summary}.
 
 
-%package        vim
-Summary:        Vim plugins for Go
-# fedora only
-%if 0%{?fedora}
-Requires:       vim-filesystem
-%endif
-BuildArch:      noarch
-
-%description    vim
-%{summary}.
-
-
-%package -n    emacs-%{name}
-Summary:       Emacs add-on package for Go
-Requires:      emacs(bin) >= %{_emacs_version}
-BuildArch:     noarch
-
-%description -n emacs-%{name}
-%{summary}.
-
-
 ##
 # the source tree
 %package        src
 Summary:        Golang compiler source tree
-Requires:       go = %{version}-%{release}
 BuildArch:      noarch
 %description    src
 %{summary}
@@ -149,6 +119,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-386 = %{version}-%{release}
 Requires(post): golang-pkg-linux-386 = %{version}-%{release}
 Provides:       golang-bin = 386
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -166,6 +137,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
 Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
 Provides:       golang-bin = amd64
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -183,6 +155,7 @@ Requires:       go = %{version}-%{release}
 Requires:       golang-pkg-linux-arm = %{version}-%{release}
 Requires(post): golang-pkg-linux-arm = %{version}-%{release}
 Provides:       golang-bin = arm
+Provides:       go(API)(go) = %{go_api}
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
@@ -200,6 +173,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 %package        pkg-linux-386
 Summary:        Golang compiler toolchain to compile for linux 386
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-386
 %{summary}
@@ -207,6 +181,7 @@ BuildArch:      noarch
 %package        pkg-linux-amd64
 Summary:        Golang compiler toolchain to compile for linux amd64
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-amd64
 %{summary}
@@ -214,6 +189,7 @@ BuildArch:      noarch
 %package        pkg-linux-arm
 Summary:        Golang compiler toolchain to compile for linux arm
 Requires:       go = %{version}-%{release}
+Provides:       go(API)(cgo) = %{go_api}
 BuildArch:      noarch
 %description    pkg-linux-arm
 %{summary}
@@ -316,7 +292,7 @@ BuildArch:      noarch
 %description    pkg-openbsd-amd64
 %{summary}
 
-## missing ./go/src/pkg/runtime/defs_openbsd_arm.h
+## missing ./go/src/runtime/defs_openbsd_arm.h
 ## we'll skip this bundle for now
 #%package        pkg-openbsd-arm
 #Summary:        Golang compiler toolchain to compile for openbsd arm
@@ -350,24 +326,6 @@ end
 # remove the P224 curve
 %patch1 -p1
 
-# skip flaky test
-%patch2 -p1
-
-# performance for archive/tar
-%patch3 -p1
-%patch4 -p1
-# buffer the PAX header
-%patch5 -p1
-
-# create a [dirty] gcc wrapper to allow us to build with our own flags
-# (dirty because it is spoofing 'gcc' since CC value is stored in the go tool)
-# TODO: remove this and just set CFLAGS/LDFLAGS once upstream supports it
-# https://code.google.com/p/go/issues/detail?id=6882
-# UPDATE: this is fixed in trunk, and will be in go1.3
-mkdir -p zz
-echo -e "#!/bin/sh\n/usr/bin/gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS \"\$@\"" > ./zz/gcc
-chmod +x ./zz/gcc
-
 %build
 # set up final install location
 export GOROOT_FINAL=%{goroot}
@@ -388,21 +346,15 @@ pushd src
 					continue
 				fi
 			fi
-			# use our gcc wrapper
-			PATH="$(pwd -P)/../zz:$PATH" CC="gcc" \
+			# use our gcc options for this build, but store gcc as default for compiler
+			CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
+			CC_FOR_TARGET="gcc" \
 				GOOS=${goos} \
 				GOARCH=${goarch} \
 				./make.bash --no-clean
 		done
 	done
 popd
-
-# compile for emacs
-cd misc
-mv emacs/go-mode-load.el emacs/%{name}-init.el
-%{_emacs_bytecompile} emacs/go-mode.el
-cd ..
-
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -483,28 +435,6 @@ rm -f $RPM_BUILD_ROOT%{_bindir}/go
 ln -sf /etc/alternatives/go $RPM_BUILD_ROOT%{_bindir}/go
 rm -f $RPM_BUILD_ROOT%{_bindir}/gofmt
 ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
-
-# misc/bash
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
-cp -av misc/bash/go $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions
-for z in 8l 6l 5l 8g 6g 5g gofmt gccgo
-  do ln -s go $RPM_BUILD_ROOT%{_datadir}/bash-completion/completions/$z
-done
-
-# misc/emacs
-mkdir -p $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
-mkdir -p $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-cp -av misc/emacs/go-mode.* $RPM_BUILD_ROOT%{_emacs_sitelispdir}/%{name}
-cp -av misc/emacs/%{name}-init.el $RPM_BUILD_ROOT%{_emacs_sitestartdir}
-
-# misc/vim
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
-cp -av misc/vim/* $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles
-rm $RPM_BUILD_ROOT%{_datadir}/vim/vimfiles/readme.txt
-
-# misc/zsh
-mkdir -p $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
-cp -av misc/zsh/go $RPM_BUILD_ROOT%{_datadir}/zsh/site-functions
 
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
@@ -596,10 +526,12 @@ fi
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 # VERSION has to be present in the GOROOT, for `go install std` to work
 %doc %{goroot}/VERSION
+%doc %{goroot}/doc/*
 
 # go files
 %dir %{goroot}
 %{goroot}/*
+%exclude %{goroot}/VERSION
 %exclude %{goroot}/bin/
 %exclude %{goroot}/pkg/
 %exclude %{goroot}/src/
@@ -612,10 +544,6 @@ fi
 %dir %{gopath}/src/code.google.com/
 %dir %{gopath}/src/code.google.com/p/
 
-
-# autocomplete
-%{_datadir}/bash-completion
-%{_datadir}/zsh
 
 # gdbinit (for gdb debugging)
 %{_sysconfdir}/gdbinit.d
@@ -630,19 +558,8 @@ fi
 %endif
 
 
-%files vim
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_datadir}/vim/vimfiles/*
-
-
-%files -n emacs-%{name}
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
-%{_emacs_sitelispdir}/%{name}
-%{_emacs_sitestartdir}/*.el
-
-
 %files -f go-src.list src
-%{goroot}/src/
+
 
 %ifarch %{ix86}
 %files pkg-bin-linux-386
@@ -672,30 +589,6 @@ fi
 %{goroot}/pkg/tool/linux_386/objdump
 %{goroot}/pkg/tool/linux_386/pack
 %{goroot}/pkg/tool/linux_386/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_386.h
-%{goroot}/src/pkg/runtime/zgoarch_386.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_386.c
-%{goroot}/src/pkg/runtime/zmprof_linux_386.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_386.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_386.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_386.go
-%{goroot}/src/pkg/runtime/zsema_linux_386.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_386.c
-%{goroot}/src/pkg/runtime/zstring_linux_386.c
-%{goroot}/src/pkg/runtime/zsys_linux_386.s
-%{goroot}/src/pkg/runtime/ztime_linux_386.c
-%{goroot}/src/pkg/runtime/zalg_linux_386.c
-%{goroot}/src/pkg/runtime/zchan_linux_386.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_386.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_386.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_386.c
-%{goroot}/src/pkg/runtime/ziface_linux_386.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_386.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_386.c
-%{goroot}/src/pkg/runtime/zslice_linux_386.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_386.c
 %endif
 
 %ifarch x86_64
@@ -726,30 +619,6 @@ fi
 %{goroot}/pkg/tool/linux_amd64/objdump
 %{goroot}/pkg/tool/linux_amd64/pack
 %{goroot}/pkg/tool/linux_amd64/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_amd64.h
-%{goroot}/src/pkg/runtime/zgoarch_amd64.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_amd64.c
-%{goroot}/src/pkg/runtime/zmprof_linux_amd64.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_amd64.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_amd64.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_amd64.go
-%{goroot}/src/pkg/runtime/zsema_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_amd64.c
-%{goroot}/src/pkg/runtime/zstring_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsys_linux_amd64.s
-%{goroot}/src/pkg/runtime/ztime_linux_amd64.c
-%{goroot}/src/pkg/runtime/zalg_linux_amd64.c
-%{goroot}/src/pkg/runtime/zchan_linux_amd64.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_amd64.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_amd64.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_amd64.c
-%{goroot}/src/pkg/runtime/ziface_linux_amd64.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_amd64.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_amd64.c
-%{goroot}/src/pkg/runtime/zslice_linux_amd64.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_amd64.c
 %endif
 
 %ifarch %{arm}
@@ -780,31 +649,6 @@ fi
 %{goroot}/pkg/tool/linux_arm/objdump
 %{goroot}/pkg/tool/linux_arm/pack
 %{goroot}/pkg/tool/linux_arm/pprof
-
-# arch dependent generated files, used by cgo
-%{goroot}/src/pkg/runtime/zasm_linux_arm.h
-%{goroot}/src/pkg/runtime/zgoarch_arm.go
-%{goroot}/src/pkg/runtime/zmalloc_linux_arm.c
-%{goroot}/src/pkg/runtime/zmprof_linux_arm.c
-%{goroot}/src/pkg/runtime/znetpoll_linux_arm.c
-%{goroot}/src/pkg/runtime/znoasm_arm_linux_arm.c
-%{goroot}/src/pkg/runtime/zruntime1_linux_arm.c
-%{goroot}/src/pkg/runtime/zruntime_defs_linux_arm.go
-%{goroot}/src/pkg/runtime/zsema_linux_arm.c
-%{goroot}/src/pkg/runtime/zsigqueue_linux_arm.c
-%{goroot}/src/pkg/runtime/zstring_linux_arm.c
-%{goroot}/src/pkg/runtime/zsys_linux_arm.s
-%{goroot}/src/pkg/runtime/ztime_linux_arm.c
-%{goroot}/src/pkg/runtime/zalg_linux_arm.c
-%{goroot}/src/pkg/runtime/zchan_linux_arm.c
-%{goroot}/src/pkg/runtime/zcomplex_linux_arm.c
-%{goroot}/src/pkg/runtime/zcpuprof_linux_arm.c
-%{goroot}/src/pkg/runtime/zhashmap_linux_arm.c
-%{goroot}/src/pkg/runtime/ziface_linux_arm.c
-%{goroot}/src/pkg/runtime/zlfstack_linux_arm.c
-%{goroot}/src/pkg/runtime/zrdebug_linux_arm.c
-%{goroot}/src/pkg/runtime/zslice_linux_arm.c
-%{goroot}/src/pkg/runtime/zsymtab_linux_arm.c
 %endif
 
 %files pkg-linux-386 -f pkg-linux-386.list
@@ -897,6 +741,37 @@ fi
 
 
 %changelog
+* Wed Mar 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-2
+- obsoleting deprecated packages
+
+* Wed Feb 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-1
+- updating to go1.4.2
+
+* Fri Jan 16 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.1-1
+- updating to go1.4.1
+
+* Fri Jan 02 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4-2
+- doc organizing
+
+* Thu Dec 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.4-1
+- update to go1.4 release
+
+* Wed Dec 03 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-3.1.4rc2
+- update to go1.4rc2
+
+* Mon Nov 17 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-2.1.4rc1
+- update to go1.4rc1
+
+* Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.99-1.1.4beta1
+- update to go1.4beta1
+
+* Thu Oct 30 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-3
+- macros will need to be in their own rpm
+
+* Fri Oct 24 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-2
+- split out rpm macros (bz1156129)
+- progress on gccgo accomodation
+
 * Wed Oct 01 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.3-1
 - update to go1.3.3 (bz1146882)
 
