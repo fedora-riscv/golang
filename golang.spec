@@ -40,7 +40,7 @@
 
 Name:           golang
 Version:        1.4.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -73,6 +73,10 @@ Obsoletes:      %{name}-docs < 1.1-4
 
 # RPM can't handle symlink -> dir with subpackages, so merge back
 Obsoletes:      %{name}-data < 1.1.1-4
+
+# go1.4 deprecates a few packages
+Obsoletes:      %{name}-vim < 1.4
+Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
 ExclusiveArch:  %{go_arches}
@@ -735,6 +739,9 @@ fi
 
 
 %changelog
+* Wed Mar 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-2
+- obsoleting deprecated packages
+
 * Wed Feb 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-1
 - updating to go1.4.2
 
