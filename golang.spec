@@ -40,7 +40,7 @@
 
 Name:           golang
 Version:        1.4.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -739,6 +739,9 @@ fi
 
 
 %changelog
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
+
 * Wed Mar 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-2
 - obsoleting deprecated packages
 
