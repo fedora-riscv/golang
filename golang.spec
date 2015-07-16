@@ -36,37 +36,48 @@
 %global gohostarch  arm
 %endif
 
-%global go_api 1.4
+%global go_api 1.5
+%global go_version 1.5beta1
 
 Name:           golang
-Version:        1.4.2
-Release:        3%{?dist}
+Version:        1.4.99
+Release:        1.%{go_version}%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
 URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go%{version}.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
+
+# go1.5 bootstrapping. The compiler is written in golang.
+BuildRequires:  golang > 1.4
+# use the arch dependent path in the bootstrap
+Patch212:       ./golang-1.5-bootstrap-binary-path.patch
 
 # this command moved places
 %if 0%{?fedora} >= 21
 BuildRequires:  /usr/bin/hostname
 Patch210:       golang-f21-hostname.patch
-
-# Patch211 - F21+ has glibc 2.19.90 (2.20 devel)+ which deprecates
-#            _BSD_SOURCE and _SVID_SOURCE
-Patch211:       golang-1.2-BSD-SVID-SOURCE.patch
 %else
 BuildRequires:  /bin/hostname
 %endif
 
 Provides:       go = %{version}-%{release}
-Requires:       golang-bin
-Requires:       golang-src = %{version}-%{release}
+Requires:       %{name}-bin
+Requires:       %{name}-src = %{version}-%{release}
 
 Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
+
+# disable TestGdbPython
+# https://github.com/golang/go/issues/11214
+Patch213:       go1.5beta1-disable-TestGdbPython.patch
+
+# disable TestVendorRun and TestVendorGOPATH
+# https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
+Patch214:       go1.5beta1-fix-TestVendorRun.patch
+
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -99,6 +110,30 @@ Source102:      macros.golang
 #%description   data
 #%{summary}.
 
+%package       docs
+Summary:       Golang compiler docs
+Requires:      %{name} = %{version}-%{release}
+BuildArch:     noarch
+Obsoletes:     %{name}-docs < 1.1-4
+
+%description   docs
+%{summary}.
+
+%package       misc
+Summary:       Golang compiler miscellaneous sources
+Requires:      %{name} = %{version}-%{release}
+BuildArch:     noarch
+
+%description   misc
+%{summary}.
+
+%package       tests
+Summary:       Golang compiler tests for stdlib
+Requires:      %{name} = %{version}-%{release}
+BuildArch:     noarch
+
+%description   tests
+%{summary}.
 
 ##
 # the source tree
@@ -108,196 +143,43 @@ BuildArch:      noarch
 %description    src
 %{summary}
 
-##
-# This is the only architecture specific binary
-%ifarch %{ix86}
-%package        pkg-bin-linux-386
-Summary:        Golang compiler tool for linux 386
+%package        bin
+Summary:        Golang core compiler tools
 Requires:       go = %{version}-%{release}
-Requires:       golang-pkg-linux-386 = %{version}-%{release}
-Requires(post): golang-pkg-linux-386 = %{version}-%{release}
-Provides:       golang-bin = 386
-Provides:       go(API)(go) = %{go_api}
+# Pre-go1.5, all arches had to be bootstrapped individually, before usable, and
+# env variables to compile for the target os-arch.
+# Now the host compiler needs only the GOOS and GOARCH environment variables
+# set to compile for the target os-arch.
+Obsoletes:      %{name}-pkg-bin-linux-386 < 1.4.99
+Obsoletes:      %{name}-pkg-bin-linux-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-bin-linux-arm < 1.4.99
+Obsoletes:      %{name}-pkg-linux-386 < 1.4.99
+Obsoletes:      %{name}-pkg-linux-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-linux-arm < 1.4.99
+Obsoletes:      %{name}-pkg-darwin-386 < 1.4.99
+Obsoletes:      %{name}-pkg-darwin-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-windows-386 < 1.4.99
+Obsoletes:      %{name}-pkg-windows-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-plan9-386 < 1.4.99
+Obsoletes:      %{name}-pkg-plan9-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-freebsd-386 < 1.4.99
+Obsoletes:      %{name}-pkg-freebsd-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-freebsd-arm < 1.4.99
+Obsoletes:      %{name}-pkg-netbsd-386 < 1.4.99
+Obsoletes:      %{name}-pkg-netbsd-amd64 < 1.4.99
+Obsoletes:      %{name}-pkg-netbsd-arm < 1.4.99
+Obsoletes:      %{name}-pkg-openbsd-386 < 1.4.99
+Obsoletes:      %{name}-pkg-openbsd-amd64 < 1.4.99
+
+Requires(post): %{_sbindir}/update-alternatives
+Requires(postun): %{_sbindir}/update-alternatives
+
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
 Requires:       gcc
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
-%description    pkg-bin-linux-386
+%description    bin
 %{summary}
-%endif
-
-%ifarch x86_64
-%package        pkg-bin-linux-amd64
-Summary:        Golang compiler tool for linux amd64
-Requires:       go = %{version}-%{release}
-Requires:       golang-pkg-linux-amd64 = %{version}-%{release}
-Requires(post): golang-pkg-linux-amd64 = %{version}-%{release}
-Provides:       golang-bin = amd64
-Provides:       go(API)(go) = %{go_api}
-# We strip the meta dependency, but go does require glibc.
-# This is an odd issue, still looking for a better fix.
-Requires:       glibc
-Requires:       gcc
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
-%description    pkg-bin-linux-amd64
-%{summary}
-%endif
-
-%ifarch %{arm}
-%package        pkg-bin-linux-arm
-Summary:        Golang compiler tool for linux arm
-Requires:       go = %{version}-%{release}
-Requires:       golang-pkg-linux-arm = %{version}-%{release}
-Requires(post): golang-pkg-linux-arm = %{version}-%{release}
-Provides:       golang-bin = arm
-Provides:       go(API)(go) = %{go_api}
-# We strip the meta dependency, but go does require glibc.
-# This is an odd issue, still looking for a better fix.
-Requires:       glibc
-Requires:       gcc
-Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
-%description    pkg-bin-linux-arm
-%{summary}
-%endif
-
-##
-# architecture independent go tooling, that allows for cross
-# compiling on golang supported architectures
-# http://golang.org/doc/install/source#environment
-%package        pkg-linux-386
-Summary:        Golang compiler toolchain to compile for linux 386
-Requires:       go = %{version}-%{release}
-Provides:       go(API)(cgo) = %{go_api}
-BuildArch:      noarch
-%description    pkg-linux-386
-%{summary}
-
-%package        pkg-linux-amd64
-Summary:        Golang compiler toolchain to compile for linux amd64
-Requires:       go = %{version}-%{release}
-Provides:       go(API)(cgo) = %{go_api}
-BuildArch:      noarch
-%description    pkg-linux-amd64
-%{summary}
-
-%package        pkg-linux-arm
-Summary:        Golang compiler toolchain to compile for linux arm
-Requires:       go = %{version}-%{release}
-Provides:       go(API)(cgo) = %{go_api}
-BuildArch:      noarch
-%description    pkg-linux-arm
-%{summary}
-
-%package        pkg-darwin-386
-Summary:        Golang compiler toolchain to compile for darwin 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-darwin-386
-%{summary}
-
-%package        pkg-darwin-amd64
-Summary:        Golang compiler toolchain to compile for darwin amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-darwin-amd64
-%{summary}
-
-%package        pkg-windows-386
-Summary:        Golang compiler toolchain to compile for windows 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-windows-386
-%{summary}
-
-%package        pkg-windows-amd64
-Summary:        Golang compiler toolchain to compile for windows amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-windows-amd64
-%{summary}
-
-%package        pkg-plan9-386
-Summary:        Golang compiler toolchain to compile for plan9 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-plan9-386
-%{summary}
-
-%package        pkg-plan9-amd64
-Summary:        Golang compiler toolchain to compile for plan9 amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-plan9-amd64
-%{summary}
-
-%package        pkg-freebsd-386
-Summary:        Golang compiler toolchain to compile for freebsd 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-freebsd-386
-%{summary}
-
-%package        pkg-freebsd-amd64
-Summary:        Golang compiler toolchain to compile for freebsd amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-freebsd-amd64
-%{summary}
-
-%package        pkg-freebsd-arm
-Summary:        Golang compiler toolchain to compile for freebsd arm
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-freebsd-arm
-%{summary}
-
-%package        pkg-netbsd-386
-Summary:        Golang compiler toolchain to compile for netbsd 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-netbsd-386
-%{summary}
-
-%package        pkg-netbsd-amd64
-Summary:        Golang compiler toolchain to compile for netbsd amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-netbsd-amd64
-%{summary}
-
-%package        pkg-netbsd-arm
-Summary:        Golang compiler toolchain to compile for netbsd arm
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-netbsd-arm
-%{summary}
-
-%package        pkg-openbsd-386
-Summary:        Golang compiler toolchain to compile for openbsd 386
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-openbsd-386
-%{summary}
-
-%package        pkg-openbsd-amd64
-Summary:        Golang compiler toolchain to compile for openbsd amd64
-Requires:       go = %{version}-%{release}
-BuildArch:      noarch
-%description    pkg-openbsd-amd64
-%{summary}
-
-## missing ./go/src/runtime/defs_openbsd_arm.h
-## we'll skip this bundle for now
-#%package        pkg-openbsd-arm
-#Summary:        Golang compiler toolchain to compile for openbsd arm
-#Requires:       go = %{version}-%{release}
-#BuildArch:      noarch
-#%description    pkg-openbsd-arm
-#%{summary}
 
 # Workaround old RPM bug of symlink-replaced-with-dir failure
 %pretrans -p <lua>
@@ -315,7 +197,6 @@ end
 
 %if 0%{?fedora} >= 21
 %patch210 -p0
-%patch211 -p1
 %endif
 
 # increase verbosity of build
@@ -324,7 +205,19 @@ end
 # remove the P224 curve
 %patch1 -p1
 
+# use the arch dependent path in the bootstrap
+%patch212 -p1
+
+# disable TestGdbPython
+%patch213 -p1
+
+# disable TestVendorRun and TestVendorGOPATH
+%patch214 -p1
+
 %build
+# go1.5 bootstrapping. The compiler is written in golang.
+export GOROOT_BOOTSTRAP=%{goroot}
+
 # set up final install location
 export GOROOT_FINAL=%{goroot}
 
@@ -335,23 +228,13 @@ export GOROOT_FINAL=%{goroot}
 export GOHOSTOS=linux
 export GOHOSTARCH=%{gohostarch}
 
-# build for all (see http://golang.org/doc/install/source#environment)
 pushd src
-	for goos in darwin freebsd linux netbsd openbsd plan9 windows ; do
-		for goarch in 386 amd64 arm ; do
-			if [ "${goarch}" = "arm" ] ; then
-				if [ "${goos}" = "darwin" -o "${goos}" = "windows" -o "${goos}" = "plan9" -o "${goos}" = "openbsd" ] ;then
-					continue
-				fi
-			fi
-			# use our gcc options for this build, but store gcc as default for compiler
-			CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
-			CC_FOR_TARGET="gcc" \
-				GOOS=${goos} \
-				GOARCH=${goarch} \
-				./make.bash --no-clean
-		done
-	done
+# use our gcc options for this build, but store gcc as default for compiler
+CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
+CC_FOR_TARGET="gcc" \
+GOOS=linux \
+GOARCH=%{gohostarch} \
+	./make.bash --no-clean
 popd
 
 %install
@@ -363,7 +246,7 @@ mkdir -p $RPM_BUILD_ROOT%{goroot}
 
 # install everything into libdir (until symlink problems are fixed)
 # https://code.google.com/p/go/issues/detail?id=5830
-cp -apv api bin doc favicon.ico include lib pkg robots.txt src misc VERSION \
+cp -apv api bin doc favicon.ico lib pkg robots.txt src misc VERSION \
    $RPM_BUILD_ROOT%{goroot}
 
 # bz1099206
@@ -374,27 +257,27 @@ find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{
 # generate the spec file ownership of this source tree and packages
 cwd=$(pwd)
 src_list=$cwd/go-src.list
-rm -f $src_list
-touch $src_list
+pkg_list=$cwd/go-pkg.list
+misc_list=$cwd/go-misc.list
+docs_list=$cwd/go-docs.list
+tests_list=$cwd/go-tests.list
+rm -f $src_list $pkg_list $docs_list $misc_list $tests_list
+touch $src_list $pkg_list $docs_list $misc_list $tests_list
 pushd $RPM_BUILD_ROOT%{goroot}
-	find src/ -type d -printf '%%%dir %{goroot}/%p\n' >> $src_list
-	find src/ ! -type d -printf '%{goroot}/%p\n' >> $src_list
+	find src/ -type d ! -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $src_list
+	find src/ ! -type d ! -ipath '*/testdata/*' ! -name '*_test.go' -printf '%{goroot}/%p\n' >> $src_list
 
+	find bin/ pkg/ -type d -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
+	find bin/ pkg/ ! -type d -printf '%{goroot}/%p\n' >> $pkg_list
 
-	for goos in darwin freebsd linux netbsd openbsd plan9 windows ; do
-		for goarch in 386 amd64 arm ; do
-			if [ "${goarch}" = "arm" ] ; then
-				if [ "${goos}" = "darwin" -o "${goos}" = "windows" -o "${goos}" = "plan9" -o "${goos}" = "openbsd" ] ;then
-					continue
-				fi
-			fi
-			file_list=${cwd}/pkg-${goos}-${goarch}.list
-			rm -f $file_list
-			touch $file_list
-			find pkg/${goos}_${goarch}/ -type d -printf '%%%dir %{goroot}/%p\n' >> $file_list
-			find pkg/${goos}_${goarch}/ ! -type d -printf '%{goroot}/%p\n' >> $file_list
-		done
-	done
+	find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
+	find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
+
+	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
+	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
+
+	find src/ -type d -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+	find src/ ! -type d -ipath '*/testdata/*' -o -name '*_test.go' -printf '%{goroot}/%p\n' >> $tests_list
 popd
 
 # remove the unnecessary zoneinfo file (Go will always use the system one first)
@@ -406,27 +289,14 @@ rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
 # put binaries to bindir, linked to the arch we're building,
 # leave the arch independent pieces in %{goroot}
 mkdir -p $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}
-mv $RPM_BUILD_ROOT%{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
-mv $RPM_BUILD_ROOT%{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
+ln -sf %{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
+ln -sf %{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
 
 # ensure these exist and are owned
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/github.com/
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/bitbucket.org/
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/p/
-
-# remove the go and gofmt for other platforms (not used in the compile)
-pushd $RPM_BUILD_ROOT%{goroot}/bin/
-	rm -rf darwin_* windows_* freebsd_* netbsd_* openbsd_* plan9_*
-	case "%{gohostarch}" in
-		amd64)
-			rm -rf linux_386 linux_arm ;;
-		386)
-			rm -rf linux_arm linux_amd64 ;;
-		arm)
-			rm -rf linux_386 linux_amd64 ;;
-	esac
-popd
 
 # make sure these files exist and point to alternatives
 rm -f $RPM_BUILD_ROOT%{_bindir}/go
@@ -455,7 +325,7 @@ cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
 
 %check
 export GOROOT=$(pwd -P)
-export PATH="$PATH":"$GOROOT"/bin
+export PATH="$GOROOT"/bin:"$PATH"
 cd src
 # skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
 # until this test/issue is fixed
@@ -465,74 +335,42 @@ cd src
 
 # not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
 # https://code.google.com/p/go/issues/detail?id=6883
-CGO_ENABLED=0 ./run.bash --no-rebuild
+
+# XXX reenable. likely go1.5beta2 https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
+#CGO_ENABLED=0 ./run.bash --no-rebuild
+#CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
+CC="gcc $RPM_LD_FLAGS" \
+CC_FOR_TARGET="gcc" \
+	#./run.bash --no-rebuild
 cd ..
 
-if [ $(go list -json std | grep Stale | wc -l) -gt 2 ] ; then
-	# cmd/go and cmd/gofmt show like they are stale. we can ignore
-	exit 1
-fi
 
-
-%ifarch %{ix86}
-%post pkg-bin-linux-386
-# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-touch -r %{goroot}/pkg/linux_386/runtime.a %{goroot}/pkg/linux_386/runtime/cgo.a
-
+%post bin
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
-	go %{goroot}/bin/linux_386/go 90 \
-	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_386/gofmt
+	go %{goroot}/bin/go 90 \
+	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/gofmt
 
-%preun pkg-bin-linux-386
+%preun bin
 if [ $1 = 0 ]; then
-	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/linux_386/go
+	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/go
 fi
-%endif
-
-%ifarch x86_64
-%post pkg-bin-linux-amd64
-# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-touch -r %{goroot}/pkg/linux_amd64/runtime.a %{goroot}/pkg/linux_amd64/runtime/cgo.a
-
-%{_sbindir}/update-alternatives --install %{_bindir}/go \
-	go %{goroot}/bin/linux_amd64/go 90 \
-	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_amd64/gofmt
-
-%preun pkg-bin-linux-amd64
-if [ $1 = 0 ]; then
-	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/linux_amd64/go
-fi
-%endif
-
-%ifarch %{arm}
-%post pkg-bin-linux-arm
-# since the cgo.a packaged in this rpm will be older than the other archives likely built on the ARM builder,
-touch -r %{goroot}/pkg/linux_arm/runtime.a %{goroot}/pkg/linux_arm/runtime/cgo.a
-
-%{_sbindir}/update-alternatives --install %{_bindir}/go \
-	go %{goroot}/bin/linux_arm/go 90 \
-	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/linux_arm/gofmt
-
-%preun pkg-bin-linux-arm
-if [ $1 = 0 ]; then
-	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/linux_arm/go
-fi
-%endif
 
 
 %files
 %doc AUTHORS CONTRIBUTORS LICENSE PATENTS
 # VERSION has to be present in the GOROOT, for `go install std` to work
 %doc %{goroot}/VERSION
+%dir %{goroot}/doc
 %doc %{goroot}/doc/*
 
 # go files
 %dir %{goroot}
-%{goroot}/*
-%exclude %{goroot}/VERSION
 %exclude %{goroot}/bin/
 %exclude %{goroot}/pkg/
 %exclude %{goroot}/src/
+%exclude %{goroot}/doc/
+%exclude %{goroot}/misc/
+%{goroot}/*
 
 # ensure directory ownership, so they are cleaned up if empty
 %dir %{gopath}
@@ -558,187 +396,21 @@ fi
 
 %files -f go-src.list src
 
+%files -f go-docs.list docs
 
-%ifarch %{ix86}
-%files pkg-bin-linux-386
-%{goroot}/bin/linux_386/
-# binary executables
+%files -f go-misc.list misc
+
+%files -f go-tests.list tests
+
+%files -f go-pkg.list bin
 %{_bindir}/go
 %{_bindir}/gofmt
-%dir %{goroot}/pkg/obj/linux_386
-%{goroot}/pkg/obj/linux_386/*
-%{goroot}/pkg/linux_386/runtime/cgo.a
-%dir %{goroot}/pkg/tool/linux_386
-%{goroot}/pkg/tool/linux_386/5a
-%{goroot}/pkg/tool/linux_386/5c
-%{goroot}/pkg/tool/linux_386/5g
-%{goroot}/pkg/tool/linux_386/5l
-%{goroot}/pkg/tool/linux_386/6a
-%{goroot}/pkg/tool/linux_386/6c
-%{goroot}/pkg/tool/linux_386/6g
-%{goroot}/pkg/tool/linux_386/6l
-%{goroot}/pkg/tool/linux_386/8a
-%{goroot}/pkg/tool/linux_386/8c
-%{goroot}/pkg/tool/linux_386/8g
-%{goroot}/pkg/tool/linux_386/8l
-%{goroot}/pkg/tool/linux_386/addr2line
-%{goroot}/pkg/tool/linux_386/dist
-%{goroot}/pkg/tool/linux_386/nm
-%{goroot}/pkg/tool/linux_386/objdump
-%{goroot}/pkg/tool/linux_386/pack
-%{goroot}/pkg/tool/linux_386/pprof
-%endif
-
-%ifarch x86_64
-%files pkg-bin-linux-amd64
-%{goroot}/bin/linux_amd64/
-# binary executables
-%{_bindir}/go
-%{_bindir}/gofmt
-%dir %{goroot}/pkg/obj/linux_amd64
-%{goroot}/pkg/obj/linux_amd64/*
-%{goroot}/pkg/linux_amd64/runtime/cgo.a
-%dir %{goroot}/pkg/tool/linux_amd64
-%{goroot}/pkg/tool/linux_amd64/5a
-%{goroot}/pkg/tool/linux_amd64/5c
-%{goroot}/pkg/tool/linux_amd64/5g
-%{goroot}/pkg/tool/linux_amd64/5l
-%{goroot}/pkg/tool/linux_amd64/6a
-%{goroot}/pkg/tool/linux_amd64/6c
-%{goroot}/pkg/tool/linux_amd64/6g
-%{goroot}/pkg/tool/linux_amd64/6l
-%{goroot}/pkg/tool/linux_amd64/8a
-%{goroot}/pkg/tool/linux_amd64/8c
-%{goroot}/pkg/tool/linux_amd64/8g
-%{goroot}/pkg/tool/linux_amd64/8l
-%{goroot}/pkg/tool/linux_amd64/addr2line
-%{goroot}/pkg/tool/linux_amd64/dist
-%{goroot}/pkg/tool/linux_amd64/nm
-%{goroot}/pkg/tool/linux_amd64/objdump
-%{goroot}/pkg/tool/linux_amd64/pack
-%{goroot}/pkg/tool/linux_amd64/pprof
-%endif
-
-%ifarch %{arm}
-%files pkg-bin-linux-arm
-%{goroot}/bin/linux_arm/
-# binary executables
-%{_bindir}/go
-%{_bindir}/gofmt
-%dir %{goroot}/pkg/obj/linux_arm
-%{goroot}/pkg/obj/linux_arm/*
-%{goroot}/pkg/linux_arm/runtime/cgo.a
-%dir %{goroot}/pkg/tool/linux_arm
-%{goroot}/pkg/tool/linux_arm/5a
-%{goroot}/pkg/tool/linux_arm/5c
-%{goroot}/pkg/tool/linux_arm/5g
-%{goroot}/pkg/tool/linux_arm/5l
-%{goroot}/pkg/tool/linux_arm/6a
-%{goroot}/pkg/tool/linux_arm/6c
-%{goroot}/pkg/tool/linux_arm/6g
-%{goroot}/pkg/tool/linux_arm/6l
-%{goroot}/pkg/tool/linux_arm/8a
-%{goroot}/pkg/tool/linux_arm/8c
-%{goroot}/pkg/tool/linux_arm/8g
-%{goroot}/pkg/tool/linux_arm/8l
-%{goroot}/pkg/tool/linux_arm/addr2line
-%{goroot}/pkg/tool/linux_arm/dist
-%{goroot}/pkg/tool/linux_arm/nm
-%{goroot}/pkg/tool/linux_arm/objdump
-%{goroot}/pkg/tool/linux_arm/pack
-%{goroot}/pkg/tool/linux_arm/pprof
-%endif
-
-%files pkg-linux-386 -f pkg-linux-386.list
-%{goroot}/pkg/linux_386/
-%ifarch %{ix86}
-%exclude %{goroot}/pkg/linux_386/runtime/cgo.a
-%endif
-%{goroot}/pkg/tool/linux_386/cgo
-%{goroot}/pkg/tool/linux_386/fix
-%{goroot}/pkg/tool/linux_386/yacc
-
-%files pkg-linux-amd64 -f pkg-linux-amd64.list
-%{goroot}/pkg/linux_amd64/
-%ifarch x86_64
-%exclude %{goroot}/pkg/linux_amd64/runtime/cgo.a
-%endif
-%{goroot}/pkg/tool/linux_amd64/cgo
-%{goroot}/pkg/tool/linux_amd64/fix
-%{goroot}/pkg/tool/linux_amd64/yacc
-
-%files pkg-linux-arm -f pkg-linux-arm.list
-%{goroot}/pkg/linux_arm/
-%ifarch %{arm}
-%exclude %{goroot}/pkg/linux_arm/runtime/cgo.a
-%endif
-%{goroot}/pkg/tool/linux_arm/cgo
-%{goroot}/pkg/tool/linux_arm/fix
-%{goroot}/pkg/tool/linux_arm/yacc
-
-%files pkg-darwin-386 -f pkg-darwin-386.list
-%{goroot}/pkg/darwin_386/
-%{goroot}/pkg/tool/darwin_386/
-
-%files pkg-darwin-amd64 -f pkg-darwin-amd64.list
-%{goroot}/pkg/darwin_amd64/
-%{goroot}/pkg/tool/darwin_amd64/
-
-%files pkg-windows-386 -f pkg-windows-386.list
-%{goroot}/pkg/windows_386/
-%{goroot}/pkg/tool/windows_386/
-
-%files pkg-windows-amd64 -f pkg-windows-amd64.list
-%{goroot}/pkg/windows_amd64/
-%{goroot}/pkg/tool/windows_amd64/
-
-%files pkg-plan9-386 -f pkg-plan9-386.list
-%{goroot}/pkg/plan9_386/
-%{goroot}/pkg/tool/plan9_386/
-
-%files pkg-plan9-amd64 -f pkg-plan9-amd64.list
-%{goroot}/pkg/plan9_amd64/
-%{goroot}/pkg/tool/plan9_amd64/
-
-%files pkg-freebsd-386 -f pkg-freebsd-386.list
-%{goroot}/pkg/freebsd_386/
-%{goroot}/pkg/tool/freebsd_386/
-
-%files pkg-freebsd-amd64 -f pkg-freebsd-amd64.list
-%{goroot}/pkg/freebsd_amd64/
-%{goroot}/pkg/tool/freebsd_amd64/
-
-%files pkg-freebsd-arm -f pkg-freebsd-arm.list
-%{goroot}/pkg/freebsd_arm/
-%{goroot}/pkg/tool/freebsd_arm/
-
-%files pkg-netbsd-386 -f pkg-netbsd-386.list
-%{goroot}/pkg/netbsd_386/
-%{goroot}/pkg/tool/netbsd_386/
-
-%files pkg-netbsd-amd64 -f pkg-netbsd-amd64.list
-%{goroot}/pkg/netbsd_amd64/
-%{goroot}/pkg/tool/netbsd_amd64/
-
-%files pkg-netbsd-arm -f pkg-netbsd-arm.list
-%{goroot}/pkg/netbsd_arm/
-%{goroot}/pkg/tool/netbsd_arm/
-
-%files pkg-openbsd-386 -f pkg-openbsd-386.list
-%{goroot}/pkg/openbsd_386/
-%{goroot}/pkg/tool/openbsd_386/
-
-%files pkg-openbsd-amd64 -f pkg-openbsd-amd64.list
-%{goroot}/pkg/openbsd_amd64/
-%{goroot}/pkg/tool/openbsd_amd64/
-
-## skipping for now
-#%files pkg-openbsd-arm
-#%{goroot}/pkg/openbsd_arm/
-#%{goroot}/pkg/tool/openbsd_arm/
 
 
 %changelog
+* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-1.1.5beta1
+- updating to go1.5beta1
+
 * Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.2-3
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
