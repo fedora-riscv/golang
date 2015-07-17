@@ -1,3 +1,9 @@
+commit f8eb1e50541c8a9e55545d7470dbeab96073a632
+Author: Vincent Batts <vbatts@hashbangbash.com>
+Date:   Thu Jul 16 11:38:45 2015 -0400
+
+    p224
+
 diff --git a/api/go1.txt b/api/go1.txt
 index 5e3dea5..1a1ee83 100644
 --- a/api/go1.txt
@@ -98,7 +104,7 @@ index f3b84e1..ca0b7cf 100644
  	initP384()
  	initP521()
 diff --git a/src/crypto/elliptic/elliptic_test.go b/src/crypto/elliptic/elliptic_test.go
-index 7e27913..0051d53 100644
+index 7e27913..e0034fc 100644
 --- a/src/crypto/elliptic/elliptic_test.go
 +++ b/src/crypto/elliptic/elliptic_test.go
 @@ -6,27 +6,25 @@ package elliptic
@@ -240,16 +246,16 @@ index 7e27913..0051d53 100644
  func TestMarshal(t *testing.T) {
 -	p224 := P224()
 -	_, x, y, err := GenerateKey(p224, rand.Reader)
-+	p254 := P254()
-+	_, x, y, err := GenerateKey(p254, rand.Reader)
++	p256 := P256()
++	_, x, y, err := GenerateKey(p256, rand.Reader)
  	if err != nil {
  		t.Error(err)
  		return
  	}
 -	serialized := Marshal(p224, x, y)
 -	xx, yy := Unmarshal(p224, serialized)
-+	serialized := Marshal(p254, x, y)
-+	xx, yy := Unmarshal(p254, serialized)
++	serialized := Marshal(p256, x, y)
++	xx, yy := Unmarshal(p256, serialized)
  	if xx == nil {
  		t.Error("failed to unmarshal")
  		return
@@ -1114,7 +1120,7 @@ index 83f9916..dea8589 100644
  		priv, err = ecdsa.GenerateKey(elliptic.P256(), rand.Reader)
  	case "P384":
 diff --git a/src/crypto/x509/x509.go b/src/crypto/x509/x509.go
-index be6c013..aa55f55 100644
+index be6c013..428053a 100644
 --- a/src/crypto/x509/x509.go
 +++ b/src/crypto/x509/x509.go
 @@ -308,9 +308,6 @@ func getPublicKeyAlgorithmFromOID(oid asn1.ObjectIdentifier) PublicKeyAlgorithm
@@ -1153,13 +1159,12 @@ index be6c013..aa55f55 100644
  	case elliptic.P256():
  		return oidNamedCurveP256, true
  	case elliptic.P384():
-@@ -1466,9 +1458,6 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
+@@ -1466,7 +1458,7 @@ func signingParamsForPublicKey(pub interface{}, requestedSigAlgo SignatureAlgori
  		pubType = ECDSA
  
  		switch pub.Curve {
 -		case elliptic.P224(), elliptic.P256():
--			hashFunc = crypto.SHA256
--			sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
++		case elliptic.P256():
+ 			hashFunc = crypto.SHA256
+ 			sigAlgo.Algorithm = oidSignatureECDSAWithSHA256
  		case elliptic.P384():
- 			hashFunc = crypto.SHA384
- 			sigAlgo.Algorithm = oidSignatureECDSAWithSHA384

@@ -37,11 +37,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5beta1
+%global go_version 1.5beta2
 
 Name:           golang
 Version:        1.4.99
-Release:        2.%{go_version}%{?dist}
+Release:        3.%{go_version}%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -74,10 +74,9 @@ Patch1:         golang-1.2-remove-ECC-p224.patch
 # https://github.com/golang/go/issues/11214
 Patch213:       go1.5beta1-disable-TestGdbPython.patch
 
-# disable TestVendorRun and TestVendorGOPATH
-# https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
-Patch214:       go1.5beta1-fix-TestVendorRun.patch
-
+# disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
+# this is not possible in the limitied build chroot
+Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -211,7 +210,7 @@ end
 # disable TestGdbPython
 %patch213 -p1
 
-# disable TestVendorRun and TestVendorGOPATH
+# disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
 
 %build
@@ -230,7 +229,9 @@ export GOHOSTARCH=%{gohostarch}
 
 pushd src
 # use our gcc options for this build, but store gcc as default for compiler
-CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
+CFLAGS="$RPM_OPT_FLAGS" \
+LDFLAGS="$RPM_LD_FLAGS" \
+CC="gcc" \
 CC_FOR_TARGET="gcc" \
 GOOS=linux \
 GOARCH=%{gohostarch} \
@@ -338,10 +339,12 @@ cd src
 
 # XXX reenable. likely go1.5beta2 https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
 #CGO_ENABLED=0 ./run.bash --no-rebuild
-#CC="gcc $RPM_OPT_FLAGS $RPM_LD_FLAGS" \
-CC="gcc $RPM_LD_FLAGS" \
-CC_FOR_TARGET="gcc" \
-	#./run.bash --no-rebuild
+
+#CFLAGS="$RPM_OPT_FLAGS" \
+#LDFLAGS="$RPM_LD_FLAGS" \
+#CC="gcc" \
+#CC_FOR_TARGET="gcc" \
+#./run.bash --no-rebuild
 cd ..
 
 
@@ -408,6 +411,9 @@ fi
 
 
 %changelog
+* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-3.1.5beta2
+- updating to go1.5beta2
+
 * Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-2.1.5beta1
 - add checksum to sources and fixed one patch
 
