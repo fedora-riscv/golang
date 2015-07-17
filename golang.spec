@@ -340,11 +340,10 @@ cd src
 # XXX reenable. likely go1.5beta2 https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
 #CGO_ENABLED=0 ./run.bash --no-rebuild
 
-#CFLAGS="$RPM_OPT_FLAGS" \
-#LDFLAGS="$RPM_LD_FLAGS" \
-#CC="gcc" \
-#CC_FOR_TARGET="gcc" \
-#./run.bash --no-rebuild
+CC="gcc" \
+CFLAGS="$RPM_OPT_FLAGS" \
+LDFLAGS="$RPM_LD_FLAGS" \
+./run.bash --no-rebuild -v -k ||:
 cd ..
 
 
