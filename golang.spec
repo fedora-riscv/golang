@@ -41,7 +41,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        0.6.beta2%{?dist}
+Release:        0.7.beta2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -417,6 +417,9 @@ fi
 
 
 %changelog
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.7.beta2
+- add the patch ..
+
 * Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.6.beta2
 - increase ELFRESERVE (bz1248071)
 
