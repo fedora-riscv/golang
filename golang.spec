@@ -37,11 +37,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5beta2
+%global go_version 1.5beta3
 
 Name:           golang
 Version:        1.5
-Release:        0.7.beta2%{?dist}
+Release:        0.8.beta3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -417,6 +417,9 @@ fi
 
 
 %changelog
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.8.beta3
+- updating to go1.5beta3
+
 * Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.7.beta2
 - add the patch ..
 
