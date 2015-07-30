@@ -41,7 +41,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        0.5.beta2%{?dist}
+Release:        0.6.beta2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -77,6 +77,10 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 # this is not possible in the limitied build chroot
 Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
+
+# debuginfo doesn't fit in the 3072 reserved space for ELF headers
+# https://bugzilla.redhat.com/show_bug.cgi?id=1248071
+Patch215:	golang/go1.5beta2-increase-elfreserve-for-debug.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -212,6 +216,9 @@ end
 
 # disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
+
+# ELFRESERVE
+%patch215 -p1
 
 %build
 # go1.5 bootstrapping. The compiler is written in golang.
@@ -410,6 +417,9 @@ fi
 
 
 %changelog
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.6.beta2
+- increase ELFRESERVE (bz1248071)
+
 * Tue Jul 28 2015 Lokesh Mandvekar <lsm5@fedoraproject.org> - 1.5-0.5.beta2
 - correct package version and release tags as per naming guidelines
 
