@@ -41,7 +41,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        0.8.beta3%{?dist}
+Release:        0.9.beta3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -81,6 +81,10 @@ Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroup
 # debuginfo doesn't fit in the 3072 reserved space for ELF headers
 # https://bugzilla.redhat.com/show_bug.cgi?id=1248071
 Patch215:	golang/go1.5beta2-increase-elfreserve-for-debug.patch
+
+# upstream commit that fixes hardlinks in archive/tar
+# should be included in go1.5
+Patch216:       go1.3beta3-tar-hardlink-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -219,6 +223,9 @@ end
 
 # ELFRESERVE
 %patch215 -p1
+
+# archive/tar hardlinks
+%patch216 -p1
 
 %build
 # go1.5 bootstrapping. The compiler is written in golang.
@@ -417,6 +424,9 @@ fi
 
 
 %changelog
+* Tue Aug 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.9.beta3
+- pull in upstream archive/tar fix
+
 * Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.8.beta3
 - updating to go1.5beta3
 
