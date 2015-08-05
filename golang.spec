@@ -40,7 +40,7 @@
 
 Name:           golang
 Version:        1.4.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -67,6 +67,12 @@ Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
+
+# TODO this should be removed with go1.4.3
+# https://bugzilla.redhat.com/show_bug.cgi?id=1250352
+Patch100:	300d9a21583e7cf0149a778a0611e76ff7c6680f.patch
+Patch101:	117ddcb83d7f42d6aa72241240af99ded81118e9.patch
+Patch102:	143822585e32449860e624cace9d2e521deee62e.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -323,6 +329,11 @@ end
 
 # remove the P224 curve
 %patch1 -p1
+
+# bz1250352
+%patch100 -p1
+%patch101 -p1
+%patch102 -p1
 
 %build
 # set up final install location
@@ -739,6 +750,9 @@ fi
 
 
 %changelog
+* Wed Aug 05 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-3
+- bz1250352
+
 * Wed Mar 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-2
 - obsoleting deprecated packages
 
