@@ -37,11 +37,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5beta3
+%global go_version 1.5rc1
 
 Name:           golang
 Version:        1.5
-Release:        0.9.beta3%{?dist}
+Release:        0.10.rc1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -77,14 +77,6 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 # this is not possible in the limitied build chroot
 Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
-
-# debuginfo doesn't fit in the 3072 reserved space for ELF headers
-# https://bugzilla.redhat.com/show_bug.cgi?id=1248071
-Patch215:	golang/go1.5beta2-increase-elfreserve-for-debug.patch
-
-# upstream commit that fixes hardlinks in archive/tar
-# should be included in go1.5
-Patch216:       go1.3beta3-tar-hardlink-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -221,12 +213,6 @@ end
 # disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
 
-# ELFRESERVE
-%patch215 -p1
-
-# archive/tar hardlinks
-%patch216 -p1
-
 %build
 # go1.5 bootstrapping. The compiler is written in golang.
 export GOROOT_BOOTSTRAP=%{goroot}
@@ -357,7 +343,7 @@ cd src
 CC="gcc" \
 CFLAGS="$RPM_OPT_FLAGS" \
 LDFLAGS="$RPM_LD_FLAGS" \
-./run.bash --no-rebuild -v -k ||:
+./run.bash --no-rebuild -v -k
 cd ..
 
 
@@ -424,6 +410,10 @@ fi
 
 
 %changelog
+* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.10.rc1
+- updating to go1.5rc1
+- checks are back in place
+
 * Tue Aug 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.9.beta3
 - pull in upstream archive/tar fix
 
