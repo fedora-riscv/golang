@@ -41,7 +41,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        0.10.rc1%{?dist}
+Release:        0.11.rc1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -410,6 +410,9 @@ fi
 
 
 %changelog
+* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.11.rc1
+- fixing the sources reference
+
 * Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.10.rc1
 - updating to go1.5rc1
 - checks are back in place
