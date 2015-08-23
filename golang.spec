@@ -50,6 +50,7 @@ Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 
 # go1.5 bootstrapping. The compiler is written in golang.
 BuildRequires:  golang > 1.4
+BuildRequires:  pcre-devel
 BuildRequires:  hostname
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
