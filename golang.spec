@@ -25,7 +25,7 @@
 # let this match the macros in macros.golang
 %global goroot          /usr/lib/%{name}
 %global gopath          %{_datadir}/gocode
-%global go_arches       %{ix86} x86_64 %{arm}
+%global go_arches       %{ix86} x86_64 %{arm} aarch64
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -35,13 +35,16 @@
 %ifarch %{arm}
 %global gohostarch  arm
 %endif
+%ifarch aarch64
+%global gohostarch  arm64
+%endif
 
 %global go_api 1.5
 %global go_version 1.5
 
 Name:           golang
 Version:        1.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -400,6 +403,10 @@ fi
 
 
 %changelog
+* Sun Aug 23 2015 Peter Robinson <pbrobinson@fedoraproject.org> 1.5-2
+- Enable aarch64
+- Minor cleanups
+
 * Thu Aug 20 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-1
 - updating to go1.5
 
