@@ -50,16 +50,9 @@ Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 
 # go1.5 bootstrapping. The compiler is written in golang.
 BuildRequires:  golang > 1.4
+BuildRequires:  hostname
 # use the arch dependent path in the bootstrap
-Patch212:       ./golang-1.5-bootstrap-binary-path.patch
-
-# this command moved places
-%if 0%{?fedora} >= 21
-BuildRequires:  /usr/bin/hostname
-Patch210:       golang-f21-hostname.patch
-%else
-BuildRequires:  /bin/hostname
-%endif
+Patch212:       golang-1.5-bootstrap-binary-path.patch
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin
@@ -193,10 +186,6 @@ end
 
 %prep
 %setup -q -n go
-
-%if 0%{?fedora} >= 21
-%patch210 -p0
-%endif
 
 # increase verbosity of build
 %patch0 -p1
