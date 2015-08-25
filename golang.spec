@@ -54,10 +54,10 @@ Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 # go1.5 bootstrapping. The compiler is written in golang.
 BuildRequires:  golang > 1.4
 BuildRequires:  pcre-devel
-%if 0%{?rhel} == 6 || 0%{?fedora} < 23
-BuildRequires:  net-tools
-%else
+%if 0%{?rhel} > 6 || 0%{?fedora} > 0
 BuildRequires:  hostname
+%else
+BuildRequires:  net-tools
 %endif
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -269,8 +269,8 @@ tests_list=$cwd/go-tests.list
 rm -f $src_list $pkg_list $docs_list $misc_list $tests_list
 touch $src_list $pkg_list $docs_list $misc_list $tests_list
 pushd $RPM_BUILD_ROOT%{goroot}
-	find src/ -type d ! -name testdata -a ! -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $src_list
-	find src/ ! -type d ! -ipath '*/testdata/*' -a ! -name '*_test*.go' -printf '%{goroot}/%p\n' >> $src_list
+	find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
+	find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
 	find bin/ pkg/ -type d -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
 	find bin/ pkg/ ! -type d -printf '%{goroot}/%p\n' >> $pkg_list
@@ -281,8 +281,8 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
-	find src/ -type d -name testdata -o -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find src/ ! -type d -ipath '*/testdata/*' -o -name '*_test*.go' -printf '%{goroot}/%p\n' >> $tests_list
+	find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+	find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
 	# this is only the zoneinfo.zip
 	find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
 	find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
