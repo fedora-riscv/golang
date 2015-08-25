@@ -44,7 +44,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -54,7 +54,11 @@ Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 # go1.5 bootstrapping. The compiler is written in golang.
 BuildRequires:  golang > 1.4
 BuildRequires:  pcre-devel
+%if 0%{?rhel} == 6 || 0%{?fedora} < 23
+BuildRequires:  net-tools
+%else
 BuildRequires:  hostname
+%endif
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
 
@@ -74,6 +78,10 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 # this is not possible in the limitied build chroot
 Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
+
+# we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
+# later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
+Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -261,8 +269,8 @@ tests_list=$cwd/go-tests.list
 rm -f $src_list $pkg_list $docs_list $misc_list $tests_list
 touch $src_list $pkg_list $docs_list $misc_list $tests_list
 pushd $RPM_BUILD_ROOT%{goroot}
-	find src/ -type d ! -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $src_list
-	find src/ ! -type d ! -ipath '*/testdata/*' ! -name '*_test.go' -printf '%{goroot}/%p\n' >> $src_list
+	find src/ -type d ! -name testdata -a ! -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $src_list
+	find src/ ! -type d ! -ipath '*/testdata/*' -a ! -name '*_test*.go' -printf '%{goroot}/%p\n' >> $src_list
 
 	find bin/ pkg/ -type d -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
 	find bin/ pkg/ ! -type d -printf '%{goroot}/%p\n' >> $pkg_list
@@ -273,12 +281,12 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
-	find src/ -type d -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find src/ ! -type d -ipath '*/testdata/*' -o -name '*_test.go' -printf '%{goroot}/%p\n' >> $tests_list
+	find src/ -type d -name testdata -o -ipath '*/testdata/*' -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+	find src/ ! -type d -ipath '*/testdata/*' -o -name '*_test*.go' -printf '%{goroot}/%p\n' >> $tests_list
+	# this is only the zoneinfo.zip
+	find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+	find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
 popd
-
-# remove the unnecessary zoneinfo file (Go will always use the system one first)
-rm -rfv $RPM_BUILD_ROOT%{goroot}/lib/time
 
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
@@ -408,6 +416,9 @@ fi
 
 
 %changelog
+* Tue Aug 25 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-3
+- only allow the golang zoneinfo.zip to be used in tests
+
 * Sun Aug 23 2015 Peter Robinson <pbrobinson@fedoraproject.org> 1.5-2
 - Enable aarch64
 - Minor cleanups
