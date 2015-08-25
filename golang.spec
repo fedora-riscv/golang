@@ -417,7 +417,10 @@ fi
 
 %changelog
 * Tue Aug 25 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-3
-- only allow the golang zoneinfo.zip to be used in tests
+- bz1256910 only allow the golang zoneinfo.zip to be used in tests
+- bz1166611 add golang.org/x directory
+- bz1256525 include stdlib shared object. This will let other libraries and binaries
+  build with `go build -buildmode=shared -linkshared ...` or similar.
 
 * Sun Aug 23 2015 Peter Robinson <pbrobinson@fedoraproject.org> 1.5-2
 - Enable aarch64
