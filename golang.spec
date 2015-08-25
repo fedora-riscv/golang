@@ -231,6 +231,9 @@ GOARCH=%{gohostarch} \
 	./make.bash --no-clean
 popd
 
+# golang shared objects for stdlib
+GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+
 %install
 rm -rf $RPM_BUILD_ROOT
 
