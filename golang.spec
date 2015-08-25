@@ -290,10 +290,10 @@ ln -sf %{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
 ln -sf %{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
 
 # ensure these exist and are owned
-mkdir -p $RPM_BUILD_ROOT%{gopath}/src/github.com/
-mkdir -p $RPM_BUILD_ROOT%{gopath}/src/bitbucket.org/
-mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/
-mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/p/
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/github.com
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/bitbucket.org
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/p
+mkdir -p $RPM_BUILD_ROOT%{gopath}/src/golang.org/x
 
 # make sure these files exist and point to alternatives
 rm -f $RPM_BUILD_ROOT%{_bindir}/go
@@ -377,6 +377,8 @@ fi
 %dir %{gopath}/src/bitbucket.org/
 %dir %{gopath}/src/code.google.com/
 %dir %{gopath}/src/code.google.com/p/
+%dir %{gopath}/src/golang.org
+%dir %{gopath}/src/golang.org/x
 
 
 # gdbinit (for gdb debugging)
