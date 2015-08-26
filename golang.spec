@@ -44,7 +44,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -239,8 +239,9 @@ GOARCH=%{gohostarch} \
 	./make.bash --no-clean
 popd
 
+# TODO get linux/386 support for shared objects.
 # golang shared objects for stdlib
-GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+#GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -251,7 +252,7 @@ mkdir -p $RPM_BUILD_ROOT%{goroot}
 
 # install everything into libdir (until symlink problems are fixed)
 # https://code.google.com/p/go/issues/detail?id=5830
-cp -apv api bin doc favicon.ico lib pkg robots.txt src misc VERSION \
+cp -apv api bin doc favicon.ico lib pkg robots.txt src misc test VERSION \
    $RPM_BUILD_ROOT%{goroot}
 
 # bz1099206
@@ -281,6 +282,8 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
+	find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+	find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
 	find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
 	find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
 	# this is only the zoneinfo.zip
@@ -416,6 +419,10 @@ fi
 
 
 %changelog
+* Wed Aug 26 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-4
+- disable shared object until linux/386 is ironned out
+- including the test/ directory for tests
+
 * Tue Aug 25 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-3
 - bz1256910 only allow the golang zoneinfo.zip to be used in tests
 - bz1166611 add golang.org/x directory
