@@ -44,7 +44,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        5%{?dist}
+Release:        6%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -103,17 +103,6 @@ Source102:      macros.golang
 %description
 %{summary}.
 
-
-# Restore this package if RPM gets fixed (bug #975909)
-#%package       data
-#Summary:       Required architecture-independent files for Go
-#Requires:      %{name} = %{version}-%{release}
-#BuildArch:     noarch
-#Obsoletes:     %{name}-docs < 1.1-4
-#
-#%description   data
-#%{summary}.
-
 %package       docs
 Summary:       Golang compiler docs
 Requires:      %{name} = %{version}-%{release}
@@ -139,8 +128,6 @@ BuildArch:     noarch
 %description   tests
 %{summary}.
 
-##
-# the source tree
 %package        src
 Summary:        Golang compiler source tree
 BuildArch:      noarch
@@ -195,6 +182,13 @@ for _,d in pairs({"api", "doc", "include", "lib", "src"}) do
   end
 end
 
+%ifarch x86_64
+%package        shared
+Summary:        Golang shared object libraries
+
+%description    shared
+%{summary}.
+%endif
 
 %prep
 %setup -q -n go
@@ -239,9 +233,11 @@ GOARCH=%{gohostarch} \
 	./make.bash --no-clean
 popd
 
+%ifarch x86_64
 # TODO get linux/386 support for shared objects.
 # golang shared objects for stdlib
-#GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+%endif
 
 %install
 rm -rf $RPM_BUILD_ROOT
@@ -264,23 +260,29 @@ find $RPM_BUILD_ROOT%{goroot}/pkg -exec touch -r $RPM_BUILD_ROOT%{goroot}/pkg "{
 cwd=$(pwd)
 src_list=$cwd/go-src.list
 pkg_list=$cwd/go-pkg.list
+shared_list=$cwd/go-shared.list
 misc_list=$cwd/go-misc.list
 docs_list=$cwd/go-docs.list
 tests_list=$cwd/go-tests.list
-rm -f $src_list $pkg_list $docs_list $misc_list $tests_list
-touch $src_list $pkg_list $docs_list $misc_list $tests_list
+rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
+touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
 pushd $RPM_BUILD_ROOT%{goroot}
 	find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
 	find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
-	find bin/ pkg/ -type d -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
-	find bin/ pkg/ ! -type d -printf '%{goroot}/%p\n' >> $pkg_list
+	find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
+	find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -printf '%{goroot}/%p\n' >> $pkg_list
 
 	find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
 	find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
 
 	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
+
+%ifarch x86_64
+	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
+	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
+%endif
 
 	find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
 	find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
@@ -417,8 +419,14 @@ fi
 %{_bindir}/go
 %{_bindir}/gofmt
 
+%ifarch x86_64
+%files -f go-shared.list shared
+%endif
 
 %changelog
+* Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-6
+- starting a shared object subpackage. This will be x86_64 only until upstream supports more arches shared objects.
+
 * Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-5
 - bz991759 gdb path fix
 
