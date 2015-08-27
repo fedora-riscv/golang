@@ -44,7 +44,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -419,6 +419,9 @@ fi
 
 
 %changelog
+* Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-5
+- bz991759 gdb path fix
+
 * Wed Aug 26 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-4
 - disable shared object until linux/386 is ironned out
 - including the test/ directory for tests
