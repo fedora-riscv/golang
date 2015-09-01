@@ -447,43 +447,6 @@ fi
 * Thu Aug 20 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-1
 - updating to go1.5
 
-* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.11.rc1
-- fixing the sources reference
-
-* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.10.rc1
-- updating to go1.5rc1
-- checks are back in place
-
-* Tue Aug 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.9.beta3
-- pull in upstream archive/tar fix
-
-* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.8.beta3
-- updating to go1.5beta3
-
-* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.7.beta2
-- add the patch ..
-
-* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.6.beta2
-- increase ELFRESERVE (bz1248071)
-
-* Tue Jul 28 2015 Lokesh Mandvekar <lsm5@fedoraproject.org> - 1.5-0.5.beta2
-- correct package version and release tags as per naming guidelines
-
-* Fri Jul 17 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-4.1.5beta2
-- adding test output, for visibility
-
-* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-3.1.5beta2
-- updating to go1.5beta2
-
-* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-2.1.5beta1
-- add checksum to sources and fixed one patch
-
-* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-1.1.5beta1
-- updating to go1.5beta1
-
-* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.2-3
-- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
-
 * Wed Aug 05 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-3
 - bz1250352
 
