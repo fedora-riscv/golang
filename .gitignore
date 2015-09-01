@@ -1,3 +1,4 @@
+*.rpm
 /go1.1.1.src.tar.gz
 /go1.1.2.src.tar.gz
 /go1.2.1.src.tar.gz
@@ -16,4 +17,9 @@
 /go1.4beta1.src.tar.gz
 /go1.4rc1.src.tar.gz
 /go1.4rc2.src.tar.gz
+/go1.5beta1.src.tar.gz
 /golang-19087:a15f344a9efa-xattrs.tar
+/go1.5beta2.src.tar.gz
+/go1.5beta3.src.tar.gz
+/go1.5rc1.src.tar.gz
+/go1.5.src.tar.gz
