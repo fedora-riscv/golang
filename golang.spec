@@ -24,8 +24,6 @@
 
 # let this match the macros in macros.golang
 %global goroot          /usr/lib/%{name}
-%global gopath          %{_datadir}/gocode
-%global go_arches       %{ix86} x86_64 %{arm} aarch64
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -44,7 +42,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        6%{?dist}
+Release:        7%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -94,7 +92,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{go_arches}
+ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
@@ -424,6 +422,9 @@ fi
 %endif
 
 %changelog
+* Thu Sep 03 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-7
+- bz1258166 remove srpm macros, for go-srpm-macros
+
 * Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-6
 - starting a shared object subpackage. This will be x86_64 only until upstream supports more arches shared objects.
 
