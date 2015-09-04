@@ -42,7 +42,7 @@
 
 Name:           golang
 Version:        1.5
-Release:        7%{?dist}
+Release:        8%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -63,6 +63,7 @@ Patch212:       golang-1.5-bootstrap-binary-path.patch
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin
 Requires:       %{name}-src = %{version}-%{release}
+Requires:	go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -96,7 +97,6 @@ ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
-Source102:      macros.golang
 
 %description
 %{summary}.
@@ -320,16 +320,6 @@ cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
-# rpm macros
-mkdir -p %{buildroot}
-%if 0%{?rhel} > 6 || 0%{?fedora} > 0
-mkdir -p $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d
-cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.golang
-%else
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rpm
-cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
-%endif
-
 
 %check
 export GOROOT=$(pwd -P)
@@ -398,13 +388,6 @@ fi
 # prelink blacklist
 %{_sysconfdir}/prelink.conf.d
 
-%if 0%{?rhel} > 6 || 0%{?fedora} > 0
-%{_rpmconfigdir}/macros.d/macros.golang
-%else
-%{_sysconfdir}/rpm/macros.golang
-%endif
-
-
 %files -f go-src.list src
 
 %files -f go-docs.list docs
@@ -422,6 +405,9 @@ fi
 %endif
 
 %changelog
+* Fri Sep 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-8
+- bz1258166 remove srpm macros, for go-srpm-macros
+
 * Thu Sep 03 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-7
 - bz1258166 remove srpm macros, for go-srpm-macros
 
