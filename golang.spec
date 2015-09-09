@@ -38,11 +38,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5
+%global go_version 1.5.1
 
 Name:           golang
-Version:        1.5
-Release:        8%{?dist}
+Version:        1.5.1
+Release:        0%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -405,6 +405,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 09 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-0
+- update to go1.5.1
+
 * Fri Sep 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-8
 - bz1258166 remove srpm macros, for go-srpm-macros
 
