@@ -43,11 +43,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5
+%global go_version 1.5.1
 
 Name:           golang
-Version:        1.5
-Release:        6%{?dist}
+Version:        1.5.1
+Release:        0%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -427,6 +427,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 09 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-0
+- update to go1.5.1
+
 * Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-6
 - starting a shared object subpackage. This will be x86_64 only until upstream supports more arches shared objects.
 
