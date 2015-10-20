@@ -42,7 +42,7 @@
 
 Name:           golang
 Version:        1.5.1
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -81,6 +81,9 @@ Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroup
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
+
+# https://bugzilla.redhat.com/show_bug.cgi?id=1271709
+Patch216:       ./golang-1.5.1-a3156aaa12.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -205,6 +208,8 @@ Summary:        Golang shared object libraries
 
 # disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
+
+%patch216 -p1
 
 %build
 # go1.5 bootstrapping. The compiler is written in golang.
@@ -405,6 +410,9 @@ fi
 %endif
 
 %changelog
+* Mon Oct 19 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-1
+- bz1271709 include patch from upstream fix
+
 * Wed Sep 09 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-0
 - update to go1.5.1
 
