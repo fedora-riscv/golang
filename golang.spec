@@ -24,8 +24,6 @@
 
 # let this match the macros in macros.golang
 %global goroot          /usr/lib/%{name}
-%global gopath          %{_datadir}/gocode
-%global go_arches       %{ix86} x86_64 %{arm} aarch64
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -44,7 +42,7 @@
 
 Name:           golang
 Version:        1.5.1
-Release:        0%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 
 License:        BSD
@@ -65,6 +63,7 @@ Patch212:       golang-1.5-bootstrap-binary-path.patch
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin
 Requires:       %{name}-src = %{version}-%{release}
+Requires:	go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -83,6 +82,9 @@ Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroup
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
+# https://bugzilla.redhat.com/show_bug.cgi?id=1271709
+Patch216:       ./golang-1.5.1-a3156aaa12.patch
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -94,11 +96,10 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{go_arches}
+ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
-Source102:      macros.golang
 
 %description
 %{summary}.
@@ -207,6 +208,8 @@ Summary:        Golang shared object libraries
 
 # disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
+
+%patch216 -p1
 
 %build
 # go1.5 bootstrapping. The compiler is written in golang.
@@ -322,16 +325,6 @@ cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
 cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 
-# rpm macros
-mkdir -p %{buildroot}
-%if 0%{?rhel} > 6 || 0%{?fedora} > 0
-mkdir -p $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d
-cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_rpmconfigdir}/macros.d/macros.golang
-%else
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/rpm
-cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
-%endif
-
 
 %check
 export GOROOT=$(pwd -P)
@@ -400,13 +393,6 @@ fi
 # prelink blacklist
 %{_sysconfdir}/prelink.conf.d
 
-%if 0%{?rhel} > 6 || 0%{?fedora} > 0
-%{_rpmconfigdir}/macros.d/macros.golang
-%else
-%{_sysconfdir}/rpm/macros.golang
-%endif
-
-
 %files -f go-src.list src
 
 %files -f go-docs.list docs
@@ -424,6 +410,9 @@ fi
 %endif
 
 %changelog
+* Mon Oct 19 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-1
+- bz1271709 include patch from upstream fix
+
 * Wed Sep 09 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-0
 - update to go1.5.1
 
