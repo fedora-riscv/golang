@@ -22,8 +22,49 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
-# let this match the macros in macros.golang
+# Golang build options.
+
+# Buid golang using external/internal(close to cgo disabled) linking.
+%ifarch %{golang_arches}
+%global external_linker 1
+%else
+%global external_linker 0
+%endif
+
+# Build golang with cgo enabled/disabled(later equals more or less to internal linking).
+%ifarch %{golang_arches}
+%global cgo_enabled 1
+%else
+%global cgo_enabled 0
+%endif
+
+# Use golang/gcc-go as bootstrap compiler
+%ifarch %{golang_arches}
+%global golang_bootstrap 1
+%else
+%global golang_bootstrap 0
+%endif
+# boostrap(with internal linking) using gcc-go fails due to bug in tests(https://github.com/golang/go/issues/12629)
+# make check not to fail due to it
+
+# Controls what ever we fails on failed tests
+%ifarch %{golang_arches}
+%global fail_on_tests 1
+%else
+%global fail_on_tests 0
+%endif
+
+# TODO get more support for shared objects
+# Build golang shared objects for stdlib
+%ifarch x86_64
+%global shared 1
+%else
+%global shared 0
+%endif
+
+# Fedora GOROOT
 %global goroot          /usr/lib/%{name}
+
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -36,39 +77,54 @@
 %ifarch aarch64
 %global gohostarch  arm64
 %endif
+%ifarch ppc64
+%global gohostarch  ppc64
+%endif
+%ifarch ppc64le
+%global gohostarch  ppc64le
+%endif
 
 %global go_api 1.5
-%global go_version 1.5.1
+%global go_version 1.5.2
 
 Name:           golang
-Version:        1.5.1
+Version:        1.5.2
 Release:        1%{?dist}
 Summary:        The Go Programming Language
-
-License:        BSD
+# source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
+License:        BSD and Public Domain
 URL:            http://golang.org/
+# pre-processed by source.sh to make Mark.Twain-Tom.Sawyer.txt free again
 Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
+# original removed by source.sh, replace by version from golang master branch with license scrubbed
+Source1:        Mark.Twain-Tom.Sawyer.txt.bz2
 
-# go1.5 bootstrapping. The compiler is written in golang.
+# The compiler is written in Go. Needs go(1.4+) compiler for build.
+%if !%{golang_bootstrap}
+BuildRequires:  gcc-go >= 5
+%else
 BuildRequires:  golang > 1.4
-BuildRequires:  pcre-devel
+%endif
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 BuildRequires:  hostname
 %else
 BuildRequires:  net-tools
 %endif
-# use the arch dependent path in the bootstrap
-Patch212:       golang-1.5-bootstrap-binary-path.patch
+# for tests
+BuildRequires:  pcre-devel, glibc-static
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin
 Requires:       %{name}-src = %{version}-%{release}
-Requires:	go-srpm-macros
+Requires:       go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
+
+# use the arch dependent path in the bootstrap
+Patch212:       golang-1.5-bootstrap-binary-path.patch
 
 # disable TestGdbPython
 # https://github.com/golang/go/issues/11214
@@ -183,7 +239,7 @@ for _,d in pairs({"api", "doc", "include", "lib", "src"}) do
   end
 end
 
-%ifarch x86_64
+%if %{shared}
 %package        shared
 Summary:        Golang shared object libraries
 
@@ -211,34 +267,41 @@ Summary:        Golang shared object libraries
 
 %patch216 -p1
 
+cp %{SOURCE1} "$(pwd)/src/compress/bzip2/testdata/Mark.Twain-Tom.Sawyer.txt.bz2"
+
 %build
-# go1.5 bootstrapping. The compiler is written in golang.
+# bootstrap compiler GOROOT
+%if !%{golang_bootstrap}
+export GOROOT_BOOTSTRAP=/
+%else
 export GOROOT_BOOTSTRAP=%{goroot}
+%endif
 
 # set up final install location
 export GOROOT_FINAL=%{goroot}
-
-# TODO use the system linker to get the system link flags and build-id
-# when https://code.google.com/p/go/issues/detail?id=5221 is solved
-#export GO_LDFLAGS="-linkmode external -extldflags $RPM_LD_FLAGS"
 
 export GOHOSTOS=linux
 export GOHOSTARCH=%{gohostarch}
 
 pushd src
 # use our gcc options for this build, but store gcc as default for compiler
-CFLAGS="$RPM_OPT_FLAGS" \
-LDFLAGS="$RPM_LD_FLAGS" \
-CC="gcc" \
-CC_FOR_TARGET="gcc" \
-GOOS=linux \
-GOARCH=%{gohostarch} \
-	./make.bash --no-clean
+export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$RPM_LD_FLAGS"
+export CC="gcc"
+export CC_FOR_TARGET="gcc"
+export GOOS=linux
+export GOARCH=%{gohostarch}
+%if !%{external_linker}
+export GO_LDFLAGS="-linkmode internal"
+%endif
+%if !%{cgo_enabled}
+export CGO_ENABLED=0
+%endif
+./make.bash --no-clean
 popd
 
-%ifarch x86_64
-# TODO get linux/386 support for shared objects.
-# golang shared objects for stdlib
+# build shared std lib
+%if %{shared}
 GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
 %endif
 
@@ -282,7 +345,7 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
-%ifarch x86_64
+%if %{shared}
 	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
 	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
@@ -330,22 +393,21 @@ cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
 export GOROOT=$(pwd -P)
 export PATH="$GOROOT"/bin:"$PATH"
 cd src
-# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
-# until this test/issue is fixed
-# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
-# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
-# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
 
-# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
-# https://code.google.com/p/go/issues/detail?id=6883
-
-# XXX reenable. likely go1.5beta2 https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
-#CGO_ENABLED=0 ./run.bash --no-rebuild
-
-CC="gcc" \
-CFLAGS="$RPM_OPT_FLAGS" \
-LDFLAGS="$RPM_LD_FLAGS" \
-./run.bash --no-rebuild -v -k
+export CC="gcc"
+export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$RPM_LD_FLAGS"
+%if !%{external_linker}
+export GO_LDFLAGS="-linkmode internal"
+%endif
+%if !%{cgo_enabled} || !%{external_linker}
+export CGO_ENABLED=0
+%endif
+%if %{fail_on_tests}
+./run.bash --no-rebuild -v -v -v -k
+%else
+./run.bash --no-rebuild -v -v -v -k || :
+%endif
 cd ..
 
 
@@ -405,11 +467,17 @@ fi
 %{_bindir}/go
 %{_bindir}/gofmt
 
-%ifarch x86_64
+%if %{shared}
 %files -f go-shared.list shared
 %endif
 
 %changelog
+* Tue Dec 08 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-1
+- bz1288263 rebase to 1.5.2
+- spec file clean up
+- added build options
+- scrubbed "Project Gutenberg License"
+
 * Mon Oct 19 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-1
 - bz1271709 include patch from upstream fix
 
