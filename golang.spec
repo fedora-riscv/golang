@@ -89,7 +89,7 @@
 
 Name:           golang
 Version:        1.5.2
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -122,6 +122,10 @@ Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
+# Accept x509 certs with negative serial
+# https://bugzilla.redhat.com/show_bug.cgi?id=1290543
+# https://github.com/golang/go/issues/8265
+Patch2:         bz1290543.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -255,6 +259,8 @@ Summary:        Golang shared object libraries
 
 # remove the P224 curve
 %patch1 -p1
+
+%patch2 -p1
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1
@@ -472,6 +478,9 @@ fi
 %endif
 
 %changelog
+* Fri Dec 11 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-2
+- bz1290472 Accept x509 certs with negative serial
+
 * Tue Dec 08 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-1
 - bz1288263 rebase to 1.5.2
 - spec file clean up
