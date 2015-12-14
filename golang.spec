@@ -479,7 +479,7 @@ fi
 
 %changelog
 * Fri Dec 11 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-2
-- bz1290472 Accept x509 certs with negative serial
+- bz1290543 Accept x509 certs with negative serial
 
 * Tue Dec 08 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-1
 - bz1288263 rebase to 1.5.2
