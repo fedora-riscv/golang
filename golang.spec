@@ -85,11 +85,11 @@
 %endif
 
 %global go_api 1.5
-%global go_version 1.5.2
+%global go_version 1.5.3
 
 Name:           golang
-Version:        1.5.2
-Release:        2%{?dist}
+Version:        1.5.3
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -271,11 +271,18 @@ Summary:        Golang shared object libraries
 # disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
 %patch214 -p1
 
+%patch215 -p1
+
 %patch216 -p1
 
 cp %{SOURCE1} "$(pwd)/src/compress/bzip2/testdata/Mark.Twain-Tom.Sawyer.txt.bz2"
 
 %build
+# print out system information
+uname -a
+cat /proc/cpuinfo
+cat /proc/meminfo
+
 # bootstrap compiler GOROOT
 %if !%{golang_bootstrap}
 export GOROOT_BOOTSTRAP=/
@@ -478,6 +485,12 @@ fi
 %endif
 
 %changelog
+* Thu Jan 14 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.3-1
+- rebase to 1.5.3
+- resolves bz1293451, CVE-2015-8618
+- apply timezone patch, avoid using bundled data
+- print out rpm build system info
+
 * Fri Dec 11 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-2
 - bz1290543 Accept x509 certs with negative serial
 
