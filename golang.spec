@@ -24,15 +24,15 @@
 
 # Golang build options.
 
-# Buid golang using external/internal(close to cgo disabled) linking.
-%ifarch %{golang_arches}
+# Build golang using external/internal(close to cgo disabled) linking.
+%ifarch %{golang_arches} %{power64}
 %global external_linker 1
 %else
 %global external_linker 0
 %endif
 
 # Build golang with cgo enabled/disabled(later equals more or less to internal linking).
-%ifarch %{golang_arches}
+%ifarch %{golang_arches} %{power64}
 %global cgo_enabled 1
 %else
 %global cgo_enabled 0
@@ -44,19 +44,16 @@
 %else
 %global golang_bootstrap 0
 %endif
-# boostrap(with internal linking) using gcc-go fails due to bug in tests(https://github.com/golang/go/issues/12629)
-# make check not to fail due to it
 
-# Controls what ever we fails on failed tests
-%ifarch %{golang_arches}
+# Controls what ever we fail on failed tests
+%ifarch %{golang_arches} %{power64}
 %global fail_on_tests 1
 %else
 %global fail_on_tests 0
 %endif
 
-# TODO get more support for shared objects
 # Build golang shared objects for stdlib
-%ifarch x86_64
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
 %global shared 1
 %else
 %global shared 0
@@ -84,20 +81,17 @@
 %global gohostarch  ppc64le
 %endif
 
-%global go_api 1.5
-%global go_version 1.5.3
+%global go_api 1.6
+%global go_version 1.6
 
 Name:           golang
-Version:        1.5.3
-Release:        1%{?dist}
+Version:        1.6
+Release:        0.1.rc1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
 URL:            http://golang.org/
-# pre-processed by source.sh to make Mark.Twain-Tom.Sawyer.txt free again
-Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
-# original removed by source.sh, replace by version from golang master branch with license scrubbed
-Source1:        Mark.Twain-Tom.Sawyer.txt.bz2
+Source0:        https://storage.googleapis.com/golang/go1.6rc1.src.tar.gz
 
 # The compiler is written in Go. Needs go(1.4+) compiler for build.
 %if !%{golang_bootstrap}
@@ -114,7 +108,7 @@ BuildRequires:  net-tools
 BuildRequires:  pcre-devel, glibc-static
 
 Provides:       go = %{version}-%{release}
-Requires:       %{name}-bin
+Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
 
@@ -122,10 +116,6 @@ Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
-# Accept x509 certs with negative serial
-# https://bugzilla.redhat.com/show_bug.cgi?id=1290543
-# https://github.com/golang/go/issues/8265
-Patch2:         bz1290543.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -134,16 +124,9 @@ Patch212:       golang-1.5-bootstrap-binary-path.patch
 # https://github.com/golang/go/issues/11214
 Patch213:       go1.5beta1-disable-TestGdbPython.patch
 
-# disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
-# this is not possible in the limitied build chroot
-Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
-
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1271709
-Patch216:       ./golang-1.5.1-a3156aaa12.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -156,7 +139,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{golang_arches}
+ExclusiveArch:  %{golang_arches} %{power64}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
@@ -260,22 +243,13 @@ Summary:        Golang shared object libraries
 # remove the P224 curve
 %patch1 -p1
 
-%patch2 -p1
-
 # use the arch dependent path in the bootstrap
 %patch212 -p1
 
 # disable TestGdbPython
 %patch213 -p1
 
-# disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
-%patch214 -p1
-
 %patch215 -p1
-
-%patch216 -p1
-
-cp %{SOURCE1} "$(pwd)/src/compress/bzip2/testdata/Mark.Twain-Tom.Sawyer.txt.bz2"
 
 %build
 # print out system information
@@ -346,37 +320,37 @@ tests_list=$cwd/go-tests.list
 rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
 touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
 pushd $RPM_BUILD_ROOT%{goroot}
-	find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
-	find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
+    find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
+    find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
-	find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
-	find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -printf '%{goroot}/%p\n' >> $pkg_list
+    find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
+    find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -printf '%{goroot}/%p\n' >> $pkg_list
 
-	find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
-	find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
+    find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
+    find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
 
-	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
-	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
+    find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
+    find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
 %if %{shared}
-	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
-	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
-	find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
-	find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
-	# this is only the zoneinfo.zip
-	find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
+    find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
+    find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
+    # this is only the zoneinfo.zip
+    find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
 popd
 
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
 
 # put binaries to bindir, linked to the arch we're building,
-# leave the arch independent pieces in %{goroot}
+# leave the arch independent pieces in {goroot}
 mkdir -p $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}
 ln -sf %{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
 ln -sf %{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
@@ -416,6 +390,10 @@ export GO_LDFLAGS="-linkmode internal"
 %if !%{cgo_enabled} || !%{external_linker}
 export CGO_ENABLED=0
 %endif
+
+# make sure to not timeout
+export GO_TEST_TIMEOUT_SCALE=2
+
 %if %{fail_on_tests}
 ./run.bash --no-rebuild -v -v -v -k
 %else
@@ -426,12 +404,12 @@ cd ..
 
 %post bin
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
-	go %{goroot}/bin/go 90 \
-	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/gofmt
+    go %{goroot}/bin/go 90 \
+    --slave %{_bindir}/gofmt gofmt %{goroot}/bin/gofmt
 
 %preun bin
 if [ $1 = 0 ]; then
-	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/go
+    %{_sbindir}/update-alternatives --remove go %{goroot}/bin/go
 fi
 
 
@@ -485,6 +463,11 @@ fi
 %endif
 
 %changelog
+* Thu Jan 28 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-0.1.rc1
+- Resolves bz1292640, rebase to pre-release 1.6
+- bootstrap for PowerPC
+- fix rpmlint errors/warning
+
 * Thu Jan 14 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.3-1
 - rebase to 1.5.3
 - resolves bz1293451, CVE-2015-8618
@@ -709,7 +692,7 @@ fi
 - include sub-packages for compiler toolchains, for all golang supported architectures
 
 * Wed Mar 26 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-2
-- provide a system rpm macros. Starting with %gopath
+- provide a system rpm macros. Starting with gopath
 
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
