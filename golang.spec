@@ -25,14 +25,14 @@
 # Golang build options.
 
 # Build golang using external/internal(close to cgo disabled) linking.
-%ifarch %{golang_arches} %{power64}
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
 %global external_linker 1
 %else
 %global external_linker 0
 %endif
 
 # Build golang with cgo enabled/disabled(later equals more or less to internal linking).
-%ifarch %{golang_arches} %{power64}
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
 %global cgo_enabled 1
 %else
 %global cgo_enabled 0
@@ -46,7 +46,7 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch %{golang_arches} %{power64}
+%ifarch %{golang_arches}
 %global fail_on_tests 1
 %else
 %global fail_on_tests 0
@@ -86,7 +86,7 @@
 
 Name:           golang
 Version:        1.6
-Release:        0.1.rc1%{?dist}
+Release:        0.2.rc1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -139,7 +139,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{golang_arches} %{power64}
+ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
 Source101:      golang-prelink.conf
@@ -463,6 +463,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 29 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-0.2.rc1
+- disabled cgo and external linking on ppc64
+
 * Thu Jan 28 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-0.1.rc1
 - Resolves bz1292640, rebase to pre-release 1.6
 - bootstrap for PowerPC
