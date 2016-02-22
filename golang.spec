@@ -86,12 +86,12 @@
 
 Name:           golang
 Version:        1.6
-Release:        0.3.rc1%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
 URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go1.6rc1.src.tar.gz
+Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 
 # The compiler is written in Go. Needs go(1.4+) compiler for build.
 %if !%{golang_bootstrap}
@@ -116,6 +116,10 @@ Patch0:         golang-1.2-verbose-build.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
+
+# Resolves RHBZ 1304591
+# https://github.com/golang/go/issues/14384
+Patch100:       mmap-cgo-stackalign.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -242,6 +246,8 @@ Summary:        Golang shared object libraries
 
 # remove the P224 curve
 %patch1 -p1
+
+%patch100 -p1
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1
@@ -463,6 +469,10 @@ fi
 %endif
 
 %changelog
+* Mon Feb 22 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-1
+- Resolves: bz1304701 - rebase to go1.6 release
+- Resolves: bz1304591 - fix possible stack miss-alignment in callCgoMmap
+
 * Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.6-0.3.rc1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
 
