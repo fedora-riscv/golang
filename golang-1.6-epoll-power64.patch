@@ -1,0 +1,206 @@
+diff -up go/src/syscall/types_linux.go.than go/src/syscall/types_linux.go
+--- go/src/syscall/types_linux.go.than	2016-04-12 09:49:46.699333091 -0400
++++ go/src/syscall/types_linux.go	2016-04-12 09:50:18.859856525 -0400
+@@ -105,6 +105,9 @@ struct my_epoll_event {
+ 	// alignment requirements of EABI
+ 	int32_t padFd;
+ #endif
++#ifdef  __powerpc64__
++	int32_t _padFd;
++#endif
+ 	int32_t fd;
+ 	int32_t pad;
+ };
+diff -up go/src/syscall/ztypes_linux_ppc64.go.than go/src/syscall/ztypes_linux_ppc64.go
+--- go/src/syscall/ztypes_linux_ppc64.go.than	2016-04-12 09:50:27.499997298 -0400
++++ go/src/syscall/ztypes_linux_ppc64.go	2016-04-12 09:54:27.593909191 -0400
+@@ -113,9 +113,9 @@ type Stat_t struct {
+ 	Atim       Timespec
+ 	Mtim       Timespec
+ 	Ctim       Timespec
+-	X__unused4 uint64
+-	X__unused5 uint64
+-	X__unused6 uint64
++	_          uint64
++	_          uint64
++	_          uint64
+ }
+ 
+ type Statfs_t struct {
+@@ -143,7 +143,7 @@ type Dirent struct {
+ }
+ 
+ type Fsid struct {
+-	X__val [2]int32
++	_ [2]int32
+ }
+ 
+ type Flock_t struct {
+@@ -247,7 +247,6 @@ type Cmsghdr struct {
+ 	Len          uint64
+ 	Level        int32
+ 	Type         int32
+-	X__cmsg_data [0]uint8
+ }
+ 
+ type Inet4Pktinfo struct {
+@@ -361,7 +360,7 @@ const (
+ 	IFLA_LINKINFO       = 0x12
+ 	IFLA_NET_NS_PID     = 0x13
+ 	IFLA_IFALIAS        = 0x14
+-	IFLA_MAX            = 0x22
++	IFLA_MAX            = 0x25
+ 	RT_SCOPE_UNIVERSE   = 0x0
+ 	RT_SCOPE_SITE       = 0xc8
+ 	RT_SCOPE_LINK       = 0xfd
+@@ -454,7 +453,7 @@ type RtAttr struct {
+ 
+ type IfInfomsg struct {
+ 	Family     uint8
+-	X__ifi_pad uint8
++	_          uint8
+ 	Type       uint16
+ 	Index      int32
+ 	Flags      uint32
+@@ -511,7 +510,6 @@ type InotifyEvent struct {
+ 	Mask   uint32
+ 	Cookie uint32
+ 	Len    uint32
+-	Name   [0]uint8
+ }
+ 
+ const SizeofInotifyEvent = 0x10
+@@ -532,6 +530,15 @@ type PtraceRegs struct {
+ 	Result    uint64
+ }
+ 
++type ptracePsw struct {
++}
++
++type ptraceFpregs struct {
++}
++
++type ptracePer struct {
++}
++
+ type FdSet struct {
+ 	Bits [16]int64
+ }
+@@ -551,7 +558,7 @@ type Sysinfo_t struct {
+ 	Totalhigh uint64
+ 	Freehigh  uint64
+ 	Unit      uint32
+-	X_f       [0]uint8
++	_         [0]uint8
+ 	Pad_cgo_1 [4]byte
+ }
+ 
+@@ -575,6 +582,7 @@ type Ustat_t struct {
+ 
+ type EpollEvent struct {
+ 	Events uint32
++	_      int32
+ 	Fd     int32
+ 	Pad    int32
+ }
+diff -up go/src/syscall/ztypes_linux_ppc64le.go.than go/src/syscall/ztypes_linux_ppc64le.go
+--- go/src/syscall/ztypes_linux_ppc64le.go.than	2016-04-12 09:54:37.134064629 -0400
++++ go/src/syscall/ztypes_linux_ppc64le.go	2016-04-12 09:58:11.097550772 -0400
+@@ -105,7 +105,7 @@ type Stat_t struct {
+ 	Mode               uint32
+ 	Uid                uint32
+ 	Gid                uint32
+-	X__pad2            int32
++	_                  int32
+ 	Rdev               uint64
+ 	Size               int64
+ 	Blksize            int64
+@@ -113,9 +113,9 @@ type Stat_t struct {
+ 	Atim               Timespec
+ 	Mtim               Timespec
+ 	Ctim               Timespec
+-	X__glibc_reserved4 uint64
+-	X__glibc_reserved5 uint64
+-	X__glibc_reserved6 uint64
++	_                  uint64
++	_                  uint64
++	_                  uint64
+ }
+ 
+ type Statfs_t struct {
+@@ -143,7 +143,7 @@ type Dirent struct {
+ }
+ 
+ type Fsid struct {
+-	X__val [2]int32
++	_ [2]int32
+ }
+ 
+ type Flock_t struct {
+@@ -247,7 +247,6 @@ type Cmsghdr struct {
+ 	Len          uint64
+ 	Level        int32
+ 	Type         int32
+-	X__cmsg_data [0]uint8
+ }
+ 
+ type Inet4Pktinfo struct {
+@@ -361,7 +360,7 @@ const (
+ 	IFLA_LINKINFO       = 0x12
+ 	IFLA_NET_NS_PID     = 0x13
+ 	IFLA_IFALIAS        = 0x14
+-	IFLA_MAX            = 0x22
++	IFLA_MAX            = 0x23
+ 	RT_SCOPE_UNIVERSE   = 0x0
+ 	RT_SCOPE_SITE       = 0xc8
+ 	RT_SCOPE_LINK       = 0xfd
+@@ -454,7 +453,7 @@ type RtAttr struct {
+ 
+ type IfInfomsg struct {
+ 	Family     uint8
+-	X__ifi_pad uint8
++	_          uint8
+ 	Type       uint16
+ 	Index      int32
+ 	Flags      uint32
+@@ -511,7 +510,6 @@ type InotifyEvent struct {
+ 	Mask   uint32
+ 	Cookie uint32
+ 	Len    uint32
+-	Name   [0]uint8
+ }
+ 
+ const SizeofInotifyEvent = 0x10
+@@ -532,6 +530,15 @@ type PtraceRegs struct {
+ 	Result    uint64
+ }
+ 
++type ptracePsw struct {
++}
++
++type ptraceFpregs struct {
++}
++
++type ptracePer struct {
++}
++
+ type FdSet struct {
+ 	Bits [16]int64
+ }
+@@ -551,7 +558,7 @@ type Sysinfo_t struct {
+ 	Totalhigh uint64
+ 	Freehigh  uint64
+ 	Unit      uint32
+-	X_f       [0]uint8
++	_         [0]uint8
+ 	Pad_cgo_1 [4]byte
+ }
+ 
+@@ -575,6 +582,7 @@ type Ustat_t struct {
+ 
+ type EpollEvent struct {
+ 	Events uint32
++	_      int32
+ 	Fd     int32
+ 	Pad    int32
+ }

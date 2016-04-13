@@ -82,10 +82,10 @@
 %endif
 
 %global go_api 1.6
-%global go_version 1.6
+%global go_version 1.6.1
 
 Name:           golang
-Version:        1.6
+Version:        1.6.1
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -121,6 +121,10 @@ Patch1:         golang-1.2-remove-ECC-p224.patch
 # https://github.com/golang/go/issues/14384
 Patch100:       mmap-cgo-stackalign.patch
 
+# Resolves RHBZ 1326366
+# https://github.com/golang/go/issues/15135
+Patch101:       golang-1.6-epoll-power64.patch
+
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
 
@@ -146,7 +150,6 @@ Obsoletes:      emacs-%{name} < 1.4
 ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
-Source101:      golang-prelink.conf
 
 %description
 %{summary}.
@@ -248,6 +251,7 @@ Summary:        Golang shared object libraries
 %patch1 -p1
 
 %patch100 -p1
+%patch101 -p1 -b .epoll
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1
@@ -377,11 +381,6 @@ ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
 cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
 
-# prelink blacklist
-mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d
-cp -av %{SOURCE101} $RPM_BUILD_ROOT%{_sysconfdir}/prelink.conf.d/golang.conf
-
-
 %check
 export GOROOT=$(pwd -P)
 export PATH="$GOROOT"/bin:"$PATH"
@@ -449,9 +448,6 @@ fi
 # gdbinit (for gdb debugging)
 %{_sysconfdir}/gdbinit.d
 
-# prelink blacklist
-%{_sysconfdir}/prelink.conf.d
-
 %files -f go-src.list src
 
 %files -f go-docs.list docs
@@ -469,6 +465,12 @@ fi
 %endif
 
 %changelog
+* Wed Apr 13 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.1-1
+- rebase to 1.6.1
+- Resolves: bz1324344 - CVE-2016-3959
+- Resolves: bz1324951 - prelink is gone, /etc/prelink.conf.d/* is no longer used
+- Resolves: bz1326366 - wrong epoll_event struct for ppc64le/ppc64
+
 * Mon Feb 22 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-1
 - Resolves: bz1304701 - rebase to go1.6 release
 - Resolves: bz1304591 - fix possible stack miss-alignment in callCgoMmap
