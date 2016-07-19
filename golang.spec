@@ -22,17 +22,19 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
+%global golibdir %{_libdir}/golang
+
 # Golang build options.
 
 # Build golang using external/internal(close to cgo disabled) linking.
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
 %global external_linker 1
 %else
 %global external_linker 0
 %endif
 
 # Build golang with cgo enabled/disabled(later equals more or less to internal linking).
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
 %global cgo_enabled 1
 %else
 %global cgo_enabled 0
@@ -46,7 +48,7 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch %{golang_arches}
+%ifarch %{ix86} x86_64 %{arm} aarch64 %{power64}
 %global fail_on_tests 1
 %else
 %global fail_on_tests 0
@@ -80,13 +82,16 @@
 %ifarch ppc64le
 %global gohostarch  ppc64le
 %endif
+%ifarch s390x
+%global gohostarch  s390x
+%endif
 
-%global go_api 1.6
-%global go_version 1.6.2
+%global go_api 1.7
+%global go_version 1.7rc2
 
 Name:           golang
-Version:        1.6.2
-Release:        1%{?dist}
+Version:        1.7
+Release:        0.0.rc2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -105,7 +110,7 @@ BuildRequires:  hostname
 BuildRequires:  net-tools
 %endif
 # for tests
-BuildRequires:  pcre-devel, glibc-static
+BuildRequires:  pcre-devel, glibc-static, perl
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin = %{version}-%{release}
@@ -139,7 +144,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{golang_arches}
+ExclusiveArch:  %{golang_arches} s390x
 
 Source100:      golang-gdbinit
 
@@ -237,16 +242,16 @@ Summary:        Golang shared object libraries
 %setup -q -n go
 
 # increase verbosity of build
-%patch0 -p1
+%patch0 -p1 -b .verbose
 
 # remove the P224 curve
-%patch1 -p1
+%patch1 -p1 -b .curve
 
 # use the arch dependent path in the bootstrap
-%patch212 -p1
+%patch212 -p1 -b .bootstrap
 
 # disable TestGdbPython
-%patch213 -p1
+%patch213 -p1 -b .gdb
 
 %patch215 -p1
 
@@ -332,8 +337,20 @@ pushd $RPM_BUILD_ROOT%{goroot}
     find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
 %if %{shared}
-    find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
-    find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
+    mkdir -p %{buildroot}/%{_libdir}/
+    mkdir -p %{buildroot}/%{golibdir}/
+    for file in $(find .  -iname "*.so" ); do
+        chmod 755 $file
+        mv  $file %{buildroot}/%{golibdir}
+        pushd $(dirname $file)
+        ln -fs %{golibdir}/$(basename $file) $(basename $file)
+        popd
+        echo "%%{goroot}/$file" >> $shared_list
+        echo "%%{golibdir}/$(basename $file)" >> $shared_list
+    done
+    
+	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
+	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
     find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
@@ -454,6 +471,13 @@ fi
 %endif
 
 %changelog
+* Tue Jul 19 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.0.rc2
+- rebase to 1.7rc2
+- added s390x build
+- improved shared lib packaging
+- Resolves: bz1357602 - CVE-2016-5386
+- Resolves: bz1342090, bz1342090
+
 * Tue Apr 26 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.2-1
 - rebase to 1.6.2
 - Resolves: bz1329206 - golang-1.6.2.src is available
