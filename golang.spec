@@ -91,7 +91,7 @@
 
 Name:           golang
 Version:        1.7
-Release:        0.0.rc2%{?dist}
+Release:        0.1.rc2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -471,6 +471,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 21 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.7-0.1.rc2
+- https://fedoraproject.org/wiki/Changes/golang1.7
+
 * Tue Jul 19 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.0.rc2
 - rebase to 1.7rc2
 - added s390x build
