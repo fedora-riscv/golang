@@ -91,7 +91,7 @@
 
 Name:           golang
 Version:        1.7
-Release:        0.2.rc5%{?dist}
+Release:        0.3.rc5%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -144,7 +144,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{golang_arches} s390x
+ExclusiveArch:  %{golang_arches}
 
 Source100:      golang-gdbinit
 
@@ -209,6 +209,9 @@ Obsoletes:      %{name}-pkg-netbsd-amd64 < 1.4.99
 Obsoletes:      %{name}-pkg-netbsd-arm < 1.4.99
 Obsoletes:      %{name}-pkg-openbsd-386 < 1.4.99
 Obsoletes:      %{name}-pkg-openbsd-amd64 < 1.4.99
+
+Obsoletes:      golang-vet < 0-12.1
+Obsoletes:      golang-cover < 0-12.1
 
 Requires(post): %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
@@ -471,6 +474,12 @@ fi
 %endif
 
 %changelog
+* Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.3.rc5
+- Obsolete golang-vet and golang-cover from golang-googlecode-tools package
+  vet/cover binaries are provided by golang-bin rpm (thanks to jchaloup)
+- clean up exclusive arch after s390x boostrap
+- resolves: #1268206
+
 * Wed Aug 03 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.2.rc5
 - rebase to go1.7rc5
 - Resolves: BZ#1342090
