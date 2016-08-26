@@ -87,11 +87,11 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7rc5
+%global go_version 1.7
 
 Name:           golang
 Version:        1.7
-Release:        0.3.rc5%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -474,6 +474,10 @@ fi
 %endif
 
 %changelog
+* Tue Aug 23 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-1
+- update to released version
+- related: BZ#1342090, BZ#1357394
+
 * Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.3.rc5
 - Obsolete golang-vet and golang-cover from golang-googlecode-tools package
   vet/cover binaries are provided by golang-bin rpm (thanks to jchaloup)
