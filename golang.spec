@@ -29,6 +29,7 @@
 %global goroot          /usr/lib/%{name}
 %global gopath          %{_datadir}/gocode
 %global go_arches       %{ix86} x86_64 %{arm} aarch64
+%global golibdir        %{_libdir}/golang
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -42,30 +43,29 @@
 %global gohostarch  arm64
 %endif
 
-%global go_api 1.5
-%global go_version 1.5.1
+%global go_api 1.7
+%global go_version 1.7.1
 
 Name:           golang
-Version:        1.5.1
+Version:        1.7.1
 Release:        1%{?dist}
 Summary:        The Go Programming Language
-
-License:        BSD
+# source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
+License:        BSD and Public Domain
 URL:            http://golang.org/
 Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
 
 # go1.5 bootstrapping. The compiler is written in golang.
 BuildRequires:  golang > 1.4
-BuildRequires:  pcre-devel
+BuildRequires:  pcre-devel, glibc-static, perl
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 BuildRequires:  hostname
 %else
 BuildRequires:  net-tools
 %endif
-# use the arch dependent path in the bootstrap
-Patch212:       golang-1.5-bootstrap-binary-path.patch
 
 Provides:       go = %{version}-%{release}
+Provides:       go-srpm-macros
 Requires:       %{name}-bin
 Requires:       %{name}-src = %{version}-%{release}
 
@@ -74,20 +74,16 @@ Patch0:         golang-1.2-verbose-build.patch
 # https://bugzilla.redhat.com/show_bug.cgi?id=1038683
 Patch1:         golang-1.2-remove-ECC-p224.patch
 
+# use the arch dependent path in the bootstrap
+Patch212:       golang-1.5-bootstrap-binary-path.patch
+
 # disable TestGdbPython
 # https://github.com/golang/go/issues/11214
 Patch213:       go1.5beta1-disable-TestGdbPython.patch
 
-# disable  TestCloneNEWUSERAndRemapNoRootDisableSetgroups
-# this is not possible in the limitied build chroot
-Patch214:       go1.5beta2-disable-TestCloneNEWUSERAndRemapNoRootDisableSetgroups.patch
-
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1271709
-Patch216:       ./golang-1.5.1-a3156aaa12.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -168,6 +164,9 @@ Obsoletes:      %{name}-pkg-netbsd-arm < 1.4.99
 Obsoletes:      %{name}-pkg-openbsd-386 < 1.4.99
 Obsoletes:      %{name}-pkg-openbsd-amd64 < 1.4.99
 
+Obsoletes:      golang-vet < 0-12.1
+Obsoletes:      golang-cover < 0-12.1
+
 Requires(post): %{_sbindir}/update-alternatives
 Requires(postun): %{_sbindir}/update-alternatives
 
@@ -200,23 +199,26 @@ Summary:        Golang shared object libraries
 %setup -q -n go
 
 # increase verbosity of build
-%patch0 -p1
+%patch0 -p1 -b .verbose
 
 # remove the P224 curve
-%patch1 -p1
+%patch1 -p1 -b .curve
 
 # use the arch dependent path in the bootstrap
-%patch212 -p1
+%patch212 -p1 -b .bootstrap
 
 # disable TestGdbPython
-%patch213 -p1
+%patch213 -p1 -b .gdb
 
-# disable TestCloneNEWUSERAndRemapNoRootDisableSetgroups
-%patch214 -p1
+%patch215 -p1
 
-%patch216 -p1
 
 %build
+# print out system information
+uname -a
+cat /proc/cpuinfo
+cat /proc/meminfo
+
 # go1.5 bootstrapping. The compiler is written in golang.
 export GOROOT_BOOTSTRAP=%{goroot}
 
@@ -288,6 +290,18 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
 %ifarch x86_64
+    mkdir -p %{buildroot}/%{_libdir}/
+    mkdir -p %{buildroot}/%{golibdir}/
+    for file in $(find .  -iname "*.so" ); do
+        chmod 755 $file
+        mv  $file %{buildroot}/%{golibdir}
+        pushd $(dirname $file)
+        ln -fs %{golibdir}/$(basename $file) $(basename $file)
+        popd
+        echo "%%{goroot}/$file" >> $shared_list
+        echo "%%{golibdir}/$(basename $file)" >> $shared_list
+    done
+    
 	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
 	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
@@ -305,7 +319,7 @@ popd
 rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
 
 # put binaries to bindir, linked to the arch we're building,
-# leave the arch independent pieces in %{goroot}
+# leave the arch independent pieces in {goroot}
 mkdir -p $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}
 ln -sf %{goroot}/bin/go $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/go
 ln -sf %{goroot}/bin/gofmt $RPM_BUILD_ROOT%{goroot}/bin/linux_%{gohostarch}/gofmt
@@ -345,22 +359,15 @@ cp -av %{SOURCE102} $RPM_BUILD_ROOT%{_sysconfdir}/rpm/macros.golang
 export GOROOT=$(pwd -P)
 export PATH="$GOROOT"/bin:"$PATH"
 cd src
-# skip using CGO for test. causes a SIGABRT on fc21 (bz1086900)
-# until this test/issue is fixed
-# https://bugzilla.redhat.com/show_bug.cgi?id=1086900
-# CGO for test, which fails in i686 on fc21 inside mock/chroot (bz1087621)
-# https://bugzilla.redhat.com/show_bug.cgi?id=1087621
 
-# not using our 'gcc' since the CFLAGS fails crash_cgo_test.go due to unused variables
-# https://code.google.com/p/go/issues/detail?id=6883
+export CC="gcc"
+export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$RPM_LD_FLAGS"
 
-# XXX reenable. likely go1.5beta2 https://github.com/golang/go/commit/9adf684686bad7c6319080d0b1da8308a77b08c9
-#CGO_ENABLED=0 ./run.bash --no-rebuild
+# make sure to not timeout
+export GO_TEST_TIMEOUT_SCALE=2
 
-CC="gcc" \
-CFLAGS="$RPM_OPT_FLAGS" \
-LDFLAGS="$RPM_LD_FLAGS" \
-./run.bash --no-rebuild -v -k
+./run.bash --no-rebuild -v -v -v -k
 cd ..
 
 
@@ -432,6 +439,11 @@ fi
 %endif
 
 %changelog
+* Fri Sep 16 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.1-1
+- rebase to go1.7.1
+- Resolves: BZ#1293449 - CVE-2015-8618, BZ#1357601 - CVE-2016-5386,
+BZ#1324345 - CVE-2016-3959, BZ#1376555
+
 * Mon Oct 19 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-1
 - bz1271709 include patch from upstream fix
 
