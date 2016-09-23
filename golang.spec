@@ -91,7 +91,7 @@
 
 Name:           golang
 Version:        1.7.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -132,6 +132,10 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
+
+#PPC64X relocation overflow fix
+Patch216: ppc64x-overflow-1.patch
+Patch217: ppc64x-overflow-2.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -257,6 +261,9 @@ Summary:        Golang shared object libraries
 %patch213 -p1 -b .gdb
 
 %patch215 -p1
+
+%patch216 -p1
+%patch217 -p1
 
 %build
 # print out system information
@@ -474,6 +481,9 @@ fi
 %endif
 
 %changelog
+* Fri Sep 23 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.1-2
+- fix link failure due to relocation overflows on PPC64X
+
 * Thu Sep 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.1-1
 - rebase to 1.7.1
 - Resolves: BZ#1374103
