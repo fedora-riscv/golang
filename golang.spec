@@ -86,7 +86,7 @@
 
 Name:           golang
 Version:        1.6.3
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -127,6 +127,9 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
+
+# Backport of https://go-review.googlesource.com/#/c/20471/
+Patch216:       runtime-use-entire-address-space-on-32-bit.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -252,6 +255,8 @@ Summary:        Golang shared object libraries
 %patch213 -p1
 
 %patch215 -p1
+
+%patch216 -p1
 
 %build
 # print out system information
@@ -457,6 +462,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 27 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-3
+- Resolves: BZ#1378960 - make possible to use whole address space on 32bit
+
 * Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-2
 - Obsolete golang-vet and golang-cover from golang-googlecode-tools package
   vet/cover binaries are provided by golang-bin rpm(thanks to jchaloup)
