@@ -136,6 +136,9 @@ Patch216: runtime-use-entire-address-space-on-32-bit.patch
 Patch217: macos-01.patch
 Patch218: macos-02.patch
 
+# Fix for https://github.com/golang/go/issues/17276
+Patch219: tzdata-fix.patch
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -265,6 +268,8 @@ Summary:        Golang shared object libraries
 
 %patch217 -p1
 %patch218 -p1
+
+%patch219 -p1
 
 %build
 # print out system information
@@ -473,6 +478,7 @@ fi
 * Tue Sep 27 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-3
 - Resolves: BZ#1378960 - make possible to use whole address space on 32bit
 - Fix nanotime for macOS Sierra
+- Fix tzdata/time tests
 
 * Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-2
 - Obsolete golang-vet and golang-cover from golang-googlecode-tools package
