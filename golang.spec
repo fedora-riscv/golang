@@ -44,10 +44,10 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7.1
+%global go_version 1.7.3
 
 Name:           golang
-Version:        1.7.1
+Version:        1.7.3
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -84,6 +84,13 @@ Patch213:       go1.5beta1-disable-TestGdbPython.patch
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
+
+#PPC64X relocation overflow fix
+Patch216: ppc64x-overflow-1.patch
+Patch217: ppc64x-overflow-2.patch
+
+# Fix for https://github.com/golang/go/issues/17276
+Patch218: tzdata-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -212,6 +219,10 @@ Summary:        Golang shared object libraries
 
 %patch215 -p1
 
+%patch216 -p1
+%patch217 -p1
+
+%patch218 -p1
 
 %build
 # print out system information
@@ -439,6 +450,11 @@ fi
 %endif
 
 %changelog
+* Fri Oct 21 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-1
+- rebase to go1.7.3
+- Fix possible relocation overflows on ppc
+- Fix failing test due to latest tzdata
+
 * Fri Sep 16 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.1-1
 - rebase to go1.7.1
 - Resolves: BZ#1293449 - CVE-2015-8618, BZ#1357601 - CVE-2016-5386,
