@@ -91,7 +91,7 @@
 
 Name:           golang
 Version:        1.7.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -118,9 +118,6 @@ Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1038683
-Patch1:         golang-1.2-remove-ECC-p224.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -253,9 +250,6 @@ Summary:        Golang shared object libraries
 
 # increase verbosity of build
 %patch0 -p1 -b .verbose
-
-# remove the P224 curve
-%patch1 -p1 -b .curve
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1 -b .bootstrap
@@ -486,6 +480,9 @@ fi
 %endif
 
 %changelog
+* Thu Nov 17 2016 Tom Callaway <spot@fedoraproject.org> - 1.7.3-2
+- re-enable the NIST P-224 curve
+
 * Thu Oct 20 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.3-1
 - Resolves: BZ#1387067 - golang-1.7.3 is available
 - added fix for tests failing with latest tzdata
