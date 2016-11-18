@@ -48,7 +48,7 @@
 
 Name:           golang
 Version:        1.7.3
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -70,9 +70,6 @@ Requires:       %{name}-bin
 Requires:       %{name}-src = %{version}-%{release}
 
 Patch0:         golang-1.2-verbose-build.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1038683
-Patch1:         golang-1.2-remove-ECC-p224.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -207,9 +204,6 @@ Summary:        Golang shared object libraries
 
 # increase verbosity of build
 %patch0 -p1 -b .verbose
-
-# remove the P224 curve
-%patch1 -p1 -b .curve
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1 -b .bootstrap
@@ -450,6 +444,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 18 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-2
+- enable back p224 curve(see BZ#1038683)
+
 * Fri Oct 21 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-1
 - rebase to go1.7.3
 - Fix possible relocation overflows on ppc
