@@ -86,7 +86,7 @@
 
 Name:           golang
 Version:        1.6.3
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -113,9 +113,6 @@ Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
-
-# https://bugzilla.redhat.com/show_bug.cgi?id=1038683
-Patch1:         golang-1.2-remove-ECC-p224.patch
 
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
@@ -252,9 +249,6 @@ Summary:        Golang shared object libraries
 
 # increase verbosity of build
 %patch0 -p1
-
-# remove the P224 curve
-%patch1 -p1
 
 # use the arch dependent path in the bootstrap
 %patch212 -p1
@@ -475,6 +469,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 18 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-4
+- re-enable p224 curve (see BZ#1038683)
+
 * Tue Sep 27 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-3
 - Resolves: BZ#1378960 - make possible to use whole address space on 32bit
 - Fix nanotime for macOS Sierra
