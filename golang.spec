@@ -89,7 +89,7 @@
 
 Name:           golang
 Version:        1.5.4
-Release:        3%{?dist}
+Release:        4%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -120,8 +120,6 @@ Requires:       go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
 
-# https://bugzilla.redhat.com/show_bug.cgi?id=1038683
-Patch1:         golang-1.2-remove-ECC-p224.patch
 # Accept x509 certs with negative serial
 # https://bugzilla.redhat.com/show_bug.cgi?id=1290543
 # https://github.com/golang/go/issues/8265
@@ -259,9 +257,6 @@ Summary:        Golang shared object libraries
 
 # increase verbosity of build
 %patch0 -p1
-
-# remove the P224 curve
-%patch1 -p1
 
 %patch2 -p1
 
@@ -486,6 +481,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 18 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.4-4
+- re-enable p224 curve (see BZ#1038683)
+
 * Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.4-3
 -Obsolete golang-vet and golang-cover from golang-googlecode-tools package
 vet/cover binaries are provided by golang-bin rpm(thanks to jchaloup)
