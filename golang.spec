@@ -82,11 +82,11 @@
 %endif
 
 %global go_api 1.6
-%global go_version 1.6.3
+%global go_version 1.6.4
 
 Name:           golang
-Version:        1.6.3
-Release:        4%{?dist}
+Version:        1.6.4
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -105,7 +105,7 @@ BuildRequires:  hostname
 BuildRequires:  net-tools
 %endif
 # for tests
-BuildRequires:  pcre-devel, glibc-static
+BuildRequires:  pcre-devel, glibc-static, perl
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin = %{version}-%{release}
@@ -469,6 +469,10 @@ fi
 %endif
 
 %changelog
+* Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-4
+- Bump to 1.6.4
+- Resolves: BZ#1400732
+
 * Fri Nov 18 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-4
 - re-enable p224 curve (see BZ#1038683)
 
