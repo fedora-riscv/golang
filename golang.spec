@@ -86,7 +86,7 @@
 
 Name:           golang
 Version:        1.6.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -469,7 +469,10 @@ fi
 %endif
 
 %changelog
-* Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.3-4
+* Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.4-2
+- Fix NVR typo in changelog
+
+* Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.4-1
 - Bump to 1.6.4
 - Resolves: BZ#1400732
 
