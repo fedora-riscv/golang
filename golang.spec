@@ -44,11 +44,11 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7.3
+%global go_version 1.7.4
 
 Name:           golang
-Version:        1.7.3
-Release:        2%{?dist}
+Version:        1.7.4
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -444,6 +444,10 @@ fi
 %endif
 
 %changelog
+* Mon Dec 05 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
+- Bump to 1.7.4
+- Resolves: BZ#1400732
+
 * Fri Nov 18 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-2
 - enable back p224 curve(see BZ#1038683)
 
