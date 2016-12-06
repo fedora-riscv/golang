@@ -89,7 +89,7 @@
 
 Name:           golang
 Version:        1.5.4
-Release:        4%{?dist}
+Release:        5%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -143,6 +143,10 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
 # https://bugzilla.redhat.com/show_bug.cgi?id=1271709
 Patch216:       ./golang-1.5.1-a3156aaa12.patch
+
+# Backpor security fixes from 1.6.4
+Patch217:       httpmultipart.patch
+Patch218:       darwinx509trust.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -274,6 +278,9 @@ Summary:        Golang shared object libraries
 %patch215 -p1
 
 %patch216 -p1
+
+%patch217 -p1
+%patch218 -p1
 
 cp %{SOURCE1} "$(pwd)/src/compress/bzip2/testdata/Mark.Twain-Tom.Sawyer.txt.bz2"
 
@@ -481,6 +488,9 @@ fi
 %endif
 
 %changelog
+* Tue Dec 06 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.4-5
+- Resolves: BZ#1401987
+
 * Fri Nov 18 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.4-4
 - re-enable p224 curve (see BZ#1038683)
 
