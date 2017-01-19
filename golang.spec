@@ -86,7 +86,7 @@
 
 Name:           golang
 Version:        1.6.4
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -258,7 +258,10 @@ Summary:        Golang shared object libraries
 
 %patch215 -p1
 
+# don't apply on ppc as it increases stack size, resulting in nosplit stack overflow
+%ifnarch ppc64le ppc64
 %patch216 -p1
+%endif
 
 %patch217 -p1
 %patch218 -p1
@@ -469,6 +472,9 @@ fi
 %endif
 
 %changelog
+* Thu Jan 19 2017 Jakub Čajka <jcajka@redhat.com> - 1.6.4-3
+- Resolves: BZ#1410784
+
 * Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.4-2
 - Fix NVR typo in changelog
 
