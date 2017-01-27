@@ -87,11 +87,11 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7.4
+%global go_version 1.7.5
 
 Name:           golang
-Version:        1.7.4
-Release:        2%{?dist}
+Version:        1.7.5
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -133,9 +133,6 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 #PPC64X relocation overflow fix
 Patch216: ppc64x-overflow-1.patch
 Patch217: ppc64x-overflow-2.patch
-
-# Fix for https://github.com/golang/go/issues/17276
-Patch218: tzdata-fix.patch
 
 # Proposed patch by mmunday https://golang.org/cl/35262
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
@@ -264,8 +261,6 @@ Summary:        Golang shared object libraries
 
 %patch216 -p1
 %patch217 -p1
-
-%patch218 -p1
 
 %patch219 -p1
 
@@ -485,6 +480,10 @@ fi
 %endif
 
 %changelog
+* Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-1
+- bump to go1.7.5
+- Resolves: BZ#1417002
+
 * Fri Jan 20 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.4-2
 - Resolves: BZ#1404679
 - expose IfInfomsg.X__ifi_pad on s390x
