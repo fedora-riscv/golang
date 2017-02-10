@@ -98,7 +98,7 @@
 
 Name:           golang
 Version:        1.8
-Release:        0.rc3.2%{?dist}
+Release:        0.rc3.2%{?dist}.1
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -503,6 +503,9 @@ fi
 %endif
 
 %changelog
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.8-0.rc3.2.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
 * Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-0.rc3.2
 - make possible to override default traceback level at build time
 - add sub-package race containing std lib built with -race enabled
