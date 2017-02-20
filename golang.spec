@@ -48,7 +48,7 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch %{ix86} x86_64 %{arm} aarch64 %{power64}
+%ifarch %{ix86} x86_64 %{arm} aarch64 ppc64le
 %global fail_on_tests 1
 %else
 %global fail_on_tests 0
@@ -94,11 +94,11 @@
 %endif
 
 %global go_api 1.8
-%global go_version 1.8rc3
+%global go_version 1.8
 
 Name:           golang
 Version:        1.8
-Release:        0.rc3.2%{?dist}.1
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -503,6 +503,11 @@ fi
 %endif
 
 %changelog
+* Fri Feb 17 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-1
+- bump to released version
+- Resolves: BZ#1423637
+- Related: BZ#1411242
+
 * Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.8-0.rc3.2.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
 
