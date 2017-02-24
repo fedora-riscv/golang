@@ -98,7 +98,7 @@
 
 Name:           golang
 Version:        1.8
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -270,6 +270,9 @@ Requires:       %{name} = %{version}-%{release}
 %patch219 -p1
 
 cp %{SOURCE1} ./src/runtime/
+
+# don't include chacha test vectors in buildID
+mv ./src/vendor/golang_org/x/crypto/chacha20poly1305/chacha20poly1305_test_vectors.go ./src/vendor/golang_org/x/crypto/chacha20poly1305/chacha20poly1305_vectors_test.go
 
 %build
 # print out system information
@@ -503,6 +506,9 @@ fi
 %endif
 
 %changelog
+* Fri Feb 24 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-2
+- avoid possibly stale packages due to chacha test file not being test file
+
 * Fri Feb 17 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-1
 - bump to released version
 - Resolves: BZ#1423637
