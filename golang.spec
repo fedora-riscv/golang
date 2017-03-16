@@ -48,7 +48,7 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch %{ix86} x86_64 %{arm} aarch64 %{power64}
+%ifarch %{ix86} x86_64 %{arm} aarch64 ppc64le
 %global fail_on_tests 1
 %else
 %global fail_on_tests 0
@@ -91,7 +91,7 @@
 
 Name:           golang
 Version:        1.7.5
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -480,6 +480,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar 16 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-2
+- disable failure in tests on ppc64
+
 * Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-1
 - bump to go1.7.5
 - Resolves: BZ#1417002
