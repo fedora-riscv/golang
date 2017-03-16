@@ -137,6 +137,8 @@ Patch217: ppc64x-overflow-2.patch
 # Proposed patch by mmunday https://golang.org/cl/35262
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
 
+Patch220: tzdata-fix.patch
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -263,6 +265,8 @@ Summary:        Golang shared object libraries
 %patch217 -p1
 
 %patch219 -p1
+
+%patch220 -p1
 
 %build
 # print out system information
@@ -482,6 +486,7 @@ fi
 %changelog
 * Thu Mar 16 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-2
 - disable failure in tests on ppc64
+- include fix for tzdata-2017a
 
 * Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-1
 - bump to go1.7.5
