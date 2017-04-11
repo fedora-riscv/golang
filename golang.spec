@@ -94,11 +94,11 @@
 %endif
 
 %global go_api 1.8
-%global go_version 1.8
+%global go_version 1.8.1
 
 Name:           golang
-Version:        1.8
-Release:        2%{?dist}
+Version:        1.8.1
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -349,7 +349,7 @@ rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_l
 touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_list
 pushd $RPM_BUILD_ROOT%{goroot}
     find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
-    find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
+    find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
     find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -a ! -path '*_race/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
     find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -a ! -path '*_race/*' -printf '%{goroot}/%p\n' >> $pkg_list
@@ -387,7 +387,7 @@ pushd $RPM_BUILD_ROOT%{goroot}
     find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
     find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
     find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-    find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
+    find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test.go' \) -printf '%{goroot}/%p\n' >> $tests_list
     # this is only the zoneinfo.zip
     find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
     find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
@@ -506,6 +506,10 @@ fi
 %endif
 
 %changelog
+* Tue Apr 11 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-1
+- bump to Go 1.8.1
+- Resolves: BZ#1440345
+
 * Fri Feb 24 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-2
 - avoid possibly stale packages due to chacha test file not being test file
 
