@@ -41,11 +41,7 @@
 %endif
 
 # Use golang/gcc-go as bootstrap compiler
-%ifarch %{golang_arches}
 %global golang_bootstrap 1
-%else
-%global golang_bootstrap 0
-%endif
 
 # Controls what ever we fail on failed tests
 %ifarch %{ix86} x86_64 %{arm} aarch64 ppc64le
