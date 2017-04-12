@@ -41,11 +41,7 @@
 %endif
 
 # Use golang/gcc-go as bootstrap compiler
-%ifarch %{golang_arches}
-%global golang_bootstrap 1
-%else
 %global golang_bootstrap 0
-%endif
 
 # Controls what ever we fail on failed tests
 %ifarch %{ix86} x86_64 %{arm} aarch64 ppc64le
@@ -149,7 +145,7 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
-ExclusiveArch:  %{golang_arches}
+ExclusiveArch:  %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
 
 Source100:      golang-gdbinit
 
