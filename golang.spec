@@ -98,7 +98,7 @@
 
 Name:           golang
 Version:        1.8.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -137,6 +137,7 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
 # Proposed patch by mmunday https://golang.org/cl/35262
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
+Patch220: s390x-uint-codegen.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -268,6 +269,7 @@ Requires:       %{name} = %{version}-%{release}
 %patch215 -p1
 
 %patch219 -p1
+%patch220 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -506,6 +508,10 @@ fi
 %endif
 
 %changelog
+* Fri Apr 21 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-2
+- fix uint64 constant codegen on s390x
+- Resolves: BZ#1441078
+
 * Tue Apr 11 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-1
 - bump to Go 1.8.1
 - Resolves: BZ#1440345
