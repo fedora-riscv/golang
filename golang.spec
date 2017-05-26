@@ -94,11 +94,11 @@
 %endif
 
 %global go_api 1.8
-%global go_version 1.8.1
+%global go_version 1.8.3
 
 Name:           golang
-Version:        1.8.1
-Release:        2%{?dist}
+Version:        1.8.3
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -137,7 +137,8 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
 # Proposed patch by mmunday https://golang.org/cl/35262
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
-Patch220: s390x-uint-codegen.patch
+# https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
+Patch220: 31bit-OID-asn1.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -508,6 +509,12 @@ fi
 %endif
 
 %changelog
+* Thu May 25 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.3-1
+- bump to 1.8.3
+- fix for CVE-2017-8932
+- make possible to use 31bit OID in ASN1
+- Resolves: BZ#1454978, BZ#1455191
+
 * Fri Apr 21 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-2
 - fix uint64 constant codegen on s390x
 - Resolves: BZ#1441078
