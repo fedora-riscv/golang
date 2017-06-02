@@ -87,11 +87,11 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7.5
+%global go_version 1.7.6
 
 Name:           golang
-Version:        1.7.5
-Release:        2%{?dist}
+Version:        1.7.6
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -138,6 +138,9 @@ Patch217: ppc64x-overflow-2.patch
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
 
 Patch220: tzdata-fix.patch
+
+# https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
+Patch221: 31bit-OID-asn1.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -267,6 +270,7 @@ Summary:        Golang shared object libraries
 %patch219 -p1
 
 %patch220 -p1
+%patch221 -p1
 
 %build
 # print out system information
@@ -484,6 +488,12 @@ fi
 %endif
 
 %changelog
+* Fri Jun 02 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.6-1
+- bump to 1.7.6
+- fix CVE-2017-8932
+- add support for 31 OID in asn1 
+- Resolves: BZ#1455191
+
 * Thu Mar 16 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.5-2
 - disable failure in tests on ppc64
 - include fix for tzdata-2017a
