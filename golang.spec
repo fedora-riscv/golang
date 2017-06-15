@@ -44,10 +44,10 @@
 %endif
 
 %global go_api 1.7
-%global go_version 1.7.4
+%global go_version 1.7.6
 
 Name:           golang
-Version:        1.7.4
+Version:        1.7.6
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -86,7 +86,6 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 Patch216: ppc64x-overflow-1.patch
 Patch217: ppc64x-overflow-2.patch
 
-# Fix for https://github.com/golang/go/issues/17276
 Patch218: tzdata-fix.patch
 
 # Having documentation separate was broken
@@ -444,6 +443,11 @@ fi
 %endif
 
 %changelog
+* Thu Jun 15 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
+- Bump to 1.7.6
+- Fix for CVE-2017-8932
+- Resolves: BZ#1455190
+
 * Mon Dec 05 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
 - Bump to 1.7.4
 - Resolves: BZ#1400732
