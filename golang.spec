@@ -93,12 +93,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.8
-%global go_version 1.8.3
+%global go_api 1.9
+%global go_version 1.9beta2
 
 Name:           golang
-Version:        1.8.3
-Release:        1%{?dist}
+Version:        1.9
+Release:        0.beta2.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -119,7 +119,7 @@ BuildRequires:  hostname
 BuildRequires:  net-tools
 %endif
 # for tests
-BuildRequires:  pcre-devel, glibc-static, perl
+BuildRequires:  pcre-devel, glibc-static, perl, procps-ng
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin = %{version}-%{release}
@@ -137,8 +137,8 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
 # Proposed patch by mmunday https://golang.org/cl/35262
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
-# https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
-Patch220: 31bit-OID-asn1.patch
+
+Patch220: s390x-ignore-L0syms.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -270,12 +270,10 @@ Requires:       %{name} = %{version}-%{release}
 %patch215 -p1
 
 %patch219 -p1
+
 %patch220 -p1
 
 cp %{SOURCE1} ./src/runtime/
-
-# don't include chacha test vectors in buildID
-mv ./src/vendor/golang_org/x/crypto/chacha20poly1305/chacha20poly1305_test_vectors.go ./src/vendor/golang_org/x/crypto/chacha20poly1305/chacha20poly1305_vectors_test.go
 
 %build
 # print out system information
@@ -509,6 +507,9 @@ fi
 %endif
 
 %changelog
+* Tue Jul 11 2017 Jakub Čajka <jcajka@redhat.com> - 1.9-0.beta2.1
+- bump to beta2
+
 * Thu May 25 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.3-1
 - bump to 1.8.3
 - fix for CVE-2017-8932
