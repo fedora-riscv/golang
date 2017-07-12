@@ -119,7 +119,7 @@ BuildRequires:  hostname
 BuildRequires:  net-tools
 %endif
 # for tests
-BuildRequires:  pcre-devel, glibc-static, perl
+BuildRequires:  pcre-devel, glibc-static, perl, procps-ng
 
 Provides:       go = %{version}-%{release}
 Requires:       %{name}-bin = %{version}-%{release}
@@ -139,6 +139,8 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
 # https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
 Patch220: 31bit-OID-asn1.patch
+
+Patch221: s390x-ignore-L0syms.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -513,6 +515,7 @@ fi
 - bump to 1.8.3
 - fix for CVE-2017-8932
 - make possible to use 31bit OID in ASN1
+- workaround build issue on s390x
 - Resolves: BZ#1454978, BZ#1455191
 
 * Fri Apr 21 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-2
