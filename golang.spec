@@ -140,8 +140,6 @@ Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch
 # https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
 Patch220: 31bit-OID-asn1.patch
 
-Patch221: s390x-ignore-L0syms.patch
-
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -273,8 +271,6 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch219 -p1
 %patch220 -p1
-
-%patch221 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
