@@ -94,7 +94,7 @@
 %endif
 
 %global go_api 1.9
-%global go_version 1.9
+%global go_version 1.9.1
 
 Name:           golang
 Version:        1.9.1
