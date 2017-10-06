@@ -94,11 +94,11 @@
 %endif
 
 %global go_api 1.8
-%global go_version 1.8.3
+%global go_version 1.8.4
 
 Name:           golang
-Version:        1.8.3
-Release:        2%{?dist}
+Version:        1.8.4
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -509,6 +509,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-1
+- fix CVE-2017-15041 and CVE-2017-15042
+
 * Fri Jul 14 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.3-2
 - apply the s390x workaround
 
