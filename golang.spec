@@ -97,7 +97,7 @@
 %global go_version 1.9
 
 Name:           golang
-Version:        1.9
+Version:        1.9.1
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -507,6 +507,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.1-1
+- fix CVE-2017-15041 and CVE-2017-15042
+
 * Fri Sep 15 2017 Jakub Čajka <jcajka@redhat.com> - 1.9-1
 - bump to the relased version
 
