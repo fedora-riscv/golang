@@ -98,7 +98,7 @@
 
 Name:           golang
 Version:        1.7.6
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -148,6 +148,9 @@ Patch220: tzdata-fix.patch
 
 # https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
 Patch221: 31bit-OID-asn1.patch
+
+Patch222: CVE-2017-15041.patch
+Patch223: CVE-2017-15042.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -289,6 +292,9 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch220 -p1
 %patch221 -p1
+
+%patch222 -p1
+%patch223 -p1
 
 %build
 # print out system information
@@ -522,6 +528,9 @@ fi
 %endif
 
 %changelog
+* Tue Oct 10 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.6-3
+- fix CVE-2017-15041 and CVE-2017-15042
+
 * Thu Jun 29 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.6-2
 - add race subpackage
 
