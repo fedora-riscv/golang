@@ -1,3 +1,4 @@
+%bcond_with bootstrap
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -41,10 +42,10 @@
 %endif
 
 # Use golang/gcc-go as bootstrap compiler
-%ifarch %{golang_arches}
-%global golang_bootstrap 1
-%else
+%if %{with bootstrap}
 %global golang_bootstrap 0
+%else
+%global golang_bootstrap 1
 %endif
 
 # Controls what ever we fail on failed tests
