@@ -1,3 +1,4 @@
+%bcond_with bootstrap
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -41,10 +42,10 @@
 %endif
 
 # Use golang/gcc-go as bootstrap compiler
-%ifarch %{golang_arches}
-%global golang_bootstrap 1
-%else
+%if %{with bootstrap}
 %global golang_bootstrap 0
+%else
+%global golang_bootstrap 1
 %endif
 
 # Controls what ever we fail on failed tests
@@ -98,7 +99,7 @@
 
 Name:           golang
 Version:        1.8.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -509,6 +510,9 @@ fi
 %endif
 
 %changelog
+* Thu Oct 07 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-2
+- add bcond for bootstrap
+
 * Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-1
 - fix CVE-2017-15041 and CVE-2017-15042
 
