@@ -48,7 +48,7 @@
 
 Name:           golang
 Version:        1.7.6
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -443,6 +443,9 @@ fi
 %endif
 
 %changelog
+* Fri Oct 13 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-2
+- fix CVE-2017-15041 and CVE-2017-15042
+
 * Thu Jun 15 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
 - Bump to 1.7.6
 - Fix for CVE-2017-8932
