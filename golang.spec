@@ -88,6 +88,9 @@ Patch217: ppc64x-overflow-2.patch
 
 Patch218: tzdata-fix.patch
 
+Patch219: CVE-2017-15041.patch
+Patch220: CVE-2017-15042.patch
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -216,6 +219,9 @@ Summary:        Golang shared object libraries
 %patch217 -p1
 
 %patch218 -p1
+
+%patch219 -p1
+%patch220 -p1
 
 %build
 # print out system information
