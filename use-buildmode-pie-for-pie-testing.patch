@@ -1,0 +1,51 @@
+diff -up go/src/cmd/dist/test.go.pie go/src/cmd/dist/test.go
+--- go/src/cmd/dist/test.go.pie	2017-10-25 20:30:21.000000000 +0200
++++ go/src/cmd/dist/test.go	2017-11-03 16:47:55.290829798 +0100
+@@ -852,6 +852,16 @@ func (t *tester) supportedBuildmode(mode
+ 			return true
+ 		}
+ 		return false
++	case "pie":
++		switch pair {
++		case "linux-386", "linux-amd64", "linux-arm", "linux-arm64", "linux-ppc64le", "linux-s390x",
++			"android-amd64", "android-arm", "android-arm64", "android-386":
++			return true
++		case "darwin-amd64":
++			return true
++		}
++		return false
++
+ 	default:
+ 		log.Fatalf("internal error: unknown buildmode %s", mode)
+ 		return false
+@@ -953,24 +963,16 @@ func (t *tester) cgoTest(dt *distTest) e
+ 				}
+ 			}
+ 
+-			if pair != "freebsd-amd64" { // clang -pie fails to link misc/cgo/test
+-				cmd := t.dirCmd("misc/cgo/test",
+-					cc, "-xc", "-o", "/dev/null", "-pie", "-")
++			if t.supportedBuildmode("pie") {
++				cmd = t.addCmd(dt, "misc/cgo/test", "go", "test", "-buildmode=pie")
+ 				cmd.Env = env
+-				cmd.Stdin = strings.NewReader("int main() {}")
+-				if err := cmd.Run(); err != nil {
+-					fmt.Println("No support for -pie found, skip cgo PIE test.")
+-				} else {
+-					cmd = t.addCmd(dt, "misc/cgo/test", "go", "test", "-ldflags", `-linkmode=external -extldflags "-pie"`)
+-					cmd.Env = env
+ 
+-					cmd = t.addCmd(dt, "misc/cgo/testtls", "go", "test", "-ldflags", `-linkmode=external -extldflags "-pie"`)
+-					cmd.Env = env
++				cmd = t.addCmd(dt, "misc/cgo/testtls", "go", "test", "-buildmode=pie")
++				cmd.Env = env
+ 
+-					cmd = t.addCmd(dt, "misc/cgo/nocgo", "go", "test", "-ldflags", `-linkmode=external -extldflags "-pie"`)
+-					cmd.Env = env
++				cmd = t.addCmd(dt, "misc/cgo/nocgo", "go", "test", "-buildmode=pie")
++				cmd.Env = env
+ 
+-				}
+ 			}
+ 		}
+ 	}

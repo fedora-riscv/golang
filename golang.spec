@@ -1,4 +1,5 @@
 %bcond_with bootstrap
+%bcond_with ignore_tests
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -49,10 +50,10 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch %{ix86} x86_64 %{arm} aarch64 ppc64le
-%global fail_on_tests 1
-%else
+%if %{with ignore_tests}
 %global fail_on_tests 0
+%else
+%global fail_on_tests 1
 %endif
 
 # Build golang shared objects for stdlib
@@ -95,10 +96,10 @@
 %endif
 
 %global go_api 1.9
-%global go_version 1.9.1
+%global go_version 1.9.2
 
 Name:           golang
-Version:        1.9.1
+Version:        1.9.2
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -140,6 +141,11 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
 
 Patch220: s390x-ignore-L0syms.patch
+
+# https://github.com/golang/go/commit/ca8c361d867d62bd46013c5abbaaad0b2ca6077f
+Patch221: use-buildmode-pie-for-pie-testing.patch
+# https://github.com/hyangah/go/commit/3502496d03bcd842fd7aac95ec0d7096d581cd26
+Patch222: use-no-pie-where-needed.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -273,6 +279,9 @@ Requires:       %{name} = %{version}-%{release}
 %patch219 -p1
 
 %patch220 -p1
+
+%patch221 -p1 -b pie
+%patch222 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -471,6 +480,7 @@ fi
 %exclude %{goroot}/src/
 %exclude %{goroot}/doc/
 %exclude %{goroot}/misc/
+%exclude %{goroot}/test/
 %{goroot}/*
 
 # ensure directory ownership, so they are cleaned up if empty
@@ -508,6 +518,12 @@ fi
 %endif
 
 %changelog
+* Thu Oct 26 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.2-1
+- Rebase to 1.9.2
+- execute correctly pie tests
+- allow to ignore tests via bcond
+- reduce size of golang package
+
 * Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.1-1
 - fix CVE-2017-15041 and CVE-2017-15042
 
