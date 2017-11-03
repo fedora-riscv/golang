@@ -95,11 +95,11 @@
 %endif
 
 %global go_api 1.8
-%global go_version 1.8.4
+%global go_version 1.8.5
 
 Name:           golang
-Version:        1.8.4
-Release:        2%{?dist}
+Version:        1.8.5
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -140,6 +140,8 @@ Patch215:       ./go1.5-zoneinfo_testing_only.patch
 Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
 # https://github.com/golang/go/commit/94aba76639cf4d5e30975d846bb0368db8202269
 Patch220: 31bit-OID-asn1.patch
+
+Patch221: s390x-ignore-L0syms.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -272,6 +274,8 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch219 -p1
 %patch220 -p1
+
+%patch221 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -473,6 +477,7 @@ fi
 %exclude %{goroot}/src/
 %exclude %{goroot}/doc/
 %exclude %{goroot}/misc/
+%exclude %{goroot}/test/
 %{goroot}/*
 
 # ensure directory ownership, so they are cleaned up if empty
@@ -510,7 +515,11 @@ fi
 %endif
 
 %changelog
-* Thu Oct 07 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-2
+* Tue Oct 31 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.5-1
+- Rebase to 1.8.5
+- re-apply s390x workaround
+
+* Thu Oct 12 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-2
 - add bcond for bootstrap
 
 * Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.4-1
