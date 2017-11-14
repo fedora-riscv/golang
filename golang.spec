@@ -143,6 +143,8 @@ Patch220: 31bit-OID-asn1.patch
 
 Patch221: s390x-ignore-L0syms.patch
 
+Patch222: use-buildmode-pie-for-pie-testing.patch 
+
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
@@ -276,6 +278,7 @@ Requires:       %{name} = %{version}-%{release}
 %patch220 -p1
 
 %patch221 -p1
+%patch222 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
