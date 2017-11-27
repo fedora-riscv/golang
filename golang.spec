@@ -1,3 +1,6 @@
+%bcond_with bootstrap
+%bcond_with ignore_tests
+
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -25,11 +28,56 @@
 # allow turning this off
 %{!?build_xemacs:%global build_xemacs 1}
 
-# let this match the macros in macros.golang
+# Golang build options.
+
+# Build golang using external/internal(close to cgo disabled) linking.
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%global external_linker 1
+%else
+%global external_linker 0
+%endif
+
+# Build golang with cgo enabled/disabled(later equals more or less to internal linking).
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%global cgo_enabled 1
+%else
+%global cgo_enabled 0
+%endif
+
+# Use golang/gcc-go as bootstrap compiler
+%if %{with bootstrap}
+%global golang_bootstrap 0
+%else
+%global golang_bootstrap 1
+%endif
+
+# Controls what ever we fail on failed tests
+%if %{with ignore_tests}
+%global fail_on_tests 0
+%else
+%global fail_on_tests 1
+%endif
+
+# Build golang shared objects for stdlib
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
+%global shared 1
+%else
+%global shared 0
+%endif
+
+# Pre build std lib with -race enabled
+%ifarch x86_64
+%global race 1
+%else
+%global race 0
+%endif
+
+# Fedora GOROOT
 %global goroot          /usr/lib/%{name}
 %global gopath          %{_datadir}/gocode
 %global go_arches       %{ix86} x86_64 %{arm} aarch64
 %global golibdir        %{_libdir}/golang
+
 %ifarch x86_64
 %global gohostarch  amd64
 %endif
@@ -43,20 +91,26 @@
 %global gohostarch  arm64
 %endif
 
-%global go_api 1.7
-%global go_version 1.7.6
+%global go_api 1.9
+%global go_version 1.9.2
 
 Name:           golang
-Version:        1.7.6
-Release:        2%{?dist}
+Version:        1.9.2
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
 URL:            http://golang.org/
 Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
+# make possible to override default traceback level at build time by setting build tag rpm_crashtraceback
+Source1:        fedora.go
 
-# go1.5 bootstrapping. The compiler is written in golang.
+# The compiler is written in Go. Needs go(1.4+) compiler for build.
+%if !%{golang_bootstrap}
+BuildRequires:  gcc-go >= 5
+%else
 BuildRequires:  golang > 1.4
+%endif
 BuildRequires:  pcre-devel, glibc-static, perl
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 BuildRequires:  hostname
@@ -74,22 +128,19 @@ Patch0:         golang-1.2-verbose-build.patch
 # use the arch dependent path in the bootstrap
 Patch212:       golang-1.5-bootstrap-binary-path.patch
 
-# disable TestGdbPython
-# https://github.com/golang/go/issues/11214
-Patch213:       go1.5beta1-disable-TestGdbPython.patch
-
 # we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
 # later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
 Patch215:       ./go1.5-zoneinfo_testing_only.patch
 
-#PPC64X relocation overflow fix
-Patch216: ppc64x-overflow-1.patch
-Patch217: ppc64x-overflow-2.patch
+# Proposed patch by mmunday https://golang.org/cl/35262
+Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch
 
-Patch218: tzdata-fix.patch
+Patch220: s390x-ignore-L0syms.patch
 
-Patch219: CVE-2017-15041.patch
-Patch220: CVE-2017-15042.patch
+# https://github.com/golang/go/commit/ca8c361d867d62bd46013c5abbaaad0b2ca6077f
+Patch221: use-buildmode-pie-for-pie-testing.patch
+# https://github.com/hyangah/go/commit/3502496d03bcd842fd7aac95ec0d7096d581cd26
+Patch222: use-no-pie-where-needed.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -193,12 +244,22 @@ for _,d in pairs({"api", "doc", "include", "lib", "src"}) do
   end
 end
 
-%ifarch x86_64
+%if %{shared}
 %package        shared
 Summary:        Golang shared object libraries
 
 %description    shared
 %{summary}.
+%endif
+
+%if %{race}
+%package        race
+Summary:        Golang std library with -race enabled
+
+Requires:       %{name} = %{version}-%{release}
+
+%description    race
+%{summary}
 %endif
 
 %prep
@@ -210,18 +271,16 @@ Summary:        Golang shared object libraries
 # use the arch dependent path in the bootstrap
 %patch212 -p1 -b .bootstrap
 
-# disable TestGdbPython
-%patch213 -p1 -b .gdb
-
 %patch215 -p1
 
-%patch216 -p1
-%patch217 -p1
-
-%patch218 -p1
-
 %patch219 -p1
+
 %patch220 -p1
+
+%patch221 -p1 -b pie
+%patch222 -p1
+
+cp %{SOURCE1} ./src/runtime/
 
 %build
 # print out system information
@@ -229,34 +288,43 @@ uname -a
 cat /proc/cpuinfo
 cat /proc/meminfo
 
-# go1.5 bootstrapping. The compiler is written in golang.
+# bootstrap compiler GOROOT
+%if !%{golang_bootstrap}
+export GOROOT_BOOTSTRAP=/
+%else
 export GOROOT_BOOTSTRAP=%{goroot}
+%endif
 
 # set up final install location
 export GOROOT_FINAL=%{goroot}
-
-# TODO use the system linker to get the system link flags and build-id
-# when https://code.google.com/p/go/issues/detail?id=5221 is solved
-#export GO_LDFLAGS="-linkmode external -extldflags $RPM_LD_FLAGS"
 
 export GOHOSTOS=linux
 export GOHOSTARCH=%{gohostarch}
 
 pushd src
 # use our gcc options for this build, but store gcc as default for compiler
-CFLAGS="$RPM_OPT_FLAGS" \
-LDFLAGS="$RPM_LD_FLAGS" \
-CC="gcc" \
-CC_FOR_TARGET="gcc" \
-GOOS=linux \
-GOARCH=%{gohostarch} \
-	./make.bash --no-clean
+export CFLAGS="$RPM_OPT_FLAGS"
+export LDFLAGS="$RPM_LD_FLAGS"
+export CC="gcc"
+export CC_FOR_TARGET="gcc"
+export GOOS=linux
+export GOARCH=%{gohostarch}
+%if !%{external_linker}
+export GO_LDFLAGS="-linkmode internal"
+%endif
+%if !%{cgo_enabled}
+export CGO_ENABLED=0
+%endif
+./make.bash --no-clean
 popd
 
-%ifarch x86_64
-# TODO get linux/386 support for shared objects.
-# golang shared objects for stdlib
+# build shared std lib
+%if %{shared}
 GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+%endif
+
+%if %{race}
+GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race std
 %endif
 
 %install
@@ -281,25 +349,26 @@ cwd=$(pwd)
 src_list=$cwd/go-src.list
 pkg_list=$cwd/go-pkg.list
 shared_list=$cwd/go-shared.list
+race_list=$cwd/go-race.list
 misc_list=$cwd/go-misc.list
 docs_list=$cwd/go-docs.list
 tests_list=$cwd/go-tests.list
-rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
-touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list
+rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_list
+touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_list
 pushd $RPM_BUILD_ROOT%{goroot}
-	find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
-	find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $src_list
+    find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
+    find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
-	find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
-	find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -printf '%{goroot}/%p\n' >> $pkg_list
+    find bin/ pkg/ -type d -a ! -path '*_dynlink/*' -a ! -path '*_race/*' -printf '%%%dir %{goroot}/%p\n' >> $pkg_list
+    find bin/ pkg/ ! -type d -a ! -path '*_dynlink/*' -a ! -path '*_race/*' -printf '%{goroot}/%p\n' >> $pkg_list
 
-	find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
-	find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
+    find doc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $docs_list
+    find doc/ ! -type d -printf '%{goroot}/%p\n' >> $docs_list
 
-	find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
-	find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
+    find misc/ -type d -printf '%%%dir %{goroot}/%p\n' >> $misc_list
+    find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
-%ifarch x86_64
+%if %{shared}
     mkdir -p %{buildroot}/%{_libdir}/
     mkdir -p %{buildroot}/%{golibdir}/
     for file in $(find .  -iname "*.so" ); do
@@ -316,13 +385,20 @@ pushd $RPM_BUILD_ROOT%{goroot}
 	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
-	find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
-	find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test*.go' \) -printf '%{goroot}/%p\n' >> $tests_list
-	# this is only the zoneinfo.zip
-	find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
-	find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
+%if %{race}
+
+    find pkg/*_race/ -type d -printf '%%%dir %{goroot}/%p\n' >> $race_list
+    find pkg/*_race/ ! -type d -printf '%{goroot}/%p\n' >> $race_list
+
+%endif
+
+    find test/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find test/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
+    find src/ -type d -a \( -name testdata -o -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find src/ ! -type d -a \( -ipath '*/testdata/*' -o -name '*_test.go' \) -printf '%{goroot}/%p\n' >> $tests_list
+    # this is only the zoneinfo.zip
+    find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
+    find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
 popd
 
 # remove the doc Makefile
@@ -373,22 +449,32 @@ cd src
 export CC="gcc"
 export CFLAGS="$RPM_OPT_FLAGS"
 export LDFLAGS="$RPM_LD_FLAGS"
+%if !%{external_linker}
+export GO_LDFLAGS="-linkmode internal"
+%endif
+%if !%{cgo_enabled} || !%{external_linker}
+export CGO_ENABLED=0
+%endif
 
 # make sure to not timeout
 export GO_TEST_TIMEOUT_SCALE=2
 
+%if %{fail_on_tests}
 ./run.bash --no-rebuild -v -v -v -k
+%else
+./run.bash --no-rebuild -v -v -v -k || :
+%endif
 cd ..
 
 
 %post bin
 %{_sbindir}/update-alternatives --install %{_bindir}/go \
-	go %{goroot}/bin/go 90 \
-	--slave %{_bindir}/gofmt gofmt %{goroot}/bin/gofmt
+    go %{goroot}/bin/go 90 \
+    --slave %{_bindir}/gofmt gofmt %{goroot}/bin/gofmt
 
 %preun bin
 if [ $1 = 0 ]; then
-	%{_sbindir}/update-alternatives --remove go %{goroot}/bin/go
+    %{_sbindir}/update-alternatives --remove go %{goroot}/bin/go
 fi
 
 
@@ -406,6 +492,7 @@ fi
 %exclude %{goroot}/src/
 %exclude %{goroot}/doc/
 %exclude %{goroot}/misc/
+%exclude %{goroot}/test/
 %{goroot}/*
 
 # ensure directory ownership, so they are cleaned up if empty
@@ -449,6 +536,10 @@ fi
 %endif
 
 %changelog
+* Mon Nov 27 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.9.2-1
+- rebase to 1.9.2
+- Resolves: BZ#1507936
+
 * Fri Oct 13 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-2
 - fix CVE-2017-15041 and CVE-2017-15042
 
