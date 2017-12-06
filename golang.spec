@@ -130,6 +130,29 @@ BuildRequires:  net-tools
 BuildRequires:  pcre-devel, glibc-static, perl-interpreter, procps-ng
 
 Provides:       go = %{version}-%{release}
+
+# Bundled/Vendored provides
+Provides:       bundled(golang(golang.org/x/crypto/chacha20poly1305))
+Provides:       bundled(golang(golang.org/x/crypto/curve25519))
+Provides:       bundled(golang(golang.org/x/crypto/poly1305))
+Provides:       bundled(golang(golang.org/x/net/http2))
+Provides:       bundled(golang(golang.org/x/net/http2/hpack))
+Provides:       bundled(golang(golang.org/x/net/idna))
+Provides:       bundled(golang(golang.org/x/net/lex))
+Provides:       bundled(golang(golang.org/x/net/lex/httplex))
+Provides:       bundled(golang(golang.org/x/net/lif))
+Provides:       bundled(golang(golang.org/x/net/route))
+Provides:       bundled(golang(golang.org/x/text/transform))
+Provides:       bundled(golang(golang.org/x/text/unicode))
+Provides:       bundled(golang(golang.org/x/text/unicode/norm))
+Provides:       bundled(golang(golang.org/x/text/width))
+Provides:       bundled(golang(golang.org/x/arch/arm))
+Provides:       bundled(golang(golang.org/x/arch/arm/armasm))
+Provides:       bundled(golang(golang.org/x/arch/ppc64))
+Provides:       bundled(golang(golang.org/x/arch/ppc64/ppc64asm))
+Provides:       bundled(golang(golang.org/x/arch/x86))
+Provides:       bundled(golang(golang.org/x/arch/x86/x86asm))
+
 Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
@@ -329,7 +352,7 @@ popd
 
 # build shared std lib
 %if %{shared}
-GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared std
+GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -buildmode=shared -v -x std
 %endif
 
 %if %{race}
