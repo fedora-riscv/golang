@@ -96,10 +96,10 @@
 %endif
 
 %global go_api 1.9
-%global go_version 1.9.2
+%global go_version 1.9.3
 
 Name:           golang
-Version:        1.9.2
+Version:        1.9.3
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -124,6 +124,42 @@ BuildRequires:  net-tools
 BuildRequires:  pcre-devel, glibc-static, perl-interpreter, procps-ng
 
 Provides:       go = %{version}-%{release}
+
+# go list -f {{.ImportPath}} ./src/vendor/... | sed "s:_$PWD/src/vendor/::g;s:_:.:;s:.*:Provides\: bundled(golang(&)):" && go list -f {{.ImportPath}} ./src/cmd/vendor/... | sed "s:_$PWD/src/cmd/vendor/::g;s:_:.:;s:.*:Provides\: bundled(golang(&)):"
+Provides: bundled(golang(golang.org/x/crypto/chacha20poly1305))
+Provides: bundled(golang(golang.org/x/crypto/chacha20poly1305/internal/chacha20))
+Provides: bundled(golang(golang.org/x/crypto/curve25519))
+Provides: bundled(golang(golang.org/x/crypto/poly1305))
+Provides: bundled(golang(golang.org/x/net/http2/hpack))
+Provides: bundled(golang(golang.org/x/net/idna))
+Provides: bundled(golang(golang.org/x/net/lex/httplex))
+Provides: bundled(golang(golang.org/x/net/nettest))
+Provides: bundled(golang(golang.org/x/net/proxy))
+Provides: bundled(golang(golang.org/x/text/secure))
+Provides: bundled(golang(golang.org/x/text/secure/bidirule))
+Provides: bundled(golang(golang.org/x/text/transform))
+Provides: bundled(golang(golang.org/x/text/unicode))
+Provides: bundled(golang(golang.org/x/text/unicode/bidi))
+Provides: bundled(golang(golang.org/x/text/unicode/norm))
+Provides: bundled(golang(github.com/google/pprof))
+Provides: bundled(golang(github.com/google/pprof/driver))
+Provides: bundled(golang(github.com/google/pprof/internal/binutils))
+Provides: bundled(golang(github.com/google/pprof/internal/driver))
+Provides: bundled(golang(github.com/google/pprof/internal/elfexec))
+Provides: bundled(golang(github.com/google/pprof/internal/graph))
+Provides: bundled(golang(github.com/google/pprof/internal/measurement))
+Provides: bundled(golang(github.com/google/pprof/internal/plugin))
+Provides: bundled(golang(github.com/google/pprof/internal/proftest))
+Provides: bundled(golang(github.com/google/pprof/internal/report))
+Provides: bundled(golang(github.com/google/pprof/internal/symbolizer))
+Provides: bundled(golang(github.com/google/pprof/internal/symbolz))
+Provides: bundled(golang(github.com/google/pprof/profile))
+Provides: bundled(golang(github.com/google/pprof/third.party/svg))
+Provides: bundled(golang(github.com/ianlancetaylor/demangle))
+Provides: bundled(golang(golang.org/x/arch/arm/armasm))
+Provides: bundled(golang(golang.org/x/arch/ppc64/ppc64asm))
+Provides: bundled(golang(golang.org/x/arch/x86/x86asm))
+
 Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
@@ -518,6 +554,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 26 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.3-1
+- Rebase to 1.9.3
+
 * Thu Oct 26 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.2-1
 - Rebase to 1.9.2
 - execute correctly pie tests
