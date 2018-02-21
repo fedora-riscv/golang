@@ -272,6 +272,7 @@ Requires(postun): %{_sbindir}/update-alternatives
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
 Requires:       gcc
+Requires:       git, subversion, mercurial
 %description    bin
 %{summary}
 
