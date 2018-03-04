@@ -100,7 +100,7 @@
 
 Name:           golang
 Version:        1.9.4
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -182,6 +182,8 @@ Patch220: s390x-ignore-L0syms.patch
 Patch221: use-buildmode-pie-for-pie-testing.patch
 # https://github.com/hyangah/go/commit/3502496d03bcd842fd7aac95ec0d7096d581cd26
 Patch222: use-no-pie-where-needed.patch
+
+Patch223: CVE-2018-7187.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -318,6 +320,8 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch221 -p1 -b pie
 %patch222 -p1
+
+%patch223 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -554,6 +558,10 @@ fi
 %endif
 
 %changelog
+* Sat Mar 03 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.4-2
+- Fix CVE-2018-7187
+- Resolves: BZ#1546386, BZ#1546388
+
 * Thu Feb 08 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.4-1
 - Rebase to 1.9.4
 - Fix CVE-2018-6574
