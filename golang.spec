@@ -1,6 +1,5 @@
 %bcond_with bootstrap
 %bcond_with ignore_tests
-
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -25,8 +24,7 @@
 %global __spec_install_post /usr/lib/rpm/check-rpaths   /usr/lib/rpm/check-buildroot  \
   /usr/lib/rpm/brp-compress
 
-# allow turning this off
-%{!?build_xemacs:%global build_xemacs 1}
+%global golibdir %{_libdir}/golang
 
 # Golang build options.
 
@@ -90,12 +88,21 @@
 %ifarch aarch64
 %global gohostarch  arm64
 %endif
+%ifarch ppc64
+%global gohostarch  ppc64
+%endif
+%ifarch ppc64le
+%global gohostarch  ppc64le
+%endif
+%ifarch s390x
+%global gohostarch  s390x
+%endif
 
 %global go_api 1.9
-%global go_version 1.9.2
+%global go_version 1.9.4
 
 Name:           golang
-Version:        1.9.2
+Version:        1.9.4
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -111,17 +118,55 @@ BuildRequires:  gcc-go >= 5
 %else
 BuildRequires:  golang > 1.4
 %endif
-BuildRequires:  pcre-devel, glibc-static, perl
 %if 0%{?rhel} > 6 || 0%{?fedora} > 0
 BuildRequires:  hostname
 %else
 BuildRequires:  net-tools
 %endif
+# for tests
+BuildRequires:  pcre-devel, glibc-static, perl
 
 Provides:       go = %{version}-%{release}
 Provides:       go-srpm-macros
-Requires:       %{name}-bin
+
+# go list -f {{.ImportPath}} ./src/vendor/... | sed "s:_$PWD/src/vendor/::g;s:_:.:;s:.*:Provides\: bundled(golang(&)):" && go list -f {{.ImportPath}} ./src/cmd/vendor/... | sed "s:_$PWD/src/cmd/vendor/::g;s:_:.:;s:.*:Provides\: bundled(golang(&)):"
+Provides: bundled(golang(golang.org/x/crypto/chacha20poly1305))
+Provides: bundled(golang(golang.org/x/crypto/chacha20poly1305/internal/chacha20))
+Provides: bundled(golang(golang.org/x/crypto/curve25519))
+Provides: bundled(golang(golang.org/x/crypto/poly1305))
+Provides: bundled(golang(golang.org/x/net/http2/hpack))
+Provides: bundled(golang(golang.org/x/net/idna))
+Provides: bundled(golang(golang.org/x/net/lex/httplex))
+Provides: bundled(golang(golang.org/x/net/nettest))
+Provides: bundled(golang(golang.org/x/net/proxy))
+Provides: bundled(golang(golang.org/x/text/secure))
+Provides: bundled(golang(golang.org/x/text/secure/bidirule))
+Provides: bundled(golang(golang.org/x/text/transform))
+Provides: bundled(golang(golang.org/x/text/unicode))
+Provides: bundled(golang(golang.org/x/text/unicode/bidi))
+Provides: bundled(golang(golang.org/x/text/unicode/norm))
+Provides: bundled(golang(github.com/google/pprof))
+Provides: bundled(golang(github.com/google/pprof/driver))
+Provides: bundled(golang(github.com/google/pprof/internal/binutils))
+Provides: bundled(golang(github.com/google/pprof/internal/driver))
+Provides: bundled(golang(github.com/google/pprof/internal/elfexec))
+Provides: bundled(golang(github.com/google/pprof/internal/graph))
+Provides: bundled(golang(github.com/google/pprof/internal/measurement))
+Provides: bundled(golang(github.com/google/pprof/internal/plugin))
+Provides: bundled(golang(github.com/google/pprof/internal/proftest))
+Provides: bundled(golang(github.com/google/pprof/internal/report))
+Provides: bundled(golang(github.com/google/pprof/internal/symbolizer))
+Provides: bundled(golang(github.com/google/pprof/internal/symbolz))
+Provides: bundled(golang(github.com/google/pprof/profile))
+Provides: bundled(golang(github.com/google/pprof/third.party/svg))
+Provides: bundled(golang(github.com/ianlancetaylor/demangle))
+Provides: bundled(golang(golang.org/x/arch/arm/armasm))
+Provides: bundled(golang(golang.org/x/arch/ppc64/ppc64asm))
+Provides: bundled(golang(golang.org/x/arch/x86/x86asm))
+
+Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
+Requires:       go-srpm-macros
 
 Patch0:         golang-1.2-verbose-build.patch
 
@@ -141,6 +186,8 @@ Patch220: s390x-ignore-L0syms.patch
 Patch221: use-buildmode-pie-for-pie-testing.patch
 # https://github.com/hyangah/go/commit/3502496d03bcd842fd7aac95ec0d7096d581cd26
 Patch222: use-no-pie-where-needed.patch
+
+Patch223: CVE-2018-7187.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -279,6 +326,8 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch221 -p1 -b pie
 %patch222 -p1
+
+%patch223 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -531,45 +580,172 @@ fi
 %{_bindir}/go
 %{_bindir}/gofmt
 
-%ifarch x86_64
+%if %{shared}
 %files -f go-shared.list shared
 %endif
 
-%changelog
-* Mon Nov 27 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.9.2-1
-- rebase to 1.9.2
-- Resolves: BZ#1507936
+%if %{race}
+%files -f go-race.list race
+%endif
 
-* Fri Oct 13 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-2
+%changelog
+* Tue Mar 20 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.4-1
+- Rebase to 1.9.4
+- Fix CVE-2018-6574 and CVE-2018-7187
+- Resolves: BZ#1543561, BZ#1543563, BZ#1546386, BZ#1546387
+
+* Thu Oct 26 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.2-1
+- Rebase to 1.9.2
+- execute correctly pie tests
+- allow to ignore tests via bcond
+- reduce size of golang package
+
+* Fri Oct 06 2017 Jakub Čajka <jcajka@redhat.com> - 1.9.1-1
 - fix CVE-2017-15041 and CVE-2017-15042
 
-* Thu Jun 15 2017 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
-- Bump to 1.7.6
-- Fix for CVE-2017-8932
-- Resolves: BZ#1455190
+* Fri Sep 15 2017 Jakub Čajka <jcajka@redhat.com> - 1.9-1
+- bump to the relased version
 
-* Mon Dec 05 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.4-1
+* Wed Aug 02 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.9-0.beta2.1.2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Binutils_Mass_Rebuild
+
+* Wed Jul 26 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.9-0.beta2.1.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_27_Mass_Rebuild
+
+* Tue Jul 11 2017 Jakub Čajka <jcajka@redhat.com> - 1.9-0.beta2.1
+- bump to beta2
+
+* Thu May 25 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.3-1
+- bump to 1.8.3
+- fix for CVE-2017-8932
+- make possible to use 31bit OID in ASN1
+- Resolves: BZ#1454978, BZ#1455191
+
+* Fri Apr 21 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-2
+- fix uint64 constant codegen on s390x
+- Resolves: BZ#1441078
+
+* Tue Apr 11 2017 Jakub Čajka <jcajka@redhat.com> - 1.8.1-1
+- bump to Go 1.8.1
+- Resolves: BZ#1440345
+
+* Fri Feb 24 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-2
+- avoid possibly stale packages due to chacha test file not being test file
+
+* Fri Feb 17 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-1
+- bump to released version
+- Resolves: BZ#1423637
+- Related: BZ#1411242
+
+* Fri Feb 10 2017 Fedora Release Engineering <releng@fedoraproject.org> - 1.8-0.rc3.2.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_26_Mass_Rebuild
+
+* Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-0.rc3.2
+- make possible to override default traceback level at build time
+- add sub-package race containing std lib built with -race enabled
+- Related: BZ#1411242
+
+* Fri Jan 27 2017 Jakub Čajka <jcajka@redhat.com> - 1.8-0.rc3.1
+- rebase to go1.8rc3
+- Resolves: BZ#1411242
+
+* Fri Jan 20 2017 Jakub Čajka <jcajka@redhat.com> - 1.7.4-2
+- Resolves: BZ#1404679
+- expose IfInfomsg.X__ifi_pad on s390x
+
+* Fri Dec 02 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.4-1
 - Bump to 1.7.4
 - Resolves: BZ#1400732
 
-* Fri Nov 18 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-2
-- enable back p224 curve(see BZ#1038683)
+* Thu Nov 17 2016 Tom Callaway <spot@fedoraproject.org> - 1.7.3-2
+- re-enable the NIST P-224 curve
 
-* Fri Oct 21 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.3-1
-- rebase to go1.7.3
-- Fix possible relocation overflows on ppc
-- Fix failing test due to latest tzdata
+* Thu Oct 20 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.3-1
+- Resolves: BZ#1387067 - golang-1.7.3 is available
+- added fix for tests failing with latest tzdata
 
-* Fri Sep 16 2016 Jakub Čajka <jcajka@fedoraproject.org> - 1.7.1-1
-- rebase to go1.7.1
-- Resolves: BZ#1293449 - CVE-2015-8618, BZ#1357601 - CVE-2016-5386,
-BZ#1324345 - CVE-2016-3959, BZ#1376555
+* Fri Sep 23 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.1-2
+- fix link failure due to relocation overflows on PPC64X
+
+* Thu Sep 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.7.1-1
+- rebase to 1.7.1
+- Resolves: BZ#1374103
+
+* Tue Aug 23 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-1
+- update to released version
+- related: BZ#1342090, BZ#1357394
+
+* Mon Aug 08 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.3.rc5
+- Obsolete golang-vet and golang-cover from golang-googlecode-tools package
+  vet/cover binaries are provided by golang-bin rpm (thanks to jchaloup)
+- clean up exclusive arch after s390x boostrap
+- resolves: #1268206
+
+* Wed Aug 03 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.2.rc5
+- rebase to go1.7rc5
+- Resolves: BZ#1342090
+
+* Thu Jul 21 2016 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.7-0.1.rc2
+- https://fedoraproject.org/wiki/Changes/golang1.7
+
+* Tue Jul 19 2016 Jakub Čajka <jcajka@redhat.com> - 1.7-0.0.rc2
+- rebase to 1.7rc2
+- added s390x build
+- improved shared lib packaging
+- Resolves: bz1357602 - CVE-2016-5386
+- Resolves: bz1342090, bz1342090
+
+* Tue Apr 26 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.2-1
+- rebase to 1.6.2
+- Resolves: bz1329206 - golang-1.6.2.src is available
+
+* Wed Apr 13 2016 Jakub Čajka <jcajka@redhat.com> - 1.6.1-1
+- rebase to 1.6.1
+- Resolves: bz1324344 - CVE-2016-3959
+- Resolves: bz1324951 - prelink is gone, /etc/prelink.conf.d/* is no longer used
+- Resolves: bz1326366 - wrong epoll_event struct for ppc64le/ppc64
+
+* Mon Feb 22 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-1
+- Resolves: bz1304701 - rebase to go1.6 release
+- Resolves: bz1304591 - fix possible stack miss-alignment in callCgoMmap
+
+* Wed Feb 03 2016 Fedora Release Engineering <releng@fedoraproject.org> - 1.6-0.3.rc1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_24_Mass_Rebuild
+
+* Fri Jan 29 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-0.2.rc1
+- disabled cgo and external linking on ppc64
+
+* Thu Jan 28 2016 Jakub Čajka <jcajka@redhat.com> - 1.6-0.1.rc1
+- Resolves bz1292640, rebase to pre-release 1.6
+- bootstrap for PowerPC
+- fix rpmlint errors/warning
+
+* Thu Jan 14 2016 Jakub Čajka <jcajka@redhat.com> - 1.5.3-1
+- rebase to 1.5.3
+- resolves bz1293451, CVE-2015-8618
+- apply timezone patch, avoid using bundled data
+- print out rpm build system info
+
+* Fri Dec 11 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-2
+- bz1290543 Accept x509 certs with negative serial
+
+* Tue Dec 08 2015 Jakub Čajka <jcajka@redhat.com> - 1.5.2-1
+- bz1288263 rebase to 1.5.2
+- spec file clean up
+- added build options
+- scrubbed "Project Gutenberg License"
 
 * Mon Oct 19 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-1
 - bz1271709 include patch from upstream fix
 
 * Wed Sep 09 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5.1-0
 - update to go1.5.1
+
+* Fri Sep 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-8
+- bz1258166 remove srpm macros, for go-srpm-macros
+
+* Thu Sep 03 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-7
+- bz1258166 remove srpm macros, for go-srpm-macros
 
 * Thu Aug 27 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-6
 - starting a shared object subpackage. This will be x86_64 only until upstream supports more arches shared objects.
@@ -594,8 +770,42 @@ BZ#1324345 - CVE-2016-3959, BZ#1376555
 * Thu Aug 20 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-1
 - updating to go1.5
 
-* Wed Aug 05 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-3
-- bz1250352
+* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.11.rc1
+- fixing the sources reference
+
+* Thu Aug 06 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.10.rc1
+- updating to go1.5rc1
+- checks are back in place
+
+* Tue Aug 04 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.9.beta3
+- pull in upstream archive/tar fix
+
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.8.beta3
+- updating to go1.5beta3
+
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.7.beta2
+- add the patch ..
+
+* Thu Jul 30 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.5-0.6.beta2
+- increase ELFRESERVE (bz1248071)
+
+* Tue Jul 28 2015 Lokesh Mandvekar <lsm5@fedoraproject.org> - 1.5-0.5.beta2
+- correct package version and release tags as per naming guidelines
+
+* Fri Jul 17 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-4.1.5beta2
+- adding test output, for visibility
+
+* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-3.1.5beta2
+- updating to go1.5beta2
+
+* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-2.1.5beta1
+- add checksum to sources and fixed one patch
+
+* Fri Jul 10 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.99-1.1.5beta1
+- updating to go1.5beta1
+
+* Wed Jun 17 2015 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.4.2-3
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_23_Mass_Rebuild
 
 * Wed Mar 18 2015 Vincent Batts <vbatts@fedoraproject.org> - 1.4.2-2
 - obsoleting deprecated packages
@@ -634,50 +844,63 @@ BZ#1324345 - CVE-2016-3959, BZ#1376555
 * Mon Sep 29 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.2-1
 - update to go1.3.2 (bz1147324)
 
-* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-22
+* Thu Sep 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-3
+- patching the tzinfo failure
+
+* Sat Aug 16 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3.1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_22_Mass_Rebuild
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3.1-1
+- update to go1.3.1
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-11
+- merged a line wrong
+
+* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-10
 - more work to get cgo.a timestamps to line up, due to build-env
-
-* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-21
-- touch cgo.a regardless
-
-* Wed Aug 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-20
-- rpm dependency ordering for %%post
-
-* Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-19
-- finally check for a Stale cgo in a %%post
-
-* Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-18
-- explicitly list all the files and directories for the packages trees
-
-* Tue Aug 12 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-17
-- explicitly list all the files and directories of the src tree, to preserve timestamps
-
-* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-16
+- explicitly list all the files and directories for the source and packages trees
 - touch all the built archives to be the same
 
-* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-15
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-9
 - make golang-src 'noarch' again, since that was not a fix, and takes up more space
 
-* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-14
+* Mon Aug 11 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-8
 - update timestamps of source files during %%install bz1099206
 
-* Fri Aug 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-13
+* Fri Aug 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-7
 - update timestamps of source during %%install bz1099206
 
-* Fri Aug 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-12
-- set another version constraint on xemacs due to bz1127518
-
-* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-11
-- set a version constraint on xemacs due to bz1127518
-
-* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-10
+* Wed Aug 06 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-6
 - make the source subpackage arch'ed, instead of noarch
 
-* Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-9
+* Mon Jul 21 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-5
+- fix the writing of pax headers
+
+* Tue Jul 15 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-4
 - fix the loading of gdb safe-path. bz981356
 
-* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.2.2-8
+* Tue Jul 08 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-3
 - `go install std` requires gcc, to build cgo. bz1105901, bz1101508
+
+* Mon Jul 07 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-2
+- archive/tar memory allocation improvements
+
+* Thu Jun 19 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3-1
+- update to go1.3
+
+* Fri Jun 13 2014 Vincent Batts <vbatts@fedoraproject.org> - 1.3rc2-1
+- update to go1.3rc2
+
+* Sat Jun 07 2014 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.3rc1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_21_Mass_Rebuild
+
+* Tue Jun 03 2014 Vincent Batts <vbatts@redhat.com> 1.3rc1-1
+- update to go1.3rc1
+- new arch file shuffling
+
+* Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.3beta2-1
+- update to go1.3beta2
+- no longer provides go-mode for xemacs (emacs only)
 
 * Wed May 21 2014 Vincent Batts <vbatts@redhat.com> 1.2.2-7
 - bz1099206 ghost files are not what is needed
@@ -721,7 +944,7 @@ BZ#1324345 - CVE-2016-3959, BZ#1376555
 - include sub-packages for compiler toolchains, for all golang supported architectures
 
 * Wed Mar 26 2014 Vincent Batts <vbatts@fedoraproject.org> 1.2.1-2
-- provide a system rpm macros. Starting with %gopath
+- provide a system rpm macros. Starting with gopath
 
 * Tue Mar 04 2014 Adam Miller <maxamillion@fedoraproject.org> 1.2.1-1
 - Update to latest upstream
@@ -765,17 +988,23 @@ BZ#1324345 - CVE-2016-3959, BZ#1376555
 - Pull upstream patches for BZ#1010271
 - Add glibc requirement that got dropped because of meta dep fix
 
-* Thu Sep 19 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.2.2-3
+* Fri Aug 30 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-4
 - fix the libc meta dependency (thanks to vbatts [at] redhat.com for the fix)
 
-* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.2-2
-- vim-filesystem only required for Fedora , vim-common owns those files in RHEL
+* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-3
+- Revert incorrect merged changelog
 
-* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.2-1
+* Tue Aug 27 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-2
+- This was reverted, just a placeholder changelog entry for bad merge
+
+* Tue Aug 20 2013 Adam Miller <maxamillion@fedoraproject.org> - 1.1.2-1
 - Update to latest upstream
 
-* Fri Aug 16 2013 Adam Miller <admiller@redhat.com> - 1.1.1-6
-- Remove xemacs bits for RHEL build
+* Sat Aug 03 2013 Fedora Release Engineering <rel-eng@lists.fedoraproject.org> - 1.1.1-7
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_20_Mass_Rebuild
+
+* Wed Jul 17 2013 Petr Pisar <ppisar@redhat.com> - 1.1.1-6
+- Perl 5.18 rebuild
 
 * Wed Jul 10 2013 Adam Goode <adam@spicenitz.org> - 1.1.1-5
 - Blacklist testdata files from prelink
