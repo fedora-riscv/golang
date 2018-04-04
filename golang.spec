@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.10
-%global go_version 1.10
+%global go_version 1.10.1
 
 Name:           golang
-Version:        1.10
-Release:        2%{?dist}
+Version:        1.10.1
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -184,8 +184,6 @@ Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch
 
 # Proposed patch by jcajka https://golang.org/cl/86541
 Patch221: golang-1.10-pkgconfig-fix.patch
-
-Patch222: CVE-2018-7187.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -314,8 +312,6 @@ Requires:       %{name} = %{version}-%{release}
 %patch219 -p1
 
 %patch221 -p1
-
-%patch222 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -552,6 +548,10 @@ fi
 %endif
 
 %changelog
+* Wed Apr 04 2018 Jakub Čajka <jcajka@redhat.com> - 1.10.1-1
+- Rebase to 1.10.1
+- Resolves: BZ#1562270
+
 * Sat Mar 03 2018 Jakub Čajka <jcajka@redhat.com> - 1.10-2
 - Fix CVE-2018-7187
 - Resolves: BZ#1546386, BZ#1546388
