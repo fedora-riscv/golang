@@ -1,7 +1,18 @@
-diff -up go/src/cmd/dist/test.go.pie go/src/cmd/dist/test.go
---- go/src/cmd/dist/test.go.pie	2017-10-25 20:30:21.000000000 +0200
-+++ go/src/cmd/dist/test.go	2017-11-03 16:47:55.290829798 +0100
-@@ -852,6 +852,16 @@ func (t *tester) supportedBuildmode(mode
+From 6d91532e4da10746ced62f714783017f682f83e1 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jakub=20=C4=8Cajka?= <jcajka@redhat.com>
+Date: Thu, 22 Mar 2018 12:44:25 +0100
+Subject: [PATCH 5/6] Backport of
+ https://github.com/golang/go/commit/ca8c361d867d62bd46013c5abbaaad0b2ca6077f
+
+---
+ src/cmd/dist/test.go | 30 ++++++++++++++++--------------
+ 1 file changed, 16 insertions(+), 14 deletions(-)
+
+diff --git a/src/cmd/dist/test.go b/src/cmd/dist/test.go
+index 73432d31ea..ed7151ab66 100644
+--- a/src/cmd/dist/test.go
++++ b/src/cmd/dist/test.go
+@@ -852,6 +852,16 @@ func (t *tester) supportedBuildmode(mode string) bool {
  			return true
  		}
  		return false
@@ -18,7 +29,7 @@ diff -up go/src/cmd/dist/test.go.pie go/src/cmd/dist/test.go
  	default:
  		log.Fatalf("internal error: unknown buildmode %s", mode)
  		return false
-@@ -953,24 +963,16 @@ func (t *tester) cgoTest(dt *distTest) e
+@@ -953,24 +963,16 @@ func (t *tester) cgoTest(dt *distTest) error {
  				}
  			}
  
@@ -49,3 +60,6 @@ diff -up go/src/cmd/dist/test.go.pie go/src/cmd/dist/test.go
  			}
  		}
  	}
+-- 
+2.14.3
+

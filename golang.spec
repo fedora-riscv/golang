@@ -96,10 +96,10 @@
 %endif
 
 %global go_api 1.9
-%global go_version 1.9.5
+%global go_version 1.9.6
 
 Name:           golang
-Version:        1.9.5
+Version:        1.9.6
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -164,24 +164,12 @@ Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
 
-Patch0:         golang-1.2-verbose-build.patch
-
-# use the arch dependent path in the bootstrap
-Patch212:       golang-1.5-bootstrap-binary-path.patch
-
-# we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
-# later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
-Patch215:       ./go1.5-zoneinfo_testing_only.patch
-
-# Proposed patch by mmunday https://golang.org/cl/35262
-Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
-
-Patch220: s390x-ignore-L0syms.patch
-
-# https://github.com/golang/go/commit/ca8c361d867d62bd46013c5abbaaad0b2ca6077f
-Patch221: use-buildmode-pie-for-pie-testing.patch
-# https://github.com/hyangah/go/commit/3502496d03bcd842fd7aac95ec0d7096d581cd26
-Patch222: use-no-pie-where-needed.patch
+Patch1: 0001-Make-build-little-bit-more-verbose.patch
+Patch2: 0002-Don-t-use-the-bundled-tzdata.patch
+Patch3: 0003-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
+Patch4: 0004-Ignore-L0-A-during-linking.patch
+Patch5: 0005-Backport-of-https-github.com-golang-go-commit-ca8c36.patch
+Patch6: 0006-misc-cgo-testcarchive-use-no-pie-where-needed.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -304,20 +292,12 @@ Requires:       %{name} = %{version}-%{release}
 %prep
 %setup -q -n go
 
-# increase verbosity of build
-%patch0 -p1 -b .verbose
-
-# use the arch dependent path in the bootstrap
-%patch212 -p1 -b .bootstrap
-
-%patch215 -p1
-
-%patch219 -p1
-
-%patch220 -p1
-
-%patch221 -p1 -b pie
-%patch222 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
+%patch4 -p1
+%patch5 -p1
+%patch6 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -554,6 +534,9 @@ fi
 %endif
 
 %changelog
+* Thu May 03 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.6-1
+- Rebase to 1.9.6
+
 * Tue Apr 03 2018 Jakub Čajka <jcajka@redhat.com> - 1.9.5-1
 - Rebase to 1.9.5
 

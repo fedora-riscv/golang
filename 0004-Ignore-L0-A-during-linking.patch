@@ -1,5 +1,14 @@
+From a170a330e0598ad67240a4080a2ab185491884f5 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jakub=20=C4=8Cajka?= <jcajka@redhat.com>
+Date: Thu, 22 Mar 2018 12:42:33 +0100
+Subject: [PATCH 4/6] Ignore L0^A during linking
+
+---
+ src/cmd/link/internal/ld/ldelf.go | 7 +++++++
+ 1 file changed, 7 insertions(+)
+
 diff --git a/src/cmd/link/internal/ld/ldelf.go b/src/cmd/link/internal/ld/ldelf.go
-index d4f9fc4..87dabaa 100644
+index d4f9fc44d7..9b02bf5d36 100644
 --- a/src/cmd/link/internal/ld/ldelf.go
 +++ b/src/cmd/link/internal/ld/ldelf.go
 @@ -799,6 +799,13 @@ func ldelf(ctxt *Link, f *bio.Reader, pkg string, length int64, pn string) {
@@ -16,3 +25,6 @@ index d4f9fc4..87dabaa 100644
  			if strings.HasPrefix(sym.name, ".LASF") { // gcc on s390x does this
  				continue
  			}
+-- 
+2.14.3
+

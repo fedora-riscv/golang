@@ -1,7 +1,17 @@
-diff -up go/src/make.bash.verbose go/src/make.bash
---- go/src/make.bash.verbose	2017-07-11 12:00:09.513553508 +0200
-+++ go/src/make.bash	2017-07-11 12:01:25.288245720 +0200
-@@ -167,7 +167,7 @@ if [ "$GOHOSTARCH" != "$GOARCH" -o "$GOH
+From 2f52dca801a86a729fb69dc9123d111a9e995895 Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jakub=20=C4=8Cajka?= <jcajka@redhat.com>
+Date: Thu, 22 Mar 2018 12:39:16 +0100
+Subject: [PATCH 1/6] Make build little bit more verbose
+
+---
+ src/make.bash | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
+diff --git a/src/make.bash b/src/make.bash
+index 71e75318f2..14c4424392 100755
+--- a/src/make.bash
++++ b/src/make.bash
+@@ -167,7 +167,7 @@ if [ "$GOHOSTARCH" != "$GOARCH" -o "$GOHOSTOS" != "$GOOS" ]; then
  	# CC_FOR_TARGET is recorded as the default compiler for the go tool. When building for the host, however,
  	# use the host compiler, CC, from `cmd/dist/dist env` instead.
  	CC=$CC GOOS=$GOHOSTOS GOARCH=$GOHOSTARCH \
@@ -10,7 +20,7 @@ diff -up go/src/make.bash.verbose go/src/make.bash
  	echo
  fi
  
-@@ -175,7 +175,7 @@ echo "##### Building packages and comman
+@@ -175,7 +175,7 @@ echo "##### Building packages and commands for $GOOS/$GOARCH."
  
  old_bin_files=$(cd $GOROOT/bin && echo *)
  
@@ -19,3 +29,6 @@ diff -up go/src/make.bash.verbose go/src/make.bash
  
  # Check that there are no new files in $GOROOT/bin other than go and gofmt
  # and $GOOS_$GOARCH (a directory used when cross-compiling).
+-- 
+2.14.3
+
