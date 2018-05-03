@@ -1,8 +1,8 @@
-From 09581ca4826b6d67b1c3a3c8597038b28a37f52d Mon Sep 17 00:00:00 2001
+From 18385565374c36eda8306c57715332d5ae6eb9a6 Mon Sep 17 00:00:00 2001
 From: =?UTF-8?q?Jakub=20=C4=8Cajka?= <jcajka@redhat.com>
 Date: Fri, 5 Jan 2018 13:38:55 +0100
-Subject: [PATCH] cmd/go/internal/work : improve pkgconfig support to work with
- latest(1.4+) pkgconf
+Subject: [PATCH 3/3] cmd/go/internal/work : improve pkgconfig support to work
+ with latest(1.4+) pkgconf
 
 Fixes #23373
 
@@ -72,7 +72,7 @@ index 3f5ba37c64..c3c63a97a4 100644
  			t.Errorf("splitPkgConfigOutput(%v) = %v; want %v", test.in, got, test.want)
  		}
 diff --git a/src/cmd/go/internal/work/exec.go b/src/cmd/go/internal/work/exec.go
-index a5ab75f6a8..8774be1385 100644
+index a50c996041..5596638e48 100644
 --- a/src/cmd/go/internal/work/exec.go
 +++ b/src/cmd/go/internal/work/exec.go
 @@ -900,36 +900,62 @@ func (b *Builder) PkgconfigCmd() string {
@@ -160,7 +160,7 @@ index a5ab75f6a8..8774be1385 100644
  }
  
  // Calls pkg-config if needed and returns the cflags/ldflags needed to build the package.
-@@ -948,7 +974,10 @@ func (b *Builder) getPkgConfigFlags(p *load.Package) (cflags, ldflags []string,
+@@ -961,7 +987,10 @@ func (b *Builder) getPkgConfigFlags(p *load.Package) (cflags, ldflags []string,
  			return nil, nil, errPrintedOutput
  		}
  		if len(out) > 0 {

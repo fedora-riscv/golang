@@ -102,10 +102,10 @@
 %endif
 
 %global go_api 1.10
-%global go_version 1.10.1
+%global go_version 1.10.2
 
 Name:           golang
-Version:        1.10.1
+Version:        1.10.2
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -175,15 +175,9 @@ Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-srpm-macros
 
-# we had been just removing the zoneinfo.zip, but that caused tests to fail for users that 
-# later run `go test -a std`. This makes it only use the zoneinfo.zip where needed in tests.
-Patch215:       ./go1.5-zoneinfo_testing_only.patch
-
-# Proposed patch by mmunday https://golang.org/cl/35262
-Patch219: s390x-expose-IfInfomsg-X__ifi_pad.patch 
-
-# Proposed patch by jcajka https://golang.org/cl/86541
-Patch221: golang-1.10-pkgconfig-fix.patch
+Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
+Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
+Patch3:       0003-cmd-go-internal-work-improve-pkgconfig-support-to-wo.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -307,11 +301,9 @@ Requires:       %{name} = %{version}-%{release}
 %prep
 %setup -q -n go
 
-%patch215 -p1
-
-%patch219 -p1
-
-%patch221 -p1
+%patch1 -p1
+%patch2 -p1
+%patch3 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -548,6 +540,9 @@ fi
 %endif
 
 %changelog
+* Wed May 02 2018 Jakub Čajka <jcajka@redhat.com> - 1.10.2-1
+- Rebase to 1.10.2
+
 * Wed Apr 04 2018 Jakub Čajka <jcajka@redhat.com> - 1.10.1-1
 - Rebase to 1.10.1
 - Resolves: BZ#1562270
