@@ -1,5 +1,14 @@
+From 63c8189910c1cc2a45a7fb21fbc5c516ce01f46c Mon Sep 17 00:00:00 2001
+From: =?UTF-8?q?Jakub=20=C4=8Cajka?= <jcajka@redhat.com>
+Date: Thu, 22 Mar 2018 12:41:12 +0100
+Subject: [PATCH 2/6] Don't use the bundled tzdata
+
+---
+ src/time/zoneinfo_unix.go | 4 ++--
+ 1 file changed, 2 insertions(+), 2 deletions(-)
+
 diff --git a/src/time/zoneinfo_unix.go b/src/time/zoneinfo_unix.go
-index ed9502d..c2569e7 100644
+index bbf263a16f..ec14bc0f7b 100644
 --- a/src/time/zoneinfo_unix.go
 +++ b/src/time/zoneinfo_unix.go
 @@ -32,14 +32,14 @@ var zoneDirs = []string{
@@ -19,3 +28,6 @@ index ed9502d..c2569e7 100644
  	if zipOnly {
  		for i := 0; i < len(zoneDirs)-1; i++ {
  			zoneDirs[i] = "/XXXNOEXIST"
+-- 
+2.14.3
+
