@@ -106,7 +106,7 @@
 
 Name:           golang
 Version:        1.11
-Release:        0.beta1.1%{?dist}.1
+Release:        0.beta1.2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -184,6 +184,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0001-cmd-go-call-flag.Parse-to-properly-initialize-test-e.patch
+Patch4:       0003-Don-t-compress-dwarf-by-derfault-as-rpm-debuginfo-is.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -310,6 +311,7 @@ Requires:       %{name} = %{version}-%{release}
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -546,6 +548,10 @@ fi
 %endif
 
 %changelog
+* Wed Jul 18 2018 Jakub Čajka <jcajka@redhat.com> - 1.11-0.beta1.2
+- Turn off DWARF compression by default as it is not supported by rpm/debuginfo
+- Related: BZ#1602096
+
 * Fri Jul 13 2018 Fedora Release Engineering <releng@fedoraproject.org> - 1.11-0.beta1.1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_29_Mass_Rebuild
 
