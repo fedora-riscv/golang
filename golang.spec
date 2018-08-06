@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.11
-%global go_version 1.11beta2
+%global go_version 1.11beta3
 
 Name:           golang
 Version:        1.11
-Release:        0.beta2.2%{?dist}
+Release:        0.beta3.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -183,7 +183,6 @@ Requires:       go-srpm-macros
 
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
-Patch3:       0001-cmd-compile-set-stricter-inlining-threshold-in-large.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -309,7 +308,6 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch1 -p1
 %patch2 -p1
-%patch3 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -546,6 +544,9 @@ fi
 %endif
 
 %changelog
+* Mon Aug 06 2018 Jakub Čajka <jcajka@redhat.com> - 1.11-0.beta3.1
+- Rebase to go1.11beta3
+
 * Fri Jul 27 2018 Jakub Čajka <jcajka@redhat.com> - 1.11-0.beta2.2
 - Turn on back DWARF compression by default
 - Use less memory on 32bit targets during build
