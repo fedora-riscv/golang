@@ -1,6 +1,6 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
-%ifarch %{ix86} aarch64 x86_64 %{arm}
+%ifarch %{ix86} aarch64 %{arm}
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.11
-%global go_version 1.11beta3
+%global go_version 1.11rc1
 
 Name:           golang
 Version:        1.11
-Release:        0.beta3.1%{?dist}
+Release:        0.rc1.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -544,6 +544,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug 14 2018 Jakub Čajka <jcajka@redhat.com> - 1.11-0.rc1.1
+- Rebase to go1.11rc1
+
 * Mon Aug 06 2018 Jakub Čajka <jcajka@redhat.com> - 1.11-0.beta3.1
 - Rebase to go1.11beta3
 
