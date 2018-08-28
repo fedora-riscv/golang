@@ -102,10 +102,10 @@
 %endif
 
 %global go_api 1.10
-%global go_version 1.10.3
+%global go_version 1.10.4
 
 Name:           golang
-Version:        1.10.3
+Version:        1.10.4
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -178,6 +178,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-internal-work-improve-pkgconfig-support-to-wo.patch
+Patch4:       0004-cmd-internal-objfile-only-consider-executable-segmen.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -304,6 +305,7 @@ Requires:       %{name} = %{version}-%{release}
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -540,6 +542,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug 28 2018 Jakub Čajka <jcajka@redhat.com> - 1.10.4-1
+- Rebase to 1.10.4
+
 * Fri Jun 08 2018 Jakub Čajka <jcajka@redhat.com> - 1.10.3-1
 - Rebase to 1.10.3
 
