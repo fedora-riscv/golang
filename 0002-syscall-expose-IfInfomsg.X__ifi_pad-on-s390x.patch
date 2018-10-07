@@ -1,7 +1,7 @@
-From d53a3784bbeab6ac7405c88e56528024061d2ef2 Mon Sep 17 00:00:00 2001
+From 817407fc2d6a861e65086388766f58082d38bc0b Mon Sep 17 00:00:00 2001
 From: Michael Munday <munday@ca.ibm.com>
 Date: Tue, 17 Jan 2017 11:33:38 -0500
-Subject: [PATCH 3/6] syscall: expose IfInfomsg.X__ifi_pad on s390x
+Subject: [PATCH 2/3] syscall: expose IfInfomsg.X__ifi_pad on s390x
 
 Exposing this field on s390x improves compatibility with the other
 linux architectures, all of which already expose it.
