@@ -73,7 +73,7 @@
 # Fedora GOROOT
 %global goroot          /usr/lib/%{name}
 %global gopath          %{_datadir}/gocode
-%global go_arches       %{ix86} x86_64 %{arm} aarch64
+%global go_arches       %{ix86} x86_64 %{arm} aarch64 ppc64le
 %global golibdir        %{_libdir}/golang
 
 %ifarch x86_64
@@ -103,7 +103,7 @@
 
 Name:           golang
 Version:        1.11.2
-Release:        2%{?dist}
+Release:        3%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -571,6 +571,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 30 2018 Jakub Čajka <jcajka@redhat.com> - 1.11.2-3
+- add ppc64le proper
+
 * Mon Nov 26 2018 Jakub Čajka <jcajka@redhat.com> - 1.11.2-2
 - fix up macros file for aarch64
 
