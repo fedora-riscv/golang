@@ -101,12 +101,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.11
-%global go_version 1.11.4
+%global go_api 1.12
+%global go_version 1.12beta2
 
 Name:           golang
-Version:        1.11.4
-Release:        1%{?dist}
+Version:        1.12
+Release:        0.beta2.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -412,8 +412,8 @@ pushd $RPM_BUILD_ROOT%{goroot}
         echo "%%{golibdir}/$(basename $file)" >> $shared_list
     done
     
-	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
-	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
 %if %{race}
@@ -546,6 +546,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 11 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-0.beta2.1
+- Rebase to go1.12beta2
+
 * Wed Jan 02 2019 Jakub Čajka <jcajka@redhat.com> - 1.11.4-1
 - Rebase to go1.11.4
 - Fix for CVE-2018-16875, CVE-2018-16874 and CVE-2018-16873
