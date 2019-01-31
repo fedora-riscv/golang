@@ -106,7 +106,7 @@
 
 Name:           golang
 Version:        1.12
-Release:        0.beta2.2%{?dist}
+Release:        0.beta2.2%{?dist}.1
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -548,6 +548,9 @@ fi
 %endif
 
 %changelog
+* Thu Jan 31 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.12-0.beta2.2.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_30_Mass_Rebuild
+
 * Sun Jan 27 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-0.beta2.2
 - Fix for CVE-2019-6486
 - Resolves: BZ#1668973
