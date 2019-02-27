@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.12
-%global go_version 1.12rc1
+%global go_version 1.12
 
 Name:           golang
 Version:        1.12
-Release:        0.rc1.1%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -546,6 +546,10 @@ fi
 %endif
 
 %changelog
+* Wed Feb 27 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-1
+- Rebase to go1.12 proper
+- Resolves:  BZ#1680040
+
 * Mon Feb 18 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-0.rc1.1
 - Rebase to go1.12rc1
 
