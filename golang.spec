@@ -265,7 +265,7 @@ Obsoletes:      golang-vet < 0-12.1
 Obsoletes:      golang-cover < 0-12.1
 
 Requires(post): %{_sbindir}/update-alternatives
-Requires(postun): %{_sbindir}/update-alternatives
+Requires(preun): %{_sbindir}/update-alternatives
 
 # We strip the meta dependency, but go does require glibc.
 # This is an odd issue, still looking for a better fix.
