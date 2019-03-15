@@ -102,10 +102,10 @@
 %endif
 
 %global go_api 1.12
-%global go_version 1.12
+%global go_version 1.12.1
 
 Name:           golang
-Version:        1.12
+Version:        1.12.1
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -271,7 +271,7 @@ Requires(preun): %{_sbindir}/update-alternatives
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
 Requires:       gcc
-Requires:       git, subversion, mercurial
+Recommends:     git, subversion, mercurial
 %description    bin
 %{summary}
 
@@ -546,6 +546,13 @@ fi
 %endif
 
 %changelog
+* Fri Mar 15 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.1-1
+- Rebase to 1.12.1
+- Fix CVE-2019-9741
+- Fix requirement for %preun (instead of %postun) scriptlet thanks to Tim Landscheidt
+- Use weak deps for SCM deps
+- Resolves: BZ#1688233
+
 * Wed Feb 27 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-1
 - Rebase to go1.12 proper
 - Resolves:  BZ#1680040
