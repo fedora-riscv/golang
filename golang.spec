@@ -106,7 +106,7 @@
 
 Name:           golang
 Version:        1.12.1
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -546,12 +546,13 @@ fi
 %endif
 
 %changelog
+* Mon Apr 01 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.1-2
+- Fix up change log, respective CVE has been fixed in go1.12rc1
+
 * Fri Mar 15 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.1-1
 - Rebase to 1.12.1
-- Fix CVE-2019-9741
-- Fix requirement for %preun (instead of %postun) scriptlet thanks to Tim Landscheidt
+- Fix requirement for %%preun (instead of %%postun) scriptlet thanks to Tim Landscheidt
 - Use weak deps for SCM deps
-- Resolves: BZ#1688233
 
 * Wed Feb 27 2019 Jakub Čajka <jcajka@redhat.com> - 1.12-1
 - Rebase to go1.12 proper
