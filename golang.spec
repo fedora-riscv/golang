@@ -101,12 +101,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.12
-%global go_version 1.12.7
+%global go_api 1.13
+%global go_version 1.13beta1
 
 Name:           golang
-Version:        1.12.7
-Release:        1%{?dist}
+Version:        1.13
+Release:        0.beta1.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -546,6 +546,10 @@ fi
 %endif
 
 %changelog
+* Wed Jul 24 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-0.beta1.1
+- Rebase to 1.13beta1
+- Related: BZ#1732118
+
 * Tue Jul 09 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.7-1
 - Rebase to 1.12.7
 - Resolves: BZ#1728056
