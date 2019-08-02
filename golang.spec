@@ -106,7 +106,7 @@
 
 Name:           golang
 Version:        1.13
-Release:        0.beta1.2%{?dist}.1
+Release:        0.beta1.2%{?dist}.2
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -184,6 +184,8 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# https://github.com/golang/go/commit/8a317ebc0f50339628c003bf06107cd865406dd4
+Patch4:       aarch-ICE-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -310,6 +312,7 @@ Requires:       %{name} = %{version}-%{release}
 %patch1 -p1
 %patch2 -p1
 %patch3 -p1
+%patch4 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -548,6 +551,10 @@ fi
 %endif
 
 %changelog
+* Thu Aug 01 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-0.beta1.2.2
+- Fix ICE affecting aarch64
+- Resolves: BZ#1735290
+
 * Thu Jul 25 2019 Fedora Release Engineering <releng@fedoraproject.org> - 1.13-0.beta1.2.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_31_Mass_Rebuild
 
