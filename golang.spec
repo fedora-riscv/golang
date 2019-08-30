@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.13
-%global go_version 1.13rc1
+%global go_version 1.13rc2
 
 Name:           golang
 Version:        1.13
-Release:        0.rc1.2%{?dist}
+Release:        0.rc2.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -184,7 +184,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-Patch4:       0001-release-branch.go1.13-net-http-update-bundled-golang.patch
+Patch4:       disable-tls13-fornow.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -550,6 +550,11 @@ fi
 %endif
 
 %changelog
+* Fri Aug 30 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-0.rc2.1
+- Rebase to go1.13rc2
+- Do not enable tls1.3 by default
+- Related: BZ#1737471
+
 * Wed Aug 28 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-0.rc1.2
 - Actually fix CVE-2019-9514 and CVE-2019-9512
 - Related: BZ#1741816, BZ#1741827
