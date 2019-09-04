@@ -102,11 +102,11 @@
 %endif
 
 %global go_api 1.13
-%global go_version 1.13rc2
+%global go_version 1.13
 
 Name:           golang
 Version:        1.13
-Release:        0.rc2.1%{?dist}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -137,19 +137,19 @@ Provides: bundled(golang(golang.org/x/crypto/chacha20poly1305))
 Provides: bundled(golang(golang.org/x/crypto/cryptobyte))
 Provides: bundled(golang(golang.org/x/crypto/cryptobyte/asn1))
 Provides: bundled(golang(golang.org/x/crypto/curve25519))
+Provides: bundled(golang(golang.org/x/crypto/hkdf))
 Provides: bundled(golang(golang.org/x/crypto/internal/chacha20))
+Provides: bundled(golang(golang.org/x/crypto/internal/subtle))
 Provides: bundled(golang(golang.org/x/crypto/poly1305))
 Provides: bundled(golang(golang.org/x/net/dns/dnsmessage))
 Provides: bundled(golang(golang.org/x/net/http/httpguts))
 Provides: bundled(golang(golang.org/x/net/http/httpproxy))
 Provides: bundled(golang(golang.org/x/net/http2/hpack))
 Provides: bundled(golang(golang.org/x/net/idna))
-Provides: bundled(golang(golang.org/x/net/internal/nettest))
 Provides: bundled(golang(golang.org/x/net/nettest))
-Provides: bundled(golang(golang.org/x/text/secure))
+Provides: bundled(golang(golang.org/x/sys/cpu))
 Provides: bundled(golang(golang.org/x/text/secure/bidirule))
 Provides: bundled(golang(golang.org/x/text/transform))
-Provides: bundled(golang(golang.org/x/text/unicode))
 Provides: bundled(golang(golang.org/x/text/unicode/bidi))
 Provides: bundled(golang(golang.org/x/text/unicode/norm))
 Provides: bundled(golang(github.com/google/pprof/driver))
@@ -159,10 +159,10 @@ Provides: bundled(golang(github.com/google/pprof/internal/elfexec))
 Provides: bundled(golang(github.com/google/pprof/internal/graph))
 Provides: bundled(golang(github.com/google/pprof/internal/measurement))
 Provides: bundled(golang(github.com/google/pprof/internal/plugin))
-Provides: bundled(golang(github.com/google/pprof/internal/proftest))
 Provides: bundled(golang(github.com/google/pprof/internal/report))
 Provides: bundled(golang(github.com/google/pprof/internal/symbolizer))
 Provides: bundled(golang(github.com/google/pprof/internal/symbolz))
+Provides: bundled(golang(github.com/google/pprof/internal/transport))
 Provides: bundled(golang(github.com/google/pprof/profile))
 Provides: bundled(golang(github.com/google/pprof/third.party/d3))
 Provides: bundled(golang(github.com/google/pprof/third.party/d3flamegraph))
@@ -175,7 +175,40 @@ Provides: bundled(golang(golang.org/x/arch/x86/x86asm))
 Provides: bundled(golang(golang.org/x/crypto/ssh/terminal))
 Provides: bundled(golang(golang.org/x/sys/unix))
 Provides: bundled(golang(golang.org/x/sys/windows))
-Provides: bundled(golang(golang.org/x/sys/windows/registry))
+Provides: bundled(golang(golang.org/x/tools/go/analysis))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/internal/analysisflags))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/internal/facts))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/asmdecl))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/assign))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/atomic))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/bools))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/buildtag))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/cgocall))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/composite))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/copylock))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/ctrlflow))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/errorsas))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/httpresponse))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/inspect))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/internal/analysisutil))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/loopclosure))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/lostcancel))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/nilfunc))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/printf))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/shift))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/stdmethods))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/structtag))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/tests))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unmarshal))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unreachable))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unsafeptr))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unusedresult))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/unitchecker))
+Provides: bundled(golang(golang.org/x/tools/go/ast/astutil))
+Provides: bundled(golang(golang.org/x/tools/go/ast/inspector))
+Provides: bundled(golang(golang.org/x/tools/go/cfg))
+Provides: bundled(golang(golang.org/x/tools/go/types/objectpath))
+Provides: bundled(golang(golang.org/x/tools/go/types/typeutil))
 
 Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
@@ -550,6 +583,9 @@ fi
 %endif
 
 %changelog
+* Wed Sep 04 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-1
+- Rebase to go1.13
+
 * Fri Aug 30 2019 Jakub Čajka <jcajka@redhat.com> - 1.13-0.rc2.1
 - Rebase to go1.13rc2
 - Do not enable tls1.3 by default
