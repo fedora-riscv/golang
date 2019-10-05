@@ -106,7 +106,7 @@
 
 Name:           golang
 Version:        1.11.13
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -183,6 +183,8 @@ Requires:       go-srpm-macros
 
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
+# Backport of https://github.com/golang/go/commit/6e6f4aaf70c8b1cc81e65a26332aa9409de03ad8
+Patch3:       CVE-2019-16276.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -308,6 +310,7 @@ Requires:       %{name} = %{version}-%{release}
 
 %patch1 -p1
 %patch2 -p1
+%patch3 -p2
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -412,8 +415,8 @@ pushd $RPM_BUILD_ROOT%{goroot}
         echo "%%{golibdir}/$(basename $file)" >> $shared_list
     done
     
-	find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
-	find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
+    find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
 %if %{race}
@@ -546,6 +549,10 @@ fi
 %endif
 
 %changelog
+* Sat Oct 5 2019 Jakub Čajka <jcajka@redhat.com> - 1.11.13-2
+- Fix for CVE-2019-16276
+- Resolves: BZ#1755970
+
 * Mon Aug 26 2019 Jakub Čajka <jcajka@redhat.com> - 1.11.13-1
 - Rebase to 1.11.13
 - Fix for CVE-2019-14809, CVE-2019-9514 and CVE-2019-9512
@@ -566,7 +573,7 @@ fi
 * Fri Mar 15 2019 Jakub Čajka <jcajka@redhat.com> - 1.11.6-1
 - Rebase to 1.11.6
 - Fix CVE-2019-9741
-- Fix requirement for %preun (instead of %postun) scriptlet thanks to Tim Landscheidt
+- Fix requirement for %%preun (instead of %%postun) scriptlet thanks to Tim Landscheidt
 - Use weak deps for SCM deps
 - Resolves: BZ#1688233
 
