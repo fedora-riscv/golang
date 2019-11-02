@@ -72,6 +72,9 @@
 
 # Fedora GOROOT
 %global goroot          /usr/lib/%{name}
+%global gopath          %{_datadir}/gocode
+%global go_arches       %{ix86} x86_64 %{arm} aarch64 ppc64le
+%global golibdir        %{_libdir}/golang
 
 %ifarch x86_64
 %global gohostarch  amd64
