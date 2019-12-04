@@ -581,7 +581,7 @@ fi
 %endif
 
 %changelog
-* Tue Nov 25 2019 Neal Gompa <ngompa@datto.com> - 1.13.4-2
+* Tue Nov 26 2019 Neal Gompa <ngompa@datto.com> - 1.13.4-2
 - Small fixes to the spec and tighten up the file list
 
 * Fri Nov 01 2019 Jakub Čajka <jcajka@redhat.com> - 1.13.4-1
