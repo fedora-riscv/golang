@@ -102,10 +102,10 @@
 %endif
 
 %global go_api 1.12
-%global go_version 1.12.13
+%global go_version 1.12.14
 
 Name:           golang
-Version:        1.12.13
+Version:        1.12.14
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -546,8 +546,11 @@ fi
 %endif
 
 %changelog
+* Mon Dec 09 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.14-1
+- Rebase to 1.12.14
+
 * Fri Nov 01 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.13-1
-- Rebase 1.12.13
+- Rebase to 1.12.13
 
 * Sun Oct 20 2019 Jakub Čajka <jcajka@redhat.com> - 1.12.12-1
 - Rebase to 1.12.12
