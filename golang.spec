@@ -104,12 +104,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.13
-%global go_version 1.13.6
+%global go_api 1.14
+%global go_version 1.14beta1
 
 Name:           golang
-Version:        1.13.6
-Release:        1%{?dist}
+Version:        1.14
+Release:        0.beta1.0%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -220,6 +220,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+Patch4:       arm32-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -581,7 +582,11 @@ fi
 %endif
 
 %changelog
-* Mon Jan 13 2020  Jakub Čajka <jcajka@redhat.com> - 1.13.6-1
+* Mon Jan 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.14-0.beta1.0
+- Rebase to go1.14beta1
+- Resolves: BZ#1792475
+
+* Mon Jan 13 2020 Jakub Čajka <jcajka@redhat.com> - 1.13.6-1
 - Rebase to go1.13.6
 
 * Thu Dec 05 2019 Jakub Čajka <jcajka@redhat.com> - 1.13.5-1
