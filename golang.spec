@@ -99,10 +99,10 @@
 %endif
 
 %global go_api 1.13
-%global go_version 1.13.4
+%global go_version 1.13.6
 
 Name:           golang
-Version:        1.13.4
+Version:        1.13.6
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -269,6 +269,8 @@ BuildArch:      noarch
 
 %package        bin
 Summary:        Golang core compiler tools
+# Some distributions refer to this package by this name
+Provides:       %{name}-go = %{version}-%{release}
 Requires:       go = %{version}-%{release}
 # Pre-go1.5, all arches had to be bootstrapped individually, before usable, and
 # env variables to compile for the target os-arch.
@@ -305,7 +307,7 @@ Requires(preun): %{_sbindir}/update-alternatives
 # This is an odd issue, still looking for a better fix.
 Requires:       glibc
 Requires:       gcc
-Requires:       git, subversion, mercurial
+Requires:     git, subversion, mercurial
 %description    bin
 %{summary}
 
@@ -338,11 +340,7 @@ Requires:       %{name} = %{version}-%{release}
 %endif
 
 %prep
-%setup -q -n go
-
-%patch1 -p1
-%patch2 -p1
-%patch3 -p1
+%autosetup -p1 -n go
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -545,7 +543,8 @@ fi
 
 
 %files
-%doc AUTHORS CONTRIBUTORS LICENSE PATENTS
+%license LICENSE PATENTS
+%doc AUTHORS CONTRIBUTORS
 # VERSION has to be present in the GOROOT, for `go install std` to work
 %doc %{goroot}/VERSION
 %dir %{goroot}/doc
@@ -553,13 +552,10 @@ fi
 
 # go files
 %dir %{goroot}
-%exclude %{goroot}/bin/
-%exclude %{goroot}/pkg/
-%exclude %{goroot}/src/
-%exclude %{goroot}/doc/
-%exclude %{goroot}/misc/
-%exclude %{goroot}/test/
-%{goroot}/*
+%{goroot}/api/
+%{goroot}/lib/time/
+%{goroot}/favicon.ico
+%{goroot}/robots.txt
 
 # ensure directory ownership, so they are cleaned up if empty
 %dir %{gopath}
@@ -587,25 +583,30 @@ fi
 
 %files -f go-src.list src
 
-%files -f go-docs.list docs
+%files docs -f go-docs.list
 
-%files -f go-misc.list misc
+%files misc -f go-misc.list
 
-%files -f go-tests.list tests
+%files tests -f go-tests.list
 
-%files -f go-pkg.list bin
+%files bin -f go-pkg.list
 %{_bindir}/go
 %{_bindir}/gofmt
+%{goroot}/bin/linux_%{gohostarch}/go
+%{goroot}/bin/linux_%{gohostarch}/gofmt
 
 %if %{shared}
-%files -f go-shared.list shared
+%files shared -f go-shared.list
 %endif
 
 %if %{race}
-%files -f go-race.list race
+%files race -f go-race.list
 %endif
 
 %changelog
+* Mon Feb 03 2020 Jakub Čajka <jcajka@redhat.com> - 1.13.6-1
+- Rebase to go1.13.6
+
 * Wed Nov 13 2019 Jakub Čajka <jcajka@redhat.com> - 1.13.4-1
 - Rebase to go1.13.4
 
