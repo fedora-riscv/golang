@@ -105,11 +105,11 @@
 %endif
 
 %global go_api 1.14
-%global go_version 1.14beta1
+%global go_version 1.14rc1
 
 Name:           golang
 Version:        1.14
-Release:        0.beta1.0%{?dist}.1
+Release:        0.rc1.0%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -220,7 +220,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-Patch4:       arm32-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -582,6 +581,10 @@ fi
 %endif
 
 %changelog
+* Thu Feb 06 2020 Jakub Čajka <jcajka@redhat.com> - 1.14-0.rc1.0
+- Rebase to go1.14.rc1
+- Related: BZ#1792475
+
 * Tue Jan 28 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.14-0.beta1.0.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_32_Mass_Rebuild
 
