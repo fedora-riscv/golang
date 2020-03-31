@@ -583,8 +583,8 @@ fi
 %changelog
 * Mon Mar 30 2020 Jakub Čajka <jcajka@redhat.com> - 1.13.9-1
 - Rebase to go1.13.9
-- Fix for CVE-2020-0601 and CVE-2020-7919
-- Resolves:
+- Fix for CVE-2020-7919
+- Resolves: BZ#1808044
 
 * Mon Jan 13 2020 Jakub Čajka <jcajka@redhat.com> - 1.13.6-1
 - Rebase to go1.13.6
