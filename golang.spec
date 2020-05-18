@@ -105,10 +105,10 @@
 %endif
 
 %global go_api 1.14
-%global go_version 1.14.2
+%global go_version 1.14.3
 
 Name:           golang
-Version:        1.14.2
+Version:        1.14.3
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -585,6 +585,9 @@ fi
 %endif
 
 %changelog
+* Mon May 18 2020 Álex Sáez <asm@redhat.com> - 1.14.3-1
+- Rebase to go1.14.3
+
 * Mon Apr 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.14.2-1
 - Rebase to go1.14.2
 - Resolves: BZ#1815282
