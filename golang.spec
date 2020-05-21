@@ -587,6 +587,7 @@ fi
 %changelog
 * Mon May 18 2020 Álex Sáez <asm@redhat.com> - 1.14.3-1
 - Rebase to go1.14.3
+- Resolves: BZ#1836015
 
 * Mon Apr 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.14.2-1
 - Rebase to go1.14.2
