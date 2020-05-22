@@ -1,5 +1,4 @@
 %bcond_with bootstrap
-%bcond_with ignore_tests
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -50,11 +49,7 @@
 %endif
 
 # Controls what ever we fail on failed tests
-%ifarch x86_64
-%global fail_on_tests 0
-%else
 %global fail_on_tests 1
-%endif
 
 # Build golang shared objects for stdlib
 %ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
@@ -99,10 +94,10 @@
 %endif
 
 %global go_api 1.13
-%global go_version 1.13.6
+%global go_version 1.13.11
 
 Name:           golang
-Version:        1.13.6
+Version:        1.13.11
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -604,6 +599,9 @@ fi
 %endif
 
 %changelog
+* Mon May 18 2020 Álex Sáez <asm@redhat.com> - 1.13.11-1
+- Rebase to go1.13.11
+
 * Mon Feb 03 2020 Jakub Čajka <jcajka@redhat.com> - 1.13.6-1
 - Rebase to go1.13.6
 
