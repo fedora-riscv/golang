@@ -1,10 +1,5 @@
 %bcond_with bootstrap
-# temporalily ignore test failures
-%ifarch %{ix86} aarch64 %{arm}
-%bcond_without ignore_tests
-%else
 %bcond_with ignore_tests
-%endif
 
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
@@ -105,10 +100,10 @@
 %endif
 
 %global go_api 1.14
-%global go_version 1.14.3
+%global go_version 1.14.4
 
 Name:           golang
-Version:        1.14.3
+Version:        1.14.4
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -585,6 +580,10 @@ fi
 %endif
 
 %changelog
+* Tue Jun 30 2020 Alejandro Sáez <asm@redhat.com> - 1.14.4-1
+- Rebase to go1.14.4
+- Related: BZ#1842708
+
 * Mon May 18 2020 Álex Sáez <asm@redhat.com> - 1.14.3-1
 - Rebase to go1.14.3
 - Resolves: BZ#1836015
