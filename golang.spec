@@ -508,7 +508,7 @@ export CGO_ENABLED=0
 %endif
 # workaround for https://github.com/golang/go/issues/39466 until it gests fixed
 %ifarch aarch64
-export CGO_CFLAG="-mno-outline-atomics"
+export CGO_CFLAGS="-mno-outline-atomics"
 %endif
 
 # make sure to not timeout
