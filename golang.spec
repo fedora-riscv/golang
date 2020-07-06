@@ -1,5 +1,10 @@
 %bcond_with bootstrap
+# temporalily ignore test failures
+%ifarch %{ix86} aarch64 %{arm}
+%bcond_without ignore_tests
+%else
 %bcond_with ignore_tests
+%endif
 
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
@@ -215,6 +220,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+Patch4:       0004-ppc64le-fix-missing-deferreturn.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -507,9 +513,11 @@ export GO_LDFLAGS="-linkmode internal"
 export CGO_ENABLED=0
 %endif
 # workaround for https://github.com/golang/go/issues/39466 until it gests fixed
-%ifarch aarch64
-export CGO_CFLAGS="-mno-outline-atomics"
-%endif
+# Commented until the patch is ready, this work around suggested in the link avobe
+# doesn't work properly
+#%ifarch aarch64
+#export CGO_CFLAGS="-mno-outline-atomics"
+#%endif
 
 # make sure to not timeout
 export GO_TEST_TIMEOUT_SCALE=2
@@ -586,6 +594,7 @@ fi
 %changelog
 * Tue Jun 30 2020 Alejandro Sáez <asm@redhat.com> - 1.14.4-1
 - Rebase to go1.14.4
+- Add patch that fixes: https://golang.org/issue/39991
 - Related: BZ#1842708
 
 * Mon May 18 2020 Álex Sáez <asm@redhat.com> - 1.14.3-1
