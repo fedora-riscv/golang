@@ -1,0 +1,89 @@
+From 9f33108dfa22946622a8a78b5cd3f64cd3e455dd Mon Sep 17 00:00:00 2001
+From: Cherry Zhang <cherryyz@google.com>
+Date: Tue, 23 Jun 2020 12:02:54 -0400
+Subject: [PATCH] cmd/link: skip zero values in fingerprint check
+
+Normally, packages are loaded in dependency order, and if a
+Library object is not nil, it is already loaded with the actual
+fingerprint. In shared build mode, however, packages may be added
+not in dependency order (e.g. go install -buildmode=shared std
+adds all std packages before loading them), and it is possible
+that a Library's fingerprint is not yet loaded. Skip the check
+in this case (when the fingerprint is the zero value).
+
+Fixes #39777.
+
+Change-Id: I66208e92bf687c8778963ba8e33e9bd948f82f3a
+Reviewed-on: https://go-review.googlesource.com/c/go/+/239517
+Run-TryBot: Cherry Zhang <cherryyz@google.com>
+TryBot-Result: Gobot Gobot <gobot@golang.org>
+Reviewed-by: Than McIntosh <thanm@google.com>
+---
+ misc/cgo/testshared/shared_test.go             | 6 ++++++
+ misc/cgo/testshared/testdata/issue39777/a/a.go | 9 +++++++++
+ misc/cgo/testshared/testdata/issue39777/b/b.go | 7 +++++++
+ src/cmd/link/internal/ld/ld.go                 | 7 ++++++-
+ 4 files changed, 28 insertions(+), 1 deletion(-)
+ create mode 100644 misc/cgo/testshared/testdata/issue39777/a/a.go
+ create mode 100644 misc/cgo/testshared/testdata/issue39777/b/b.go
+
+diff --git a/misc/cgo/testshared/shared_test.go b/misc/cgo/testshared/shared_test.go
+index acae1b2c212c..fda3d2ce76fc 100644
+--- a/misc/cgo/testshared/shared_test.go
++++ b/misc/cgo/testshared/shared_test.go
+@@ -1028,3 +1028,9 @@ func TestGeneratedHash(t *testing.T) {
+ 	goCmd(nil, "install", "-buildmode=shared", "-linkshared", "./issue30768/issue30768lib")
+ 	goCmd(nil, "test", "-linkshared", "./issue30768")
+ }
++
++// Test that packages can be added not in dependency order (here a depends on b, and a adds
++// before b). This could happen with e.g. go build -buildmode=shared std. See issue 39777.
++func TestPackageOrder(t *testing.T) {
++	goCmd(t, "install", "-buildmode=shared", "-linkshared", "./issue39777/a", "./issue39777/b")
++}
+diff --git a/misc/cgo/testshared/testdata/issue39777/a/a.go b/misc/cgo/testshared/testdata/issue39777/a/a.go
+new file mode 100644
+index 000000000000..c7bf8359514a
+--- /dev/null
++++ b/misc/cgo/testshared/testdata/issue39777/a/a.go
+@@ -0,0 +1,9 @@
++// Copyright 2020 The Go Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style
++// license that can be found in the LICENSE file.
++
++package a
++
++import "testshared/issue39777/b"
++
++func F() { b.F() }
+diff --git a/misc/cgo/testshared/testdata/issue39777/b/b.go b/misc/cgo/testshared/testdata/issue39777/b/b.go
+new file mode 100644
+index 000000000000..4e681965e68b
+--- /dev/null
++++ b/misc/cgo/testshared/testdata/issue39777/b/b.go
+@@ -0,0 +1,7 @@
++// Copyright 2020 The Go Authors. All rights reserved.
++// Use of this source code is governed by a BSD-style
++// license that can be found in the LICENSE file.
++
++package b
++
++func F() {}
+diff --git a/src/cmd/link/internal/ld/ld.go b/src/cmd/link/internal/ld/ld.go
+index 71f388b5a066..e56a6690fbcc 100644
+--- a/src/cmd/link/internal/ld/ld.go
++++ b/src/cmd/link/internal/ld/ld.go
+@@ -160,7 +160,12 @@ func addlib(ctxt *Link, src, obj, lib string, fingerprint goobj2.FingerprintType
+ 	pkg := pkgname(ctxt, lib)
+ 
+ 	// already loaded?
+-	if l := ctxt.LibraryByPkg[pkg]; l != nil {
++	if l := ctxt.LibraryByPkg[pkg]; l != nil && !l.Fingerprint.IsZero() {
++		// Normally, packages are loaded in dependency order, and if l != nil
++		// l is already loaded with the actual fingerprint. In shared build mode,
++		// however, packages may be added not in dependency order, and it is
++		// possible that l's fingerprint is not yet loaded -- exclude it in
++		// checking.
+ 		checkFingerprint(l, l.Fingerprint, src, fingerprint)
+ 		return l
+ 	}
