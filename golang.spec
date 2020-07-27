@@ -105,11 +105,11 @@
 %endif
 
 %global go_api 1.15
-%global go_version 1.15beta1
+%global go_version 1.15rc1
 
 Name:           golang
 Version:        1.15
-Release:        0.beta1.0%{?dist}
+Release:        0.rc1.0%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -220,7 +220,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-Patch4:       shared-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -515,9 +514,9 @@ export CGO_ENABLED=0
 # workaround for https://github.com/golang/go/issues/39466 until it gests fixed
 # Commented until the patch is ready, this work around suggested in the link avobe
 # doesn't work properly
-#%ifarch aarch64
+#ifarch aarch64
 #export CGO_CFLAGS="-mno-outline-atomics"
-#%endif
+#endif
 
 # make sure to not timeout
 export GO_TEST_TIMEOUT_SCALE=2
@@ -592,8 +591,12 @@ fi
 %endif
 
 %changelog
+* Mon Jul 27 2020 Jakub Čajka <jcajka@redhat.com> - 1.15-0.rc1.0
+- Rebase to go1.15rc1
+- Related: BZ#1859241
+
 * Mon Jul 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.15-0.beta1.0
-* Rebase to go1.15beta1
+- Rebase to go1.15beta1
 
 * Mon Jul 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.14.6-1
 - Rebase to go1.14.6
