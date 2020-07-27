@@ -109,7 +109,7 @@
 
 Name:           golang
 Version:        1.15
-Release:        0.rc1.0%{?dist}
+Release:        0.rc1.0%{?dist}.1
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -591,6 +591,9 @@ fi
 %endif
 
 %changelog
+* Mon Jul 27 2020 Fedora Release Engineering <releng@fedoraproject.org> - 1.15-0.rc1.0.1
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_33_Mass_Rebuild
+
 * Mon Jul 27 2020 Jakub Čajka <jcajka@redhat.com> - 1.15-0.rc1.0
 - Rebase to go1.15rc1
 - Related: BZ#1859241
