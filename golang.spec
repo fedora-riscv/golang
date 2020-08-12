@@ -105,10 +105,10 @@
 %endif
 
 %global go_api 1.14
-%global go_version 1.14.6
+%global go_version 1.14.7
 
 Name:           golang
-Version:        1.14.6
+Version:        1.14.7
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -220,6 +220,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+Patch4:       0004-fix-cve-2020-14040.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -591,6 +592,11 @@ fi
 %endif
 
 %changelog
+* Mon Aug 10 2020 Alejandro Sáez <asm@redhat.com> - 1.14.7-1
+- Rebase to go1.14.7
+- Security fix for CVE-2020-14040 and CVE-2020-15586
+- Resolves: BZ#1853654, BZ#1867100, BZ#1866892
+
 * Mon Jul 20 2020 Jakub Čajka <jcajka@redhat.com> - 1.14.6-1
 - Rebase to go1.14.6
 - Security fix for CVE-2020-14040 and CVE-2020-15586
