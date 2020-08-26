@@ -226,6 +226,9 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# Revert https://github.com/golang/go/commit/b4924870f4b8302aba051a506bb499fad99b464e
+# as RHEL 6 is using gcc 4.4
+Patch4:       el6-atomics.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
