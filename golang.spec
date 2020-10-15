@@ -1,6 +1,7 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
-%ifarch %{ix86} aarch64 %{arm}
+# due to https://github.com/golang/go/issues/39466
+%ifarch aarch64
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -105,10 +106,10 @@
 %endif
 
 %global go_api 1.15
-%global go_version 1.15.2
+%global go_version 1.15.3
 
 Name:           golang
-Version:        1.15.2
+Version:        1.15.3
 Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
@@ -607,6 +608,10 @@ fi
 %endif
 
 %changelog
+* Thu Oct 15 2020 Jakub Čajka <jcajka@redhat.com> - 1.15.3-1
+- Rebase to go1.15.3
+- Resolves: BZ#1888443
+
 * Thu Sep 10 2020 Jakub Čajka <jcajka@redhat.com> - 1.15.2-1
 - Rebase to go1.15.2
 - Resolves: BZ#1877565
