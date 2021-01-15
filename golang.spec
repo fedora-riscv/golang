@@ -105,12 +105,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.15
-%global go_version 1.15.6
+%global go_api 1.16
+%global go_version 1.16beta1
 
 Name:           golang
-Version:        1.15.6
-Release:        1%{?dist}
+Version:        1.16
+Release:        0.beta1.1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -203,6 +203,7 @@ Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/composite))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/copylock))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/ctrlflow))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/errorsas))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/framepointer))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/httpresponse))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/ifaceassert))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/inspect))
@@ -215,6 +216,7 @@ Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/shift))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/stdmethods))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/stringintconv))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/structtag))
+Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/testinggoroutine))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/tests))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unmarshal))
 Provides: bundled(golang(golang.org/x/tools/go/analysis/passes/unreachable))
@@ -227,6 +229,7 @@ Provides: bundled(golang(golang.org/x/tools/go/cfg))
 Provides: bundled(golang(golang.org/x/tools/go/types/objectpath))
 Provides: bundled(golang(golang.org/x/tools/go/types/typeutil))
 Provides: bundled(golang(golang.org/x/tools/internal/analysisinternal))
+Provides: bundled(golang(golang.org/x/tools/internal/lsp/fuzzy))
 Provides: bundled(golang(golang.org/x/xerrors))
 Provides: bundled(golang(golang.org/x/xerrors/internal))
 
@@ -608,6 +611,10 @@ fi
 %endif
 
 %changelog
+* Fri Jan 15 2021 Jakub Čajka <jcajka@redhat.com> - 1.16-0.beta1.1
+- Update to go1.16beta1
+- Related: BZ#1913835
+
 * Fri Dec 04 2020 Jakub Čajka <jcajka@redhat.com> - 1.15.6-1
 - Rebase to go1.15.6
 - Resolves: BZ#1904238
