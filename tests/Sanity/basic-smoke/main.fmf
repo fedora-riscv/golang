@@ -1,0 +1,13 @@
+summary: basic smoke test for go
+description: ''
+contact:
+- Edjunior Machado <emachado@redhat.com>
+component:
+- golang
+test: ./runtest.sh
+framework: beakerlib
+recommend:
+- golang
+duration: 5m
+extra-summary: /tools/golang/Sanity/basic-smoke
+extra-task: /tools/golang/Sanity/basic-smoke
