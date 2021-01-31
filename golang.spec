@@ -106,11 +106,15 @@
 %endif
 
 %global go_api 1.16
-%global go_version 1.16beta1
+%global go_prerelease rc1
+%global go_version %{go_api}%{?go_prerelease}
+
+# For rpmdev-bumpspec and releng automation
+%global baserelease 1
 
 Name:           golang
 Version:        1.16
-Release:        0.beta1.1%{?dist}.1
+Release:        %{?go_prerelease:0.%{go_prerelease}.}%{baserelease}%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -611,6 +615,10 @@ fi
 %endif
 
 %changelog
+* Sun Jan 31 2021 Neal Gompa <ngompa13@gmail.com> - 1.16-0.rc1.1
+- Update to go1.16rc1
+- Related: BZ#1913835
+
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.16-0.beta1.1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
 
