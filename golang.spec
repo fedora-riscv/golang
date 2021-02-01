@@ -244,6 +244,9 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# CL https://go-review.googlesource.com/c/go/+/288278
+# Fixes bug in the test on s390x and other arches
+Patch4:       CL288278.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -536,7 +539,7 @@ export GO_LDFLAGS="-linkmode internal"
 export CGO_ENABLED=0
 %endif
 # workaround for https://github.com/golang/go/issues/39466 until it gests fixed
-# Commented until the patch is ready, this work around suggested in the link avobe
+# Commented until the patch is ready, this workaround suggested in the link above
 # doesn't work properly
 #ifarch aarch64
 #export CGO_CFLAGS="-mno-outline-atomics"
@@ -618,6 +621,7 @@ fi
 * Sun Jan 31 2021 Neal Gompa <ngompa13@gmail.com> - 1.16-0.rc1.1
 - Update to go1.16rc1
 - Related: BZ#1913835
+- Resolves: BZ#1922617
 
 * Tue Jan 26 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.16-0.beta1.1.1
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_34_Mass_Rebuild
