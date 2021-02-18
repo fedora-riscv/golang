@@ -17,6 +17,7 @@
 
 provides=""
 for bundle in $(find -name modules.txt); do
-provides="$provides\n$(cat "$bundle" | grep "^# " | grep -v "# explicit" | sed -r s/"^#.* => "// | sed -r "s/# //" | sed -r "s:(.*) (.*):Provides\: bundled(golang(\1)) = \2:")"
+provides="$provides\n$(cat "$bundle" | grep "^# " | grep -v "# explicit" | sed -r s/"^#.* => "// | sed -r "s/# //" | sed -r "s:(.*) v(.*):Provides\: bundled(golang(\1)) = \2:")"
 done
+#TODO replace - with . in version per packaging guidelines
 echo -e "$provides" | sort -u
