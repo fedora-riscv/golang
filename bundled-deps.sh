@@ -1,4 +1,4 @@
-#! /bin/bash
+#!/bin/bash
 # Copyright (C) 2021 Jakub Čajka jcajka@redhat.com
 #
 # This program is free software; you can redistribute it and/or
@@ -16,7 +16,14 @@
 # Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 provides=""
+
 for bundle in $(find -name modules.txt); do
-provides="$provides\n$(cat "$bundle" | grep "^# " | grep -v "# explicit" | sed -r s/"^#.* => "// | sed -r "s/# //" | sed -r "s:(.*) v(.*):Provides\: bundled(golang(\1)) = \2:")"
-done
+	provides="$provides\n$(cat "$bundle" |
+		grep "^# " |
+		grep -v "# explicit" |
+		sed -r s/"^#.* => "// |
+		sed -r "s/# //" |
+		sed -r "s:(.*) v(.*):Provides\: bundled(golang(\1)) = \2:" |
+		sed '/= .*/s/-/./g')"
+	done
 echo -e "$provides" | sed 's/-/./g' | sort -u
