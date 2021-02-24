@@ -105,7 +105,7 @@
 %endif
 
 %global go_api 1.14
-%global go_version 1.14.13
+%global go_version 1.14.15
 
 Name:           golang
 Version:        1.14.15
