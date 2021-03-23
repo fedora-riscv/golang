@@ -110,7 +110,7 @@
 %global go_version %{go_api}%{?go_prerelease}
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
 
 Name:           golang
 Version:        1.16
@@ -530,6 +530,10 @@ fi
 %endif
 
 %changelog
+* Tue Mar 23 2021 Alejandro Sáez <asm@redhat.com> - 1.16-2
+- Update to go1.16.2
+- Resolves: rhbz#1937435
+
 * Thu Feb 18 2021 Jakub Čajka <jcajka@redhat.com> - 1.16-1
 - Update to go1.16
 - Improved bundled provides
