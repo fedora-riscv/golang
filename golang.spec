@@ -106,15 +106,14 @@
 %endif
 
 %global go_api 1.16
-#global go_prerelease {nil}
-%global go_version %{go_api}%{?go_prerelease}
+%global go_version 1.16.3
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
 
 Name:           golang
-Version:        1.16
-Release:        %{?go_prerelease:0.%{go_prerelease}.}%{baserelease}%{?dist}
+Version:        %{go_version}
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -530,6 +529,10 @@ fi
 %endif
 
 %changelog
+* Fri Apr 09 2021 Alejandro Sáez <asm@redhat.com> - 1.16.3-1
+- Update to go1.16.3
+- Resolves: rhbz#1945768
+
 * Tue Mar 23 2021 Alejandro Sáez <asm@redhat.com> - 1.16-2
 - Update to go1.16.2
 - Resolves: rhbz#1937435
