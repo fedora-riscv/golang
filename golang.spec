@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.16
-%global go_version 1.16.3
+%global go_version 1.16.4
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -529,6 +529,11 @@ fi
 %endif
 
 %changelog
+* Mon May 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.4-1
+- Update to go1.16.4
+- Security fix for CVE-2021-31525 
+- Resolves: rhbz#1958343
+
 * Fri Apr 09 2021 Alejandro Sáez <asm@redhat.com> - 1.16.3-1
 - Update to go1.16.3
 
