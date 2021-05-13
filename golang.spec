@@ -109,11 +109,11 @@
 %global go_version 1.16.4
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
 
 Name:           golang
 Version:        %{go_version}
-Release:        1%{?dist}
+Release:        %baserelease%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -158,6 +158,8 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# Scheduled backport for go1.16 https://golang.org/cl/316750 by laboger
+Patch4:       ppc64x-linker-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -529,6 +531,9 @@ fi
 %endif
 
 %changelog
+* Thu May 13 2021 Jakub Čajka <jcajka@redhat.com> - 1.16.4-2
+- Fix linker issue on ppc64le breaking kube 1.21 build
+
 * Mon May 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.4-1
 - Update to go1.16.4
 - Security fix for CVE-2021-31525 
