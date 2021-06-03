@@ -106,14 +106,14 @@
 %endif
 
 %global go_api 1.16
-%global go_version 1.16.4
+%global go_version %{go_api}.4
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 2
 
 Name:           golang
 Version:        %{go_version}
-Release:        %baserelease%{?dist}
+Release:        %{baserelease}%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
