@@ -158,8 +158,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-# Scheduled backport for go1.16 https://golang.org/cl/316750 by laboger
-# Patch4:       ppc64x-linker-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
