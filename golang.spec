@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.5
+%global go_version %{go_api}.6
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -158,8 +158,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-# Scheduled backport for go1.16 https://golang.org/cl/316750 by laboger
-# Patch4:       ppc64x-linker-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -531,6 +529,10 @@ fi
 %endif
 
 %changelog
+* Wed Jul 14 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.6-1
+- Update to go1.16.6
+- Security fix for CVE-2021-34558
+
 * Mon Jun 21 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.5-1
 - Update to go1.16.5
 - Security fix for CVE-2021-33195
