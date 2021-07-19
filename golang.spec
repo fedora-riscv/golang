@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.15
-%global go_version 1.15.13
+%global go_version 1.15.14
 
 Name:           golang
 Version:        %{go_version}
@@ -608,6 +608,11 @@ fi
 %endif
 
 %changelog
+* Mon Jul 19 2021 Jakub Čajka <jcajka@redhat.com> - 1.15.14-1
+- Update to go1.15.14
+- Security fix for CVE-2021-34558
+- Resolves: BZ#1983597
+
 * Wed Jun 23 2021 Alejandro Sáez <asm@redhat.com> - 1.15.13-1
 - Update to go1.15.13
 
