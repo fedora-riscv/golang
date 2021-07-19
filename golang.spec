@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.5
+%global go_version %{go_api}.6
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -529,6 +529,11 @@ fi
 %endif
 
 %changelog
+* Wed Jul 14 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.6-1
+- Update to go1.16.6
+- Security fix for CVE-2021-34558
+- Resolves: BZ#1983597
+
 * Mon Jun 21 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.5-1
 - Update to go1.16.5
 - Security fix for CVE-2021-33195
