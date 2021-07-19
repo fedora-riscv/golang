@@ -532,6 +532,7 @@ fi
 * Wed Jul 14 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.6-1
 - Update to go1.16.6
 - Security fix for CVE-2021-34558
+- Resolves: BZ#1983597
 
 * Mon Jun 21 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.5-1
 - Update to go1.16.5
