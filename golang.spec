@@ -109,7 +109,7 @@
 %global go_version %{go_api}.6
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
 
 Name:           golang
 Version:        %{go_version}
@@ -529,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Thu Jul 22 2021 Fedora Release Engineering <releng@fedoraproject.org> - 1.16.6-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_35_Mass_Rebuild
+
 * Wed Jul 14 2021 Mike Rochefort <mroche@fedoraproject.org> - 1.16.6-1
 - Update to go1.16.6
 - Security fix for CVE-2021-34558
