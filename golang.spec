@@ -226,6 +226,8 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# https://go-review.googlesource.com/c/go/+/334411
+Patch4:       ppc64le-vdso-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -617,6 +619,7 @@ fi
 %changelog
 * Tue Jul 27 2021 Jakub Čajka <jcajka@redhat.com> - 1.15.14-1
 - Update to go1.15.14
+- Fix crash in VDSO calls on ppc64le
 - Security fix for CVE-2020-28851, CVE-2020-28852, CVE-2021-3114, CVE-2021-3115, CVE-2021-27918, CVE-2021-31525, CVE-2021-33198, CVE-2021-33197, CVE-2021-33195 and CVE-2021-34558
 - Resolves: BZ#1913336, BZ#1913365, BZ#1918752, BZ#1918762, BZ#1937902, BZ#1958342, BZ#1989576, BZ#1989571, BZ#1989565 and BZ#1986200
 
