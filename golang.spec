@@ -110,7 +110,7 @@
 
 Name:           golang
 Version:        %{go_version}
-Release:        1%{?dist}
+Release:        2%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -237,6 +237,8 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+# https://go-review.googlesource.com/c/go/+/334411
+Patch4:       ppc64le-vdso-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -608,6 +610,9 @@ fi
 %endif
 
 %changelog
+* Fri Jul 30 2021 Jakub Čajka <jcajka@redhat.com> - 1.15.14-2
+- Fix crash in VDSO calls on ppc64le
+
 * Mon Jul 19 2021 Jakub Čajka <jcajka@redhat.com> - 1.15.14-1
 - Update to go1.15.14
 - Security fix for CVE-2021-34558
