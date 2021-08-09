@@ -105,11 +105,12 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.16
-%global go_version %{go_api}.6
+%global go_api 1.17
+%global go_prerelease rc2
+%global go_version %{go_api}%{?go_prerelease}
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 3
+%global baserelease 1
 
 Name:           golang
 Version:        %{go_version}
@@ -158,8 +159,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-# https://go-review.googlesource.com/c/go/+/334410/
-Patch4:       ppc64le-vdso-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -337,6 +336,7 @@ GOROOT=$(pwd) PATH=$(pwd)/bin:$PATH go install -race -v -x std
 %endif
 
 %install
+echo "== 1 =="
 rm -rf $RPM_BUILD_ROOT
 # remove GC build cache
 rm -rf pkg/obj/go-build/*
@@ -347,9 +347,9 @@ mkdir -p $RPM_BUILD_ROOT%{goroot}
 
 # install everything into libdir (until symlink problems are fixed)
 # https://code.google.com/p/go/issues/detail?id=5830
-cp -apv api bin doc favicon.ico lib pkg robots.txt src misc test VERSION \
+cp -apv api bin doc lib pkg src misc test VERSION \
    $RPM_BUILD_ROOT%{goroot}
-
+echo "== 2 =="
 # bz1099206
 find $RPM_BUILD_ROOT%{goroot}/src -exec touch -r $RPM_BUILD_ROOT%{goroot}/VERSION "{}" \;
 # and level out all the built archives
@@ -367,6 +367,7 @@ tests_list=$cwd/go-tests.list
 rm -f $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_list
 touch $src_list $pkg_list $docs_list $misc_list $tests_list $shared_list $race_list
 pushd $RPM_BUILD_ROOT%{goroot}
+  echo "== 3 =="
     find src/ -type d -a \( ! -name testdata -a ! -ipath '*/testdata/*' \) -printf '%%%dir %{goroot}/%p\n' >> $src_list
     find src/ ! -type d -a \( ! -ipath '*/testdata/*' -a ! -name '*_test.go' \) -printf '%{goroot}/%p\n' >> $src_list
 
@@ -380,6 +381,7 @@ pushd $RPM_BUILD_ROOT%{goroot}
     find misc/ ! -type d -printf '%{goroot}/%p\n' >> $misc_list
 
 %if %{shared}
+echo "== 4 =="
     mkdir -p %{buildroot}/%{_libdir}/
     mkdir -p %{buildroot}/%{golibdir}/
     for file in $(find .  -iname "*.so" ); do
@@ -396,6 +398,8 @@ pushd $RPM_BUILD_ROOT%{goroot}
     find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
 
+echo "== 5 =="
+
 %if %{race}
 
     find pkg/*_race/ -type d -printf '%%%dir %{goroot}/%p\n' >> $race_list
@@ -411,7 +415,7 @@ pushd $RPM_BUILD_ROOT%{goroot}
     find lib/ -type d -printf '%%%dir %{goroot}/%p\n' >> $tests_list
     find lib/ ! -type d -printf '%{goroot}/%p\n' >> $tests_list
 popd
-
+echo "== 6 =="
 # remove the doc Makefile
 rm -rfv $RPM_BUILD_ROOT%{goroot}/doc/Makefile
 
@@ -426,7 +430,7 @@ mkdir -p $RPM_BUILD_ROOT%{gopath}/src/github.com
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/bitbucket.org
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/code.google.com/p
 mkdir -p $RPM_BUILD_ROOT%{gopath}/src/golang.org/x
-
+echo "== 7 =="
 # make sure these files exist and point to alternatives
 rm -f $RPM_BUILD_ROOT%{_bindir}/go
 ln -sf /etc/alternatives/go $RPM_BUILD_ROOT%{_bindir}/go
@@ -436,6 +440,8 @@ ln -sf /etc/alternatives/gofmt $RPM_BUILD_ROOT%{_bindir}/gofmt
 # gdbinit
 mkdir -p $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d
 cp -av %{SOURCE100} $RPM_BUILD_ROOT%{_sysconfdir}/gdbinit.d/golang.gdb
+
+echo "== END OF INSTALL =="
 
 %check
 export GOROOT=$(pwd -P)
@@ -491,8 +497,6 @@ fi
 %dir %{goroot}
 %{goroot}/api/
 %{goroot}/lib/time/
-%{goroot}/favicon.ico
-%{goroot}/robots.txt
 
 # ensure directory ownership, so they are cleaned up if empty
 %dir %{gopath}
@@ -531,6 +535,11 @@ fi
 %endif
 
 %changelog
+* Mon Aug 09 2021 Alejandro Sáez <asm@redhat.com> - 1.17-0.rc2
+- Update to go1.17rc2
+- Update patches
+- Remove patch, already in the source https://go-review.googlesource.com/c/go/+/334410/
+
 * Thu Jul 29 2021 Jakub Čajka <jcajka@redhat.com> - 1.16.6-3
 - fix crash in VDSO calls on ppc64le with new kernels
 
