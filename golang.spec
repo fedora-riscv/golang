@@ -106,10 +106,10 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.6
+%global go_version %{go_api}.8
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
 
 Name:           golang
 Version:        %{go_version}
@@ -158,8 +158,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-# https://go-review.googlesource.com/c/go/+/334410/
-Patch4:       ppc64le-vdso-fix.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -531,6 +529,12 @@ fi
 %endif
 
 %changelog
+* Fri Sep 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.8-1
+- Update to go1.16.8
+- Remove patch: ppc64le-vdso-fix.patch
+- Related: rhbz#1937911
+- Related: rhbz#1999415
+
 * Thu Jul 29 2021 Jakub Čajka <jcajka@redhat.com> - 1.16.6-2
 - fix crash in VDSO calls on ppc64le with new kernels
 
