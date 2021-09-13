@@ -109,7 +109,7 @@
 %global go_version %{go_api}.8
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
 
 Name:           golang
 Version:        %{go_version}
@@ -529,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Mon Sep 13 2021 Alejandro Sáez <asm@redhat.com> - 1.16.8-2
+- Fix patch
+
 * Fri Sep 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.8-1
 - Update to go1.16.8
 - Remove patch: ppc64le-vdso-fix.patch
