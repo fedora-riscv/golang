@@ -106,11 +106,11 @@
 %endif
 
 %global go_api 1.17
-%global go_version %{go_api}
-
+%global go_version %{go_api}.3
+ 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
-
+%global baserelease 1
+ 
 Name:           golang
 Version:        %{go_version}
 Release:        %{baserelease}%{?dist}
@@ -534,6 +534,10 @@ fi
 %endif
 
 %changelog
+* Mon Nov 22 2021 Alejandro Sáez <asm@redhat.com> - 1.17.3-1
+- Update to 1.17.3
+- Related: rhbz#2002859
+
 * Wed Aug 18 2021 Alejandro Sáez <asm@redhat.com> - 1.17-1
 - Update to go1.17
 - Resolves: rhbz#1957935
