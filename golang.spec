@@ -106,10 +106,10 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.8
+%global go_version %{go_api}.10
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
 
 Name:           golang
 Version:        %{go_version}
@@ -529,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Fri Nov 12 2021 Alejandro Sáez <asm@redhat.com> - 1.16.10-1
+- Update to go1.16.10
+
 * Mon Sep 13 2021 Alejandro Sáez <asm@redhat.com> - 1.16.8-2
 - Fix patch
 
