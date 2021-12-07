@@ -1,7 +1,7 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
 # due to https://github.com/golang/go/issues/39466
-%ifarch aarch64
+%ifarch aarch64 ppc64le
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.17
-%global go_version %{go_api}.3
+%global go_version %{go_api}.4
  
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -534,6 +534,10 @@ fi
 %endif
 
 %changelog
+* Tue Dec 07 2021 Alejandro Sáez <asm@redhat.com> - 1.17.4-1
+- Update to 1.17.4
+- Related: rhbz#2002859
+
 * Mon Nov 22 2021 Alejandro Sáez <asm@redhat.com> - 1.17.3-1
 - Update to 1.17.3
 - Related: rhbz#2002859
