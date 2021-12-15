@@ -1,7 +1,7 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
 # due to https://github.com/golang/go/issues/39466
-%ifarch aarch64 ppc64le
+%ifarch aarch64
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -160,6 +160,8 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+#https://go-review.googlesource.com/c/go/+/371634
+Patch4:       testshared-size-limit.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
