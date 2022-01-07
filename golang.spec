@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.12
+%global go_version %{go_api}.13
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -144,8 +144,8 @@ Provides: bundled(golang(github.com/google/pprof)) = 0.0.0.20201203190320.1bf35d
 Provides: bundled(golang(github.com/ianlancetaylor/demangle)) = 0.0.0.20200824232613.28f6c0f3b639
 Provides: bundled(golang(golang.org/x/arch)) = 0.0.0.20201008161808.52c3e6f60cff
 Provides: bundled(golang(golang.org/x/crypto)) = 0.0.0.20201016220609.9e8e0b390897
-Provides: bundled(golang(golang.org/x/mod)) = 0.4.1
-Provides: bundled(golang(golang.org/x/net)) = 0.0.0.20201209123823.ac852fbbde11
+Provides: bundled(golang(golang.org/x/mod)) = 0.4.2.0.20210325185522.dbbbf8a3c6ea
+Provides: bundled(golang(golang.org/x/net)) = 0.0.0.20220106012026.aa5a62bac9b2
 Provides: bundled(golang(golang.org/x/sys)) = 0.0.0.20201204225414.ed752295db88
 Provides: bundled(golang(golang.org/x/text)) = 0.3.4
 Provides: bundled(golang(golang.org/x/tools)) = 0.0.0.20210107193943.4ed967dd8eff
@@ -529,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Fri Jan 07 2022 Alejandro Sáez <asm@redhat.com> - 1.16.13-1
+- Update to go1.16.13
+
 * Tue Dec 21 2021 Alejandro Sáez <asm@redhat.com> - 1.16.12-1
 - Update to go1.16.12
 - Resolves: rhbz#2030810
