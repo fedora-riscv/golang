@@ -105,8 +105,13 @@
 %global gohostarch  s390x
 %endif
 
+# Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
-%global go_version %{go_api}beta1
+%global go_prerelease beta1
+#global go_patch 1
+
+%global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
+%global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -117,8 +122,8 @@ Release:        %{baserelease}%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
-URL:            http://golang.org/
-Source0:        https://storage.googleapis.com/golang/go%{go_version}.src.tar.gz
+URL:            https://go.dev
+Source0:        https://go.dev/dl/go%{go_source}.src.tar.gz
 # make possible to override default traceback level at build time by setting build tag rpm_crashtraceback
 Source1:        fedora.go
 
