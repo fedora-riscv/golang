@@ -170,7 +170,9 @@ Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
 
 # These are the only RHEL/Fedora architectures that we compile this package for
+%if %{defined golang_arches}
 ExclusiveArch:  %{golang_arches}
+%endif
 
 Source100:      golang-gdbinit
 
