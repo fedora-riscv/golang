@@ -114,7 +114,7 @@
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
  
 Name:           golang
 Version:        %{go_version}
@@ -543,6 +543,9 @@ fi
 %endif
 
 %changelog
+* Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.18~beta1-2
+- Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
+
 * Tue Dec 14 2021 Mike Rochefort <mroche@redhat.com> - 1.18beta1-1
 - Update to 1.18beta1
 - Related: rhbz#2002859
