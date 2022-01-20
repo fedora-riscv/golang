@@ -176,7 +176,9 @@ Obsoletes:      emacs-%{name} < 1.4
 %if ! %{defined golang_arches}
 %define golang_arches %{go_arches}
 %endif
+%if %{defined golang_arches}
 ExclusiveArch:  %{golang_arches}
+%endif
 
 Source100:      golang-gdbinit
 %if 0%{?rhel} == 7
