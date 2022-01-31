@@ -107,14 +107,14 @@
 
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
-%global go_prerelease beta1
+%global go_prerelease beta2
 #global go_patch 1
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
  
 Name:           golang
 Version:        %{go_version}
@@ -148,14 +148,14 @@ Provides:       go = %{version}-%{release}
 Provides: bundled(golang(github.com/google/pprof)) = 0.0.0.20211104044539.f987b9c94b31
 Provides: bundled(golang(github.com/ianlancetaylor/demangle)) = 0.0.0.20210905161508.09a460cdf81d
 Provides: bundled(golang(golang.org/x/arch)) = 0.0.0.20210923205945.b76863e36670
-Provides: bundled(golang(golang.org/x/crypto)) = 0.0.0.20211108221036.ceb1ce70b4fa
+Provides: bundled(golang(golang.org/x/crypto)) = 0.0.0.20211215153901.e495a2d5b3d3
 Provides: bundled(golang(golang.org/x/mod)) = 0.6.0.dev.0.20211102181907.3a5865c02020
 Provides: bundled(golang(golang.org/x/net)) = 0.0.0.20211209124913.491a49abca63
 Provides: bundled(golang(golang.org/x/sync)) = 0.0.0.20210220032951.036812b2e83c
 Provides: bundled(golang(golang.org/x/sys)) = 0.0.0.20211205182925.97ca703d548d
 Provides: bundled(golang(golang.org/x/term)) = 0.0.0.20210927222741.03fcf44c2211
 Provides: bundled(golang(golang.org/x/text)) = 0.3.8.0.20211105212822.18b340fc7af2
-Provides: bundled(golang(golang.org/x/tools)) = 0.1.9.0.20211207220608.fd2bfb79a16a
+Provides: bundled(golang(golang.org/x/tools)) = 0.1.9.0.20220124164225.97de9ec46646
 Provides: bundled(golang(golang.org/x/xerrors)) = 0.0.0.20200804184101.5ec99f83aff1
 
 Requires:       %{name}-bin = %{version}-%{release}
@@ -165,8 +165,6 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
-#https://go-review.googlesource.com/c/go/+/371634
-Patch4:       testshared-size-limit.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -543,6 +541,11 @@ fi
 %endif
 
 %changelog
+* Mon Jan 31 2022 Mike Rochefort <mroche@redhat.com> - 1.18~beta2-1
+- Update to 1.18beta2
+- Remove testshared-size-limit patch (now upstream) 83fc097
+- Related: rhbz#2002859
+
 * Thu Jan 20 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.18~beta1-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_36_Mass_Rebuild
 
