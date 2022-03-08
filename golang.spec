@@ -114,7 +114,7 @@
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
  
 Name:           golang
 Version:        %{go_version}
@@ -165,6 +165,7 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+Patch4:       0004-syscall-remove-TestRlimit.diff
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -541,6 +542,9 @@ fi
 %endif
 
 %changelog
+* Tue Mar 08 2022 Alejandro Sáez <asm@redhat.com> - 1.18~rc1-2
+- Add 0004-syscall-remove-TestRlimit.diff until it gets removed in rc2
+
 * Thu Feb 17 2022 Mike Rochefort <mroche@redhat.com> - 1.18~rc1-1
 - Update to 1.18rc1
 - Resolves: rhbz#2002859
