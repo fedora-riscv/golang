@@ -106,7 +106,7 @@
 %endif
 
 %global go_api 1.16
-%global go_version %{go_api}.14
+%global go_version %{go_api}.15
 
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
@@ -529,6 +529,9 @@ fi
 %endif
 
 %changelog
+* Thu Mar 10 2022 Alejandro Sáez <asm@redhat.com> - 1.16.15-1
+- Update to go1.16.15
+
 * Fri Feb 11 2022 Alejandro Sáez <asm@redhat.com> - 1.16.14-1
 - Update to go1.16.14
 
