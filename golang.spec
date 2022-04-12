@@ -106,7 +106,7 @@
 %endif
 
 # Comment out go_prerelease and go_patch as needed
-%global go_api 1.18
+%global go_api 1.18.1
 #global go_prerelease rc1
 #global go_patch 1
 
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Tue Apr 12 2022 Alejandro Sáez <asm@redhat.com> - 1.18.1-1
+- Update to 1.18.1
+
 * Tue Mar 15 2022 Mike Rochefort <mroche@redhat.com> - 1.18-1
 - Update to 1.18
 - Resolves: rhbz#2064409
