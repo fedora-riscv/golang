@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-#global go_patch 1
+%global go_patch 1
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Tue Apr 12 2022 Alejandro Sáez <asm@redhat.com> - 1.18.1-1
+- Update to 1.18.1
+
 * Wed Mar 16 2022 Alejandro Sáez <asm@redhat.com> - 1.18-1
 - Update to 1.18
 - Remove 0004-syscall-remove-TestRlimit.diff
