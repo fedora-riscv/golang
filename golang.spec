@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-%global go_patch 1
+%global go_patch 2
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -155,7 +155,7 @@ Provides: bundled(golang(golang.org/x/sync)) = 0.0.0.20210220032951.036812b2e83c
 Provides: bundled(golang(golang.org/x/sys)) = 0.0.0.20211205182925.97ca703d548d
 Provides: bundled(golang(golang.org/x/term)) = 0.0.0.20210927222741.03fcf44c2211
 Provides: bundled(golang(golang.org/x/text)) = 0.3.8.0.20211105212822.18b340fc7af2
-Provides: bundled(golang(golang.org/x/tools)) = 0.1.9.0.20220124164225.97de9ec46646
+Provides: bundled(golang(golang.org/x/tools)) = 0.1.9.0.20220329150752.294080fd2f5a
 Provides: bundled(golang(golang.org/x/xerrors)) = 0.0.0.20200804184101.5ec99f83aff1
 
 Requires:       %{name}-bin = %{version}-%{release}
@@ -541,6 +541,10 @@ fi
 %endif
 
 %changelog
+* Sun May 15 2022 Mike Rochefort <mroche@redhat.com> - 1.18.2-1
+- Update to 1.18.2
+- Resolves: rhbz#2075141
+
 * Tue Apr 12 2022 Alejandro Sáez <asm@redhat.com> - 1.18.1-1
 - Update to 1.18.1
 
