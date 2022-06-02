@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-%global go_patch 2
+%global go_patch 3
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -541,6 +541,10 @@ fi
 %endif
 
 %changelog
+* Thu Jun 02 2022 Alejandro Sáez <asm@redhat.com> - 1.18.3-1
+- Update to 1.18.3
+- Resolves: rhbz#2092631
+
 * Sun May 15 2022 Mike Rochefort <mroche@redhat.com> - 1.18.2-1
 - Update to 1.18.2
 - Resolves: rhbz#2075141
