@@ -1,7 +1,7 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
 # due to https://github.com/golang/go/issues/39466
-%ifarch aarch64
+%ifarch aarch64 %{arm}
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -59,13 +59,6 @@
 %global golang_bootstrap 1
 %endif
 
-# Controls what ever we fail on failed tests
-%if %{with ignore_tests}
-%global fail_on_tests 0
-%else
-%global fail_on_tests 1
-%endif
-
 # Build golang shared objects for stdlib
 %ifarch %{ix86} x86_64 ppc64le %{arm} aarch64
 %global shared 1
@@ -109,7 +102,7 @@
 %global go_version %{go_api}.15
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
 
 Name:           golang
 Version:        %{go_version}
@@ -158,6 +151,18 @@ Requires:       go-srpm-macros
 Patch1:       0001-Don-t-use-the-bundled-tzdata-at-runtime-except-for-t.patch
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
+
+# The issue: https://github.com/golang/go/issues/51853
+# Fixed in: go1.19
+# Backported by upstream to go1.18.1 and Go1.17.9
+# Patch: https://go-review.googlesource.com/c/go/+/399816/
+Patch4:       0004-fix-CVE-2022-24675.patch
+
+# The issue: https://github.com/golang/go/issues/52075
+# Fixed in: go1.19
+# Backported by upstream to go1.18
+# Patch: https://go-review.googlesource.com/c/go/+/397135/
+Patch5:       0005-fix-CVE-2022-28327.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -459,11 +464,7 @@ export CGO_ENABLED=0
 # make sure to not timeout
 export GO_TEST_TIMEOUT_SCALE=2
 
-%if %{fail_on_tests}
-./run.bash --no-rebuild -v -v -v -k
-%else
-./run.bash --no-rebuild -v -v -v -k || :
-%endif
+./run.bash --no-rebuild -v -v -v -k %{?with_ignore_tests: || :}
 cd ..
 
 
@@ -529,6 +530,14 @@ fi
 %endif
 
 %changelog
+* Wed Jun 08 2022 Alejandro Sáez <asm@redhat.com> - 1.16.15-2
+- Backport of patches.
+- Skip tests for arm
+- Adds 0004-fix-CVE-2022-24675.patch
+- Resolves: rhbz#2080125
+- Adds 0005-fix-CVE-2022-28327.patch
+- Resolves: rhbz#2079826
+
 * Thu Mar 10 2022 Alejandro Sáez <asm@redhat.com> - 1.16.15-1
 - Update to go1.16.15
 
