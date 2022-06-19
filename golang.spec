@@ -114,7 +114,7 @@
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
  
 Name:           golang
 Version:        %{go_version}
@@ -541,6 +541,10 @@ fi
 %endif
 
 %changelog
+* Sun Jun 19 2022 Robert-André Mauchin <zebob.m@gmail.com> - 1.18.3-2
+- Rebuilt for CVE-2022-1996, CVE-2022-24675, CVE-2022-28327, CVE-2022-27191,
+  CVE-2022-29526, CVE-2022-30629
+
 * Thu Jun 02 2022 Alejandro Sáez <asm@redhat.com> - 1.18.3-1
 - Update to 1.18.3
 - Resolves: rhbz#2092631
