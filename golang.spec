@@ -101,7 +101,7 @@
 %endif
 
 %global go_api 1.17
-%global go_version 1.17.7
+%global go_version 1.17.10
 %global pkg_release 1
 
 Name:           golang
@@ -111,8 +111,9 @@ Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
 URL:            http://golang.org/
-Source0:        https://pagure.io/go/archive/go-%{go_version}-%{pkg_release}-openssl-fips/go-go-%{go_version}-%{pkg_release}-openssl-fips.tar.gz
 # make possible to override default traceback level at build time by setting build tag rpm_crashtraceback
+Source0:         https://github.com/golang-fips/go/archive/refs/tags/go%{go_version}-%{pkg_release}-openssl-fips.tar.gz
+
 Source1:        fedora.go
 
 # The compiler is written in Go. Needs go(1.4+) compiler for build.
@@ -150,11 +151,6 @@ Patch215:       go1.5-zoneinfo_testing_only.patch
 Patch221:       fix_TestScript_list_std.patch
 
 Patch1939923:   skip_test_rhbz1939923.patch
-
-# These tests has been removed upstream due to
-# nondeterministic flakiness
-# https://bugzilla.redhat.com/show_bug.cgi?id=2028662
-Patch2028662: 	remove_waitgroup_misuse_tests.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -246,15 +242,13 @@ Requires:       %{name} = %{version}-%{release}
 %endif
 
 %prep
-%setup -q -n go-go-%{go_version}-%{pkg_release}-openssl-fips
+%setup -q -n go-go%{go_version}-%{pkg_release}-openssl-fips
 
 %patch215 -p1
 
 %patch221 -p1
 
 %patch1939923 -p1
-
-%patch2028662 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -539,6 +533,9 @@ cd ..
 %endif
 
 %changelog
+* Thu Jun 30 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.10-1
+- Update to 1.17.10 by cherry-picking the commit from centos8-stream.
+
 * Tue May 10 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.7-1
 - Update to 1.17.7, based on centos8-stream packaging except keeping
   go-srpm-macros and the "--with ignore_tests" rpmbuild option
