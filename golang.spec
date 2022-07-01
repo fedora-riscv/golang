@@ -102,7 +102,7 @@
 %global go_version %{go_api}.15
 
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 3
 
 Name:           golang
 Version:        %{go_version}
@@ -163,6 +163,12 @@ Patch4:       0004-fix-CVE-2022-24675.patch
 # Backported by upstream to go1.18
 # Patch: https://go-review.googlesource.com/c/go/+/397135/
 Patch5:       0005-fix-CVE-2022-28327.patch
+
+# The issue: https://github.com/golang/go/issues/52313
+# Fixed in: go1.19
+# Backported by upstream to go1.18.2 and go1.17.10
+# Patch: https://go-review.googlesource.com/c/go/+/401078/
+Patch6:       0006-fix-CVE-2022-29526.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -530,6 +536,11 @@ fi
 %endif
 
 %changelog
+* Fri Jul 01 2022 Alejandro Sáez <asm@redhat.com> - 1.16.15-3
+- Backport of patch.
+- Resolves: rhbz#2093092
+- Adds 0006-fix-CVE-2022-29526.patch
+
 * Wed Jun 08 2022 Alejandro Sáez <asm@redhat.com> - 1.16.15-2
 - Backport of patches.
 - Skip tests for arm
