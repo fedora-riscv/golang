@@ -108,13 +108,13 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-%global go_patch 3
+%global go_patch 4
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
  
 Name:           golang
 Version:        %{go_version}
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Wed Jul 13 2022 Alejandro Sáez <asm@redhat.com> - 1.18.4-1
+- Update to 1.18.4
+
 * Wed Jun 22 2022 Robert-André Mauchin <zebob.m@gmail.com> - 1.18.3-2
 - Rebuilt for CVE-2022-1996, CVE-2022-24675, CVE-2022-28327, CVE-2022-27191,
   CVE-2022-29526, CVE-2022-30629
