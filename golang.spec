@@ -101,7 +101,7 @@
 %endif
 
 %global go_api 1.17
-%global go_version 1.17.10
+%global go_version 1.17.12
 %global pkg_release 1
 
 Name:           golang
@@ -533,6 +533,9 @@ cd ..
 %endif
 
 %changelog
+* Thu Aug  1 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.12-1
+- Update to 1.17.12 by doing the equivalent changes as centos8-stream.
+
 * Thu Jun 30 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.10-1
 - Update to 1.17.10 by cherry-picking the commit from centos8-stream.
 
