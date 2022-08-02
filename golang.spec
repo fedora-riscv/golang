@@ -107,14 +107,14 @@
 
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.19
-%global go_prerelease rc2
-#global go_patch 1
+#global go_prerelease rc2
+#global go_patch 0
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 2
+%global baserelease 1
  
 Name:           golang
 Version:        %{go_version}
@@ -491,7 +491,6 @@ fi
 
 %files
 %license LICENSE PATENTS
-%doc AUTHORS CONTRIBUTORS
 # VERSION has to be present in the GOROOT, for `go install std` to work
 %doc %{goroot}/VERSION
 %dir %{goroot}/doc
@@ -538,6 +537,10 @@ fi
 %endif
 
 %changelog
+* Tue Aug 02 2022 Alejandro Sáez <asm@redhat.com> - 1.19-1
+- Update to go1.19.0
+- Remove reference to AUTHORS and CONTRIBUTORS due to https://github.com/golang/go/issues/53961
+
 * Thu Jul 21 2022 Fedora Release Engineering <releng@fedoraproject.org> - 1.19~rc2-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_37_Mass_Rebuild
 
