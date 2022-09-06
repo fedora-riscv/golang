@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.19
 #global go_prerelease rc2
-#global go_patch 0
+%global go_patch 1
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -537,6 +537,9 @@ fi
 %endif
 
 %changelog
+* Tue Sep 06 2022 Alejandro Sáez <asm@redhat.com> - 1.19.1-1
+- Update to go1.19.1
+
 * Tue Aug 02 2022 Alejandro Sáez <asm@redhat.com> - 1.19-1
 - Update to go1.19.0
 - Remove reference to AUTHORS and CONTRIBUTORS due to https://github.com/golang/go/issues/53961
