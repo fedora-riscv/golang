@@ -108,14 +108,14 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-%global go_patch 7
+%global go_patch 8
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
- 
+
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
- 
+
 Name:           golang
 Version:        %{go_version}
 Release:        %{baserelease}%{?dist}
@@ -399,7 +399,7 @@ echo "== 4 =="
         echo "%%{goroot}/$file" >> $shared_list
         echo "%%{golibdir}/$(basename $file)" >> $shared_list
     done
-    
+
     find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
     find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Sun Nov 13 2022 Bradley G Smith <bradley.g.smith@gmail.com> - 1.18.8-1
+- Update to 1.18.8
+
 * Tue Oct 04 2022 Alejandro Sáez <asm@redhat.com> - 1.18.7-1
 - Update to 1.18.7
 
@@ -637,7 +640,7 @@ fi
 
 * Mon May 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.4-1
 - Update to go1.16.4
-- Security fix for CVE-2021-31525 
+- Security fix for CVE-2021-31525
 - Resolves: rhbz#1958343
 
 * Fri Apr 09 2021 Alejandro Sáez <asm@redhat.com> - 1.16.3-1
