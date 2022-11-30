@@ -1,5 +1,5 @@
 diff --git a/src/time/internal_test.go b/src/time/internal_test.go
-index 87a4208..0923e75 100644
+index f0dddb7..415949a 100644
 --- a/src/time/internal_test.go
 +++ b/src/time/internal_test.go
 @@ -4,13 +4,15 @@
@@ -17,7 +17,7 @@ index 87a4208..0923e75 100644
 -	z, err := loadLocation("America/Los_Angeles", zoneSources[len(zoneSources)-1:])
 +	z, err := loadLocation("America/Los_Angeles", zoneSources)
  	if err != nil {
- 		panic("cannot load America/Los_Angeles for testing: " + err.Error())
+ 		panic("cannot load America/Los_Angeles for testing: " + err.Error() + "; you may want to use -tags=timetzdata")
  	}
 @@ -21,8 +23,9 @@ func initTestingZone() {
  var OrigZoneSources = zoneSources
@@ -52,10 +52,10 @@ index f032aa7..e3e5547 100644
  		t.Fatal(err)
  	}
 diff --git a/src/time/zoneinfo_unix.go b/src/time/zoneinfo_unix.go
-index 4ea029d..e887769 100644
+index 23f8b3c..228db1b 100644
 --- a/src/time/zoneinfo_unix.go
 +++ b/src/time/zoneinfo_unix.go
-@@ -13,7 +13,6 @@
+@@ -12,7 +12,6 @@
  package time
  
  import (
@@ -63,7 +63,7 @@ index 4ea029d..e887769 100644
  	"syscall"
  )
  
-@@ -23,7 +22,6 @@ var zoneSources = []string{
+@@ -22,7 +21,6 @@ var zoneSources = []string{
  	"/usr/share/zoneinfo/",
  	"/usr/share/lib/zoneinfo/",
  	"/usr/lib/locale/TZ/",

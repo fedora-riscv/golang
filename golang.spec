@@ -1,7 +1,6 @@
 %undefine _missing_build_ids_terminate_build
 
-%bcond_with strict_fips
-%bcond_with ignore_tests
+%global bcond_with strict_fips
 
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
@@ -58,11 +57,7 @@
 
 # Controls what ever we fail on failed tests
 %ifarch x86_64 %{arm} aarch64 ppc64le
-%if %{with ignore_tests}
-%global fail_on_tests 0
-%else
 %global fail_on_tests 1
-%endif
 %else
 %global fail_on_tests 0
 %endif
@@ -100,8 +95,8 @@
 %global gohostarch  s390x
 %endif
 
-%global go_api 1.17
-%global go_version 1.17.12
+%global go_api 1.18
+%global go_version 1.18.4
 %global pkg_release 1
 
 Name:           golang
@@ -112,7 +107,7 @@ Summary:        The Go Programming Language
 License:        BSD and Public Domain
 URL:            http://golang.org/
 # make possible to override default traceback level at build time by setting build tag rpm_crashtraceback
-Source0:         https://github.com/golang-fips/go/archive/refs/tags/go%{go_version}-%{pkg_release}-openssl-fips.tar.gz
+Source0:        https://github.com/golang-fips/go/archive/refs/tags/go%{go_version}-%{pkg_release}-openssl-fips.tar.gz
 
 Source1:        fedora.go
 
@@ -150,7 +145,10 @@ Patch215:       go1.5-zoneinfo_testing_only.patch
 # Proposed patch by jcajka https://golang.org/cl/86541
 Patch221:       fix_TestScript_list_std.patch
 
-Patch1939923:   skip_test_rhbz1939923.patch
+# static linking of dlopen is unsupported
+Patch226:      disable_static_external_tests.patch
+
+Patch223: remove_ed25519vectors_test.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -245,10 +243,9 @@ Requires:       %{name} = %{version}-%{release}
 %setup -q -n go-go%{go_version}-%{pkg_release}-openssl-fips
 
 %patch215 -p1
-
 %patch221 -p1
-
-%patch1939923 -p1
+%patch223 -p1
+%patch226 -p1
 
 cp %{SOURCE1} ./src/runtime/
 
@@ -533,7 +530,10 @@ cd ..
 %endif
 
 %changelog
-* Thu Aug  1 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.12-1
+* Wed Nov 30 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.18.14-1
+- Update to 1.18.4 by doing the equivalent changes as centos8-stream.
+
+* Mon Aug  1 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.12-1
 - Update to 1.17.12 by doing the equivalent changes as centos8-stream.
 
 * Thu Jun 30 2022 Dave Dykstra <dwd@fedoraproject.org> - 1.17.10-1
