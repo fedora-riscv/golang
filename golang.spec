@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.18
 #global go_prerelease rc1
-%global go_patch 8
+%global go_patch 9
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -541,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Wed Dec 07 2022 Alejandro Sáez <asm@redhat.com> - 1.18.9-1
+- Update to 1.18.9
+
 * Sun Nov 13 2022 Bradley G Smith <bradley.g.smith@gmail.com> - 1.18.8-1
 - Update to 1.18.8
 
