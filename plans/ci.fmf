@@ -1,6 +1,6 @@
 summary: CI Gating Plan
 discover:
     how: fmf
-    directory: tests
+    path: tests
 execute:
-    how: beakerlib
+    how: tmt
