@@ -1,7 +1,7 @@
 %bcond_with bootstrap
 # temporalily ignore test failures
 # due to https://github.com/golang/go/issues/39466
-%ifarch aarch64
+%ifarch aarch64 riscv64
 %bcond_without ignore_tests
 %else
 %bcond_with ignore_tests
@@ -39,14 +39,14 @@
 # Golang build options.
 
 # Build golang using external/internal(close to cgo disabled) linking.
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x riscv64
 %global external_linker 1
 %else
 %global external_linker 0
 %endif
 
 # Build golang with cgo enabled/disabled(later equals more or less to internal linking).
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x riscv64
 %global cgo_enabled 1
 %else
 %global cgo_enabled 0
@@ -104,6 +104,9 @@
 %ifarch s390x
 %global gohostarch  s390x
 %endif
+%ifarch riscv64
+%global gohostarch  riscv64
+%endif
 
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.19
@@ -118,7 +121,7 @@
  
 Name:           golang
 Version:        %{go_version}
-Release:        %{baserelease}%{?dist}
+Release:        %{baserelease}.rv64%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -538,6 +541,9 @@ fi
 %endif
 
 %changelog
+* Tue Jan 10 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.19.4-1.rv64
+- Fix build on riscv64.
+
 * Wed Dec 07 2022 Alejandro Sáez <asm@redhat.com> - 1.19.4-1
 - Update to go1.19.4
 - Resolves: rhbz#2151595
