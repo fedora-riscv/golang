@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.19
 #global go_prerelease rc2
-%global go_patch 5
+%global go_patch 6
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -538,6 +538,9 @@ fi
 %endif
 
 %changelog
+* Wed Feb 15 2023 Alejandro Sáez <asm@redhat.com> - 1.19.6-1
+- Update to go1.19.6
+
 * Tue Jan 10 2023 Alejandro Sáez <asm@redhat.com> - 1.19.5-1
 - Update to go1.19.5
 
