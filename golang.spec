@@ -108,14 +108,14 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.19
 #global go_prerelease rc2
-%global go_patch 6
+%global go_patch 7
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
- 
+
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
- 
+
 Name:           golang
 Version:        %{go_version}
 Release:        %{baserelease}%{?dist}
@@ -150,7 +150,7 @@ Provides: bundled(golang(github.com/ianlancetaylor/demangle)) = 0.0.0.2022031903
 Provides: bundled(golang(golang.org/x/arch)) = 0.0.0.20220412001346.fc48f9fe4c15
 Provides: bundled(golang(golang.org/x/crypto)) = 0.0.0.20220516162934.403b01795ae8
 Provides: bundled(golang(golang.org/x/mod)) = 0.6.0.dev.0.20220419223038.86c51ed26bb4
-Provides: bundled(golang(golang.org/x/net)) = 0.0.0.20220907013720.d52c520e3766
+Provides: bundled(golang(golang.org/x/net)) = 0.0.0.20230214200805.d99f623d45a4
 Provides: bundled(golang(golang.org/x/sync)) = 0.0.0.20220513210516.0976fa681c29
 Provides: bundled(golang(golang.org/x/sys)) = 0.0.0.20220614162138.6c1b26c55098
 Provides: bundled(golang(golang.org/x/term)) = 0.0.0.20220411215600.e5f449aeb171
@@ -397,7 +397,7 @@ echo "== 4 =="
         echo "%%{goroot}/$file" >> $shared_list
         echo "%%{golibdir}/$(basename $file)" >> $shared_list
     done
-    
+
     find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
     find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
@@ -538,6 +538,10 @@ fi
 %endif
 
 %changelog
+* Thu Mar 23 2023 Bradley G Smith <bradley.g.smith@gmail.com> - 1.19.7-1
+- Update to go1.19.7
+- Resolves #2176528 in part.
+
 * Wed Feb 15 2023 Alejandro Sáez <asm@redhat.com> - 1.19.6-1
 - Update to go1.19.6
 
@@ -657,7 +661,7 @@ fi
 
 * Mon May 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.4-1
 - Update to go1.16.4
-- Security fix for CVE-2021-31525 
+- Security fix for CVE-2021-31525
 - Resolves: rhbz#1958343
 
 * Fri Apr 09 2021 Alejandro Sáez <asm@redhat.com> - 1.16.3-1
