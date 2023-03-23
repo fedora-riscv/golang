@@ -105,14 +105,14 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.20
 #global go_prerelease rc3
-%global go_patch 1
+%global go_patch 2
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
- 
+
 # For rpmdev-bumpspec and releng automation
 %global baserelease 1
- 
+
 Name:           golang
 Version:        %{go_version}
 Release:        %{baserelease}%{?dist}
@@ -147,7 +147,7 @@ Provides: bundled(golang(github.com/ianlancetaylor/demangle)) = 0.0.0.2022031903
 Provides: bundled(golang(golang.org/x/arch)) = 0.1.1.0.20221116201807.1bb480fc256a
 Provides: bundled(golang(golang.org/x/crypto)) = 0.3.1.0.20221117191849.2c476679df9a
 Provides: bundled(golang(golang.org/x/mod)) = 0.7.0
-Provides: bundled(golang(golang.org/x/net)) = 0.3.1.0.20221206200815.1e63c2f08a10
+Provides: bundled(golang(golang.org/x/net)) = 0.4.1.0.20230214201333.88ed8ca3307d
 Provides: bundled(golang(golang.org/x/sync)) = 0.1.0
 Provides: bundled(golang(golang.org/x/sys)) = 0.3.0
 Provides: bundled(golang(golang.org/x/term)) = 0.2.0
@@ -394,7 +394,7 @@ echo "== 4 =="
         echo "%%{goroot}/$file" >> $shared_list
         echo "%%{golibdir}/$(basename $file)" >> $shared_list
     done
-    
+
     find pkg/*_dynlink/ -type d -printf '%%%dir %{goroot}/%p\n' >> $shared_list
     find pkg/*_dynlink/ ! -type d -printf '%{goroot}/%p\n' >> $shared_list
 %endif
@@ -535,6 +535,10 @@ fi
 %endif
 
 %changelog
+* Thu Mar 23 2023 Bradley G Smith <bradley.g.smith@gmail.com> - 1.20.2-1
+- Update to go1.20.2
+- Resolves: rhbz#2176528, in part
+
 * Wed Feb 15 2023 Alejandro Sáez <asm@redhat.com> - 1.20.1
 - Update to go1.20.1
 - Resolves: rhbz#2169896
@@ -666,7 +670,7 @@ fi
 
 * Mon May 10 2021 Alejandro Sáez <asm@redhat.com> - 1.16.4-1
 - Update to go1.16.4
-- Security fix for CVE-2021-31525 
+- Security fix for CVE-2021-31525
 - Resolves: rhbz#1958343
 
 * Fri Apr 09 2021 Alejandro Sáez <asm@redhat.com> - 1.16.3-1
