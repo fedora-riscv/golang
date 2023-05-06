@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.20
 #global go_prerelease rc3
-%global go_patch 3
+%global go_patch 4
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -173,6 +173,10 @@ Obsoletes:      %{name}-data < 1.1.1-4
 # go1.4 deprecates a few packages
 Obsoletes:      %{name}-vim < 1.4
 Obsoletes:      emacs-%{name} < 1.4
+
+# We stopped building the golang-race subpackage, so we need to to maintain the
+# update path.
+Obsoletes:      golang-race < 1.20~rc3-2
 
 # These are the only RHEL/Fedora architectures that we compile this package for
 ExclusiveArch:  %{golang_arches}
@@ -538,6 +542,16 @@ fi
 %endif
 
 %changelog
+* Sat May 06 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.4-1.rv64
+- merge to upstream golang-1.20.4-1
+
+* Fri May 05 2023 Alejandro Sáez <asm@redhat.com> - 1.20.4-1
+- Update to go1.20.4
+- Resolves: rhbz#2184454
+
+* Sat Apr 15 2023 Maxwell G <maxwell@gtmx.me> - 1.20.3-2
+- Fix broken golang-race update path
+
 * Wed Apr 12 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.3-1.rv64
 - Fix build on riscv64.
 
