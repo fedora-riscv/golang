@@ -118,7 +118,7 @@
 
 Name:           golang
 Version:        %{go_version}
-Release:        %{baserelease}.rv64%{?dist}
+Release:        %{baserelease}.rv64.sg2042.0%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -163,6 +163,9 @@ Requires:       %{name}-src = %{version}-%{release}
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
 Patch4:       0004-cmd-link-use-gold-on-ARM-ARM64-only-if-gold-is-avail.patch
+
+# sg2042 patch
+Patch10:    0001-Fix-go-build-go-issue.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
@@ -542,6 +545,9 @@ fi
 %endif
 
 %changelog
+* Sat May 20 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.4-1.rv64.sg2042.0
+- Add sg2042 patch.
+
 * Sat May 06 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.4-1.rv64
 - merge to upstream golang-1.20.4-1
 
