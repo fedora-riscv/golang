@@ -111,7 +111,7 @@
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 # For rpmdev-bumpspec and releng automation
-%global baserelease 1
+%global baserelease 2
  
 Name:           golang
 Version:        %{go_version}
@@ -156,6 +156,7 @@ Provides: bundled(golang(golang.org/x/tools)) = 0.3.1.0.20230118190848.070db2996
 
 Requires:       %{name}-bin = %{version}-%{release}
 Requires:       %{name}-src = %{version}-%{release}
+Requires:       go-filesystem
 
 Patch2:       0002-syscall-expose-IfInfomsg.X__ifi_pad-on-s390x.patch
 Patch3:       0003-cmd-go-disable-Google-s-proxy-and-sumdb.patch
@@ -541,6 +542,10 @@ fi
 %changelog
 * Tue Jul 11 2023 Mike Rochefort <mroche@omenos.dev> - 1.20.6-1
 - Update to go 1.20.6
+
+* Fri Jun 16 2023 Alejandro Sáez <asm@redhat.com> - 1.20.5-2
+- Add go-filesystem
+- Resolves: rhbz#2172392
 
 * Tue Jun 06 2023 Alejandro Sáez <asm@redhat.com> - 1.20.5-1
 - Update to go 1.20.5
