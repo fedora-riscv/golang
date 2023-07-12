@@ -3,6 +3,9 @@ downstream_package_name: golang
 upstream_project_url: https://github.com/golang/go
 specfile_path: golang.spec
 upstream_tag_template: go{version}
+actions:
+  changelog-entry:
+  - echo "New release ${PACKIT_PROJECT_VERSION}"
 jobs:
   - job: pull_from_upstream
     trigger: release
