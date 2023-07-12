@@ -1,0 +1,17 @@
+upstream_package_name: go
+downstream_package_name: golang
+upstream_project_url: https://github.com/golang/go
+specfile_path: golang.spec
+jobs:
+  - job: pull_from_upstream
+    trigger: release
+    dist_git_branches:
+      - fedora-rawhide
+      - fedora-stable
+
+  - job: koji_build
+    trigger: commit
+    dist_git_branches:
+      - fedora-rawhide
+      - fedora-stable
+
