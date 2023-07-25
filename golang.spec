@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.20
 #global go_prerelease rc3
-%global go_patch 5
+%global go_patch 6
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -542,8 +542,11 @@ fi
 %endif
 
 %changelog
-* Sat Jun 10 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.5-1.rv64
-- merge to upstream golang-1.20.5-1
+* Tue Jul 25 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.6-1.rv64
+- merge to upstream golang-1.20.6-1
+
+* Tue Jul 11 2023 Mike Rochefort <mroche@omenos.dev> - 1.20.6-1
+- Update to go 1.20.6
 
 * Thu Jun 08 2023 Alejandro Sáez <asm@redhat.com> - 1.20.5-1
 - Update to go1.20.5
