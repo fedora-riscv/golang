@@ -106,8 +106,8 @@
 %global baserelease 2
  
 Name:           golang
-Version:        %{go_version}
-Release:        %{baserelease}%{?dist}
+Version:        1.21.0
+Release:        1%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD and Public Domain
@@ -528,6 +528,9 @@ fi
 %endif
 
 %changelog
+* Tue Aug 08 2023 Packit <hello@packit.dev> - 1.21.0-1
+New release ${PACKIT_PROJECT_VERSION}
+
 * Thu Jul 20 2023 Fedora Release Engineering <releng@fedoraproject.org> - 1.21~rc3-2
 - Rebuilt for https://fedoraproject.org/wiki/Fedora_39_Mass_Rebuild
 
