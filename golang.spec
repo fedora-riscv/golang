@@ -108,7 +108,7 @@
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.20
 #global go_prerelease rc3
-%global go_patch 4
+%global go_patch 7
 
 %global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
@@ -545,6 +545,24 @@ fi
 %endif
 
 %changelog
+* Thu Aug 31 2023 Zhengyu He <hezhy472013@gmail.com> - 1.20.7-1.rv64.sg2042.0
+- merge to upstream golang-1.20.7-1.rv64
+
+* Tue Aug 08 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.7-1.rv64
+- merge to upstream golang-1.20.7-1
+
+* Tue Aug 01 2023 Alejandro Sáez <asm@redhat.com> - 1.20.7-1
+- Update to go 1.20.7
+
+* Tue Jul 25 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.6-1.rv64
+- merge to upstream golang-1.20.6-1
+
+* Tue Jul 11 2023 Mike Rochefort <mroche@omenos.dev> - 1.20.6-1
+- Update to go 1.20.6
+
+* Thu Jun 08 2023 Alejandro Sáez <asm@redhat.com> - 1.20.5-1
+- Update to go1.20.5
+
 * Sat May 20 2023 Liu Yang <Yang.Liu.sn@gmail.com> - 1.20.4-1.rv64.sg2042.0
 - Add sg2042 patch.
 
