@@ -316,7 +316,7 @@ export GO_LDFLAGS="-linkmode internal"
 %if !%{cgo_enabled}
 export CGO_ENABLED=0
 %endif
-./make.bash --no-clean -v
+./make.bash -v
 popd
 
 # build shared std lib
