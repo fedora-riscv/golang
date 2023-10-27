@@ -31,14 +31,14 @@
 # Golang build options.
 
 # Build golang using external/internal(close to cgo disabled) linking.
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x riscv64
 %global external_linker 1
 %else
 %global external_linker 0
 %endif
 
 # Build golang with cgo enabled/disabled(later equals more or less to internal linking).
-%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x
+%ifarch %{ix86} x86_64 ppc64le %{arm} aarch64 s390x riscv64
 %global cgo_enabled 1
 %else
 %global cgo_enabled 0
@@ -93,6 +93,9 @@
 %ifarch s390x
 %global gohostarch  s390x
 %endif
+%ifarch riscv64
+%global gohostarch  riscv64
+%endif
 
 # Comment out go_prerelease and go_patch as needed
 %global go_api 1.21
@@ -104,7 +107,7 @@
  
 Name:           golang
 Version:        %{go_version}
-Release:        %autorelease
+Release:        %autorelease -e rv64
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD-3-Clause AND LicenseRef-Fedora-Public-Domain
