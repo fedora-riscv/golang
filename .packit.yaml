@@ -28,6 +28,7 @@ jobs:
   - job: pull_from_upstream
     trigger: release
     dist_git_branches: fedora-rawhide
+    upstream_tag_include: "^go1.22.+"
 
   # Run Koji builds when Packit pull requests are merged
   - job: koji_build
