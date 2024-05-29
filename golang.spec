@@ -1,12 +1,5 @@
 %bcond_with bootstrap
 
-# temporarily ignore test failures in riscv64
-%ifarch riscv64
-%bcond_without ignore_tests
-%else
-%bcond_with ignore_tests
-%endif
-
 # build ids are not currently generated:
 # https://code.google.com/p/go/issues/detail?id=5238
 #
@@ -468,7 +461,12 @@ export CGO_ENABLED=0
 #endif
 
 # make sure to not timeout
+%ifnarch riscv64
 export GO_TEST_TIMEOUT_SCALE=2
+%else
+# NOTE(davidlt): 20 is probably too much, but it's only for riscv and it works
+export GO_TEST_TIMEOUT_SCALE=20
+%endif
 
 %if %{fail_on_tests}
 ./run.bash --no-rebuild -v -v -v -k
