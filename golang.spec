@@ -128,6 +128,9 @@ BuildRequires:  hostname
 %else
 BuildRequires:  net-tools
 %endif
+%ifarch aarch64
+BuildRequires:  binutils-gold
+%endif
 # for tests
 BuildRequires:  pcre2-devel, glibc-static, perl-interpreter, procps-ng
 
