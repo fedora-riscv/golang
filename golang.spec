@@ -128,9 +128,7 @@ BuildRequires:  hostname
 %else
 BuildRequires:  net-tools
 %endif
-%ifarch aarch64
-BuildRequires:  binutils-gold
-%endif
+
 # for tests
 BuildRequires:  pcre2-devel, glibc-static, perl-interpreter, procps-ng
 
@@ -155,8 +153,8 @@ Requires:       %{name}-src = %{version}-%{release}
 Requires:       go-filesystem
 
 Patch1:         0001-Modify-go.env.patch
-Patch4:         0004-cmd-link-use-gold-on-ARM-ARM64-only-if-gold-is-avail.patch
 Patch5:		0005-Skip-TestCrashDumpsAllThreads.patch
+Patch6:		0006-Default-to-ld.bfd-on-ARM64.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
