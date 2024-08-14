@@ -99,11 +99,11 @@
 %endif
 
 # Comment out go_prerelease and go_patch as needed
-%global go_api 1
-%global go_prerelease rc2
-%global go_patch 23
+%global go_api 1.23
+#global go_prerelease rc2
+%global go_patch 0
 
-%global go_version 1.23.0
+%global go_version %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease:~%{go_prerelease}}
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
  
 Name:           golang
@@ -144,7 +144,7 @@ Provides: bundled(golang(golang.org/x/mod)) = 0.19.0
 Provides: bundled(golang(golang.org/x/net)) = 0.25.1.0.20240603202750.6249541f2a6c
 Provides: bundled(golang(golang.org/x/sync)) = 0.7.0
 Provides: bundled(golang(golang.org/x/sys)) = 0.22.0
-Provides: bundled(golang(golang.org/x/telemetry)) = 0.0.0.20240712210958.268b4a8ec2d7
+Provides: bundled(golang(golang.org/x/telemetry)) = 0.0.0.20240717194752.0b706e19b701
 Provides: bundled(golang(golang.org/x/term)) = 0.20.0
 Provides: bundled(golang(golang.org/x/text)) = 0.16.0
 Provides: bundled(golang(golang.org/x/tools)) = 0.22.1.0.20240618181713.f2d2ebe43e72
