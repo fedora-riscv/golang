@@ -12,12 +12,6 @@ actions:
     - bash -c "echo - New release ${PACKIT_PROJECT_VERSION}"
 
 jobs:
-  # Fedora 38 now follows Go 1.21 since Go 1.20 went EOL
-  - job: pull_from_upstream
-    trigger: release
-    dist_git_branches: fedora-38
-    upstream_tag_include: "^go1.21.+"
-
   # Fedora 39 follows Go 1.21
   - job: pull_from_upstream
     trigger: release
@@ -29,6 +23,12 @@ jobs:
     trigger: release
     dist_git_branches: fedora-40
     upstream_tag_include: "^go1.22.+"
+
+  # Fedora 41 follows Go 1.23
+  - job: pull_from_upstream
+    trigger: release
+    dist_git_branches: fedora-41
+    upstream_tag_include: "^go1.23.+"
 
   # Fedora Rawhide follows the latest version
   - job: pull_from_upstream
