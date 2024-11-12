@@ -157,6 +157,7 @@ Requires:       go-filesystem
 Patch1:         0001-Modify-go.env.patch
 Patch5:		0005-Skip-TestCrashDumpsAllThreads.patch
 Patch6:		0006-Default-to-ld.bfd-on-ARM64.patch
+Patch7:   0007-link-skip-TestPIESize-on-i386-and-s390x-due-to-Fedor.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
