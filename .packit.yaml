@@ -31,11 +31,17 @@ jobs:
     dist_git_branches: fedora-41
     upstream_tag_include: "^go1.23.+"
 
+  # Fedora 42 follows Go 1.24
+  - job: pull_from_upstream
+    trigger: release
+    dist_git_branches: fedora-42
+    upstream_tag_include: "^go1.24.+"
+
   # Fedora Rawhide follows the latest version
   - job: pull_from_upstream
     trigger: release
     dist_git_branches: fedora-rawhide
-    upstream_tag_include: "^go1.23.+"
+    upstream_tag_include: "^go1.24.+"
 
   # Run Koji builds when Packit pull requests are merged
   - job: koji_build
