@@ -161,7 +161,8 @@ Patch6:		0006-Default-to-ld.bfd-on-ARM64.patch
 # to include a significant amount of necessary changes so I generated a single patch
 # git diff go1.24rc1..release-branch.go1.24 > combined_commits_2025-01-08.patch
 Patch7:		combined_commits_2025-01-08.patch
-Patch8:   fix_cgo_panic-with-gcc15-in-368.patch
+# Related to https://gcc.gnu.org/PR118497
+Patch8:		fix_cgo_panic-with-gcc15-in-368.patch
 
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
