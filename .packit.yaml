@@ -12,13 +12,6 @@ actions:
     - bash -c "echo - New release ${PACKIT_PROJECT_VERSION}"
 
 jobs:
-  # Fedora 39 follows Go 1.22
-  # https://pagure.io/fesco/issue/3261
-  - job: pull_from_upstream
-    trigger: release
-    dist_git_branches: fedora-39
-    upstream_tag_include: "^go1.22.+"
-
   # Fedora 40 follows Go 1.22
   - job: pull_from_upstream
     trigger: release
