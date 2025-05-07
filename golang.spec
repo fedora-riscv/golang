@@ -160,9 +160,6 @@ Patch6:         0006-Default-to-ld.bfd-on-ARM64.patch
 # Related to https://gcc.gnu.org/PR118497
 Patch8:         fix_cgo_panic-with-gcc15-in-368.patch
 
-# Remove with Go 1.24.3
-Patch9:         ff2636f.patch
-
 # Having documentation separate was broken
 Obsoletes:      %{name}-docs < 1.1-4
 
