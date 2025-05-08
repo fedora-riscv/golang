@@ -502,6 +502,8 @@ fi
 %dir %{goroot}
 %{goroot}/api/
 %{goroot}/lib/time/
+%{goroot}/lib/wasm/
+%{goroot}/lib/fips140/
 
 # ensure directory ownership, so they are cleaned up if empty
 %dir %{gopath}
