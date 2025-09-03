@@ -103,7 +103,7 @@
 %global go_prerelease rc2
 #global go_patch 4
 
-%global go_version 1.25.0
+%global go_version 1.25.1
 %global go_source %{go_api}%{?go_patch:.%{go_patch}}%{?go_prerelease}
 
 Name:           golang
