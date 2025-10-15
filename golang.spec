@@ -114,7 +114,7 @@
 Name:           golang
 Version:        %{go_version}
 # Fixed release nubmer for riscv64 rebuild.
-Release:        2.rv64%{?dist}
+Release:        1.rv64%{?dist}
 Summary:        The Go Programming Language
 # source tree includes several copies of Mark.Twain-Tom.Sawyer.txt under Public Domain
 License:        BSD-3-Clause AND LicenseRef-Fedora-Public-Domain
